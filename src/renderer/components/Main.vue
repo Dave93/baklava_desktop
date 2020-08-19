@@ -58,7 +58,7 @@
               >
                 <v-data-table
                   :headers="headers"
-                  :items="items"
+                  :items="cartItems"
                   disable-pagination
                   hide-default-footer
                   class="elevation-1"
@@ -116,7 +116,7 @@
                   <v-img
                     class="white--text align-end"
                     height="140px"
-                    src="../assets/images/rahat.png"
+                    src="static/images/rahat.png"
                   >
                   </v-img>
                   <v-card-title>Rahat Lokum</v-card-title>
@@ -613,7 +613,6 @@
 import { format } from "date-fns";
 import product from "@/store/index";
 export default {
-  layout: "cash",
   data: () => ({
     currentWeight: "",
     showSearchDialog: false,
@@ -633,7 +632,7 @@ export default {
       { text: "Total Price", value: "totalPrice" },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    items: [
+    cartItems: [
       {
         name: "Rahat Lokum",
         weight: "2",
@@ -652,7 +651,7 @@ export default {
   }),
   computed: {
     subTotalPrice() {
-      return this.items.reduce((previousValue, currentValue) => {
+      return this.cartItems.reduce((previousValue, currentValue) => {
         return (
           previousValue.price * +previousValue.weight +
           currentValue.price * +currentValue.weight
@@ -660,12 +659,14 @@ export default {
       });
     },
     totalPrice() {
-      const totalPrice = this.items.reduce((previousValue, currentValue) => {
-        return (
-          previousValue.price * +previousValue.weight +
-          currentValue.price * +currentValue.weight
-        );
-      });
+      const totalPrice = this.cartItems.reduce(
+        (previousValue, currentValue) => {
+          return (
+            previousValue.price * +previousValue.weight +
+            currentValue.price * +currentValue.weight
+          );
+        }
+      );
 
       return totalPrice * ((100 - this.discountValue) / 100);
     },
