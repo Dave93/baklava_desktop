@@ -1,6 +1,6 @@
 {
   "name": "electron_gavali1",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "author": "shahaa <projects.salim95@gmail.com>",
   "description": "An electron-vue project",
   "license": null,
@@ -49,6 +49,9 @@
     },
     "linux": {
       "icon": "build/icons"
+    },
+    "nsis": {
+      "artifactName": "${productName}-setup-${version}.${ext}"
     },
     "nsisWeb": {
       "artifactName": "${productName}-setup-${version}.${ext}"
