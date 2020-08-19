@@ -73,10 +73,10 @@ autoUpdater.on('update-downloaded', () => {
         const isForceRunAfter = true;
         autoUpdater.quitAndInstall(isSilent, isForceRunAfter);
       }
-      else {
-        autoUpdater.enabled = true
-        autoUpdater = null
-      }
+      // else {
+      //   autoUpdater.enabled = true
+      //   autoUpdater = null
+      // }
     })
   }
 
