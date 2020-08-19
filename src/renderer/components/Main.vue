@@ -140,14 +140,46 @@
                   class="keyboard-background px-10 selected-product-weight my-3"
                   elevation="5"
                 >
-                  <h1 class="font-weight-medium white--text">
-                    {{ currentWeight }}
+                  <h1 class="font-weight-medium black--text">
+                    {{ currentWeight || "0" }}
                   </h1>
                 </v-card>
                 <v-card
                   class="keyboard-background px-10 weight-keyboard"
                   elevation="5"
                 >
+                  <v-row class="mb-n4">
+                    <v-col cols="12" class="pl-0">
+                      <v-row>
+                        <v-col cols="6">
+                          <v-btn
+                            @click="append('-')"
+                            color="black"
+                            rounded
+                            height="56"
+                            width="100%"
+                            class="justify-center"
+                            ><h1 class="font-weight-bold green--text">
+                              -
+                            </h1></v-btn
+                          >
+                        </v-col>
+                        <v-col cols="6">
+                          <v-btn
+                            @click="append('+')"
+                            color="black"
+                            rounded
+                            height="56"
+                            width="100%"
+                            class="justify-center"
+                            ><h1 class="font-weight-bold green--text">
+                              +
+                            </h1></v-btn
+                          >
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
                   <v-row>
                     <v-col cols="9" class="pl-0">
                       <v-row class="mb-n4">
@@ -235,7 +267,7 @@
                           ></v-btn>
                         </v-col>
                         <v-col cols="4">
-                          <v-btn fab color="black" @click="dot"
+                          <v-btn fab color="black" @click="append(',')"
                             ><h1 class="font-weight-bold green--text">
                               ,
                             </h1></v-btn
@@ -265,6 +297,7 @@
                       <v-row class="mb-n4">
                         <v-col cols="12">
                           <v-btn
+                            @click="equal"
                             rounded
                             color="black"
                             height="120px"
@@ -666,6 +699,9 @@ import product from "@/store/index";
 export default {
   data: () => ({
     currentWeight: "",
+    operator: null,
+    previous: null,
+    operatorClicked: false,
     showSearchDialog: false,
     set: false,
     searchText: "",
@@ -778,8 +814,12 @@ export default {
       this.currentWeight = this.currentWeight + number;
     },
     dot() {
-      if (this.currentWeight.includes(",") === -1) {
+      if (this.currentWeight.indexOf(",") === -1) {
+        this.append(",");
       }
+    },
+    equal() {
+      this.currentWeight = eval(this.currentWeight);
     },
     changeItem(key, val) {},
     categoryToggle(id) {
