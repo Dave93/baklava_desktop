@@ -55,6 +55,7 @@
     "axios": "^0.18.0",
     "date-fns": "^2.15.0",
     "electron-log": "^4.2.4",
+    "electron-updater": "^4.3.4",
     "serialport": "^9.0.1",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
