@@ -357,7 +357,7 @@
       <div>
         <v-card>
           <v-card-text>
-            <v-row class="align-center">
+            <v-row class="align-baseline">
               <v-col cols="10">
                 <v-text-field
                   v-model="searchText"
@@ -611,7 +611,7 @@
 
 <script>
 import { format } from "date-fns";
-import { mapGetters } from "vuex";
+import product from "@/store/index";
 export default {
   layout: "cash",
   data: () => ({
@@ -675,10 +675,16 @@ export default {
     currentTime() {
       return format(this.time, "HH:mm:ss");
     },
-    ...mapGetters({
-      categories: "product/categories",
-      items: "product/items",
-    }),
+    items: () => {
+      return product.getters.items;
+    },
+    categories: () => {
+      return product.getters.categories;
+    },
+    // ...mapGetters({
+    //   categories: "product/categories",
+    //   items: "product/items",
+    // }),
     filteredProducts() {
       if (this.currentCategoryId > 0) {
         return this.items.filter(
@@ -693,6 +699,7 @@ export default {
             item.barcode.toString().indexOf(this.searchText) === 0
         );
       }
+      console.log(this.items);
       return this.items;
     },
   },
@@ -722,7 +729,7 @@ export default {
   },
   filters: {
     money: (value) => {
-      return value.toLocaleString();
+      return value && value.toLocaleString();
     },
   },
 };

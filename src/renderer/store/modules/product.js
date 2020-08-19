@@ -1,5 +1,4 @@
-export const state = () => {
-  return {
+const state = {
     items: [
       {
         id: 1,
@@ -33,15 +32,14 @@ export const state = () => {
         name: 'Category 2'
       }
     ]
-  }
 }
 
-export const getters = {
+const getters = {
   items: (state) => state.items,
   categories: (state) => state.categories
 }
 
-export const mutations = {
+const mutations = {
   CHANGE_ITEM(state, { index, key, val }) {
     state.items = state.items.map((item, i) => {
       if (i === index) {
@@ -52,8 +50,16 @@ export const mutations = {
   }
 }
 
-export const actions = {
+const actions = {
   changeItem({ commit }, { index, key, val }) {
     commit('CHANGE_ITEM', { index, key, val })
   }
+}
+
+
+export default {
+  state,
+  mutations,
+  actions,
+  getters
 }
