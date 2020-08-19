@@ -27,3 +27,7 @@ build_script:
   - yarn build
 
 test: off
+
+artifacts:
+  - path: build\electron_gavali1*.exe
+    name: setup
