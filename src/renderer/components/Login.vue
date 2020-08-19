@@ -39,9 +39,9 @@
                           outlined
                           rounded
                         />
-                        <v-btn color="primary" rounded x-large to="/main/"
-                          >Sign In</v-btn
-                        >
+                        <router-link to="/main">
+                          <v-btn color="primary" rounded x-large>Sign In</v-btn>
+                        </router-link>
                       </v-card-text>
                     </v-card>
                   </v-form>
@@ -77,9 +77,24 @@ export default {
   name: "Login",
   layout: "auth",
   data: () => ({
+    dialog: false,
     managers: ["Manager 1", "Manager 2", "Manager 3"],
   }),
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.auth-back {
+  background-image: url("../assets/images/auth.png");
+  background-size: contain;
+  width: 100%;
+  height: 100vh;
+  margin-left: -15px;
+  margin-bottom: -25px;
+  margin-top: -25px;
+}
+.auth-right-side {
+  height: 85vh;
+  margin-bottom: -25px;
+}
+</style>
