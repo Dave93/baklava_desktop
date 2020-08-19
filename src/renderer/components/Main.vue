@@ -521,8 +521,8 @@
           </v-slide-group>
         </v-card-text>
       </v-card>
-      <v-row style="background-color: #fff;">
-        <v-col cols="4" class="mx-auto">
+      <v-row style="background-color: #fff;" class="mx-md-auto">
+        <v-col cols="4" class="">
           <v-card flat class="keyboard-background px-10 weight-keyboard">
             <v-row>
               <v-col cols="9" class="pl-0">
@@ -630,6 +630,31 @@
             <h1 class="font-weight-medium">Total</h1>
           </v-btn>
         </v-col>
+        <div class="col-md-6">
+          <v-row>
+            <v-col cols="6"><h3>SubTotal</h3></v-col>
+            <v-col cols="6"
+              ><h3>{{ subTotalPrice | money }} сум</h3></v-col
+            >
+          </v-row>
+          <v-row>
+            <v-col cols="6"><h3>Discount</h3></v-col>
+            <v-col cols="6"
+              ><h3>{{ discountValue }} %</h3></v-col
+            >
+          </v-row>
+          <v-row>
+            <v-col cols="6"> <h2 class="text-uppercase">Total Price</h2></v-col>
+            <v-col cols="6"
+              ><h1 class="display-3 font-weight-bold">
+                {{ totalPrice | money }} сум
+              </h1></v-col
+            >
+          </v-row>
+          <v-col class="pt-6">
+            <div class="text-right"></div>
+          </v-col>
+        </div>
       </v-row>
     </v-dialog>
   </v-app>
