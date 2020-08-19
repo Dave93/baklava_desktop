@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, dialog } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -52,14 +52,36 @@ app.on('activate', () => {
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
  */
 
-/*
+
 import { autoUpdater } from 'electron-updater'
 
+autoUpdater.logger = require("electron-log");
+autoUpdater.logger.transports.file.level = "info";
+
 autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
+  console.log('update-downloaded lats quitAndInstall');
+
+  if (process.env.NODE_ENV === 'production') {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Found Updates',
+      message: 'Found updates, do you want update now?',
+      buttons: ['Sure', 'No']
+    }, (buttonIndex) => {
+      if (buttonIndex === 0) {
+        const isSilent = true;
+        const isForceRunAfter = true;
+        autoUpdater.quitAndInstall(isSilent, isForceRunAfter);
+      }
+      else {
+        autoUpdater.enabled = true
+        autoUpdater = null
+      }
+    })
+  }
+
 })
 
 app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
- */
