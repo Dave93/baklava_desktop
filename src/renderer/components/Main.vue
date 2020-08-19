@@ -63,6 +63,17 @@
                   hide-default-footer
                   class="elevation-1"
                 >
+                  <template v-slot:item.img="{ item }">
+                    <v-list-item>
+                      <v-list-item-avatar
+                        size="40"
+                        rounded
+                        class="manager-avatar"
+                      >
+                        <img :src="item.img" alt="photo" />
+                      </v-list-item-avatar>
+                    </v-list-item>
+                  </template>
                   <template v-slot:item.price="{ item }">
                     {{ item.price | money }}
                   </template>
@@ -435,23 +446,38 @@
                   >
                     <v-item v-slot:default="{ active, toggle }">
                       <v-card
+                        max-width="400"
                         :color="active ? 'primary' : ''"
-                        class="d-flex align-center"
+                        class="mx-auto"
                         height="200"
                         @click="toggle"
                       >
-                        <v-scroll-y-transition>
-                          <div
-                            v-if="item.selected"
-                            class="display-1 flex-grow-1 text-center"
-                          >
-                            {{ item.name }}
-                          </div>
-                          <div v-else class="display-1 flex-grow-1 text-center">
-                            {{ item.name }}
-                          </div>
-                        </v-scroll-y-transition>
+                        <v-img
+                          class="white--text align-end"
+                          height="200px"
+                          src="/static/images/rahat.png"
+                        >
+                        </v-img>
+                        <v-card-title> {{ item.name }} </v-card-title>
                       </v-card>
+                      <!--                      <v-card-->
+                      <!--                        :color="active ? 'primary' : ''"-->
+                      <!--                        class="d-flex align-center"-->
+                      <!--                        height="200"-->
+                      <!--                        @click="toggle"-->
+                      <!--                      >-->
+                      <!--                        <v-scroll-y-transition>-->
+                      <!--                          <div-->
+                      <!--                            v-if="item.selected"-->
+                      <!--                            class="display-1 flex-grow-1 text-center"-->
+                      <!--                          >-->
+                      <!--                            {{ item.name }}-->
+                      <!--                          </div>-->
+                      <!--                          <div v-else class="display-1 flex-grow-1 text-center">-->
+                      <!--                            {{ item.name }}-->
+                      <!--                          </div>-->
+                      <!--                        </v-scroll-y-transition>-->
+                      <!--                      </v-card>-->
                     </v-item>
                   </v-col>
                 </v-row>
@@ -627,6 +653,11 @@ export default {
         sortable: false,
         value: "name",
       },
+      {
+        text: "Image",
+        sortable: false,
+        value: "img",
+      },
       { text: "Price", value: "price", sortable: false },
       { text: "Weight", value: "weight", sortable: false },
       { text: "Total Price", value: "totalPrice" },
@@ -636,12 +667,14 @@ export default {
       {
         name: "Rahat Lokum",
         weight: "2",
+        img: "/static/images/rahat.png",
         price: 25000,
         totalPrice: 50000,
       },
       {
         name: "Chocolate",
         weight: "3.500",
+        img: "https://cdn.vuetifyjs.com/images/john.jpg",
         price: 15000,
         totalPrice: 52500,
       },
