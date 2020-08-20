@@ -900,6 +900,7 @@ export default {
 }
 .selected-product-weight {
   flex: 1;
+  color: black;
 }
 .weight-keyboard {
   flex: 1;
