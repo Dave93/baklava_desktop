@@ -58,11 +58,22 @@
               >
                 <v-data-table
                   :headers="headers"
-                  :items="items"
+                  :items="cartItems"
                   disable-pagination
                   hide-default-footer
                   class="elevation-1"
                 >
+                  <template v-slot:item.img="{ item }">
+                    <v-list-item>
+                      <v-list-item-avatar
+                        size="40"
+                        rounded
+                        class="manager-avatar"
+                      >
+                        <img :src="item.img" alt="photo" />
+                      </v-list-item-avatar>
+                    </v-list-item>
+                  </template>
                   <template v-slot:item.price="{ item }">
                     {{ item.price | money }}
                   </template>
@@ -116,7 +127,7 @@
                   <v-img
                     class="white--text align-end"
                     height="140px"
-                    src="../assets/images/rahat.png"
+                    src="static/images/rahat.png"
                   >
                   </v-img>
                   <v-card-title>Rahat Lokum</v-card-title>
@@ -129,14 +140,46 @@
                   class="keyboard-background px-10 selected-product-weight my-3"
                   elevation="5"
                 >
-                  <h1 class="font-weight-medium white--text">
-                    {{ currentWeight }}
+                  <h1 class="font-weight-medium black--text">
+                    {{ currentWeight || "0" }}
                   </h1>
                 </v-card>
                 <v-card
                   class="keyboard-background px-10 weight-keyboard"
                   elevation="5"
                 >
+                  <v-row class="mb-n4">
+                    <v-col cols="12" class="pl-0">
+                      <v-row>
+                        <v-col cols="6">
+                          <v-btn
+                            @click="append('-')"
+                            color="black"
+                            rounded
+                            height="56"
+                            width="100%"
+                            class="justify-center"
+                            ><h1 class="font-weight-bold green--text">
+                              -
+                            </h1></v-btn
+                          >
+                        </v-col>
+                        <v-col cols="6">
+                          <v-btn
+                            @click="append('+')"
+                            color="black"
+                            rounded
+                            height="56"
+                            width="100%"
+                            class="justify-center"
+                            ><h1 class="font-weight-bold green--text">
+                              +
+                            </h1></v-btn
+                          >
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
                   <v-row>
                     <v-col cols="9" class="pl-0">
                       <v-row class="mb-n4">
@@ -224,7 +267,7 @@
                           ></v-btn>
                         </v-col>
                         <v-col cols="4">
-                          <v-btn fab color="black" @click="dot"
+                          <v-btn fab color="black" @click="append(',')"
                             ><h1 class="font-weight-bold green--text">
                               ,
                             </h1></v-btn
@@ -257,6 +300,7 @@
                       <v-row class="mb-n4">
                         <v-col cols="12">
                           <v-btn
+                            @click="equal"
                             rounded
                             color="black"
                             height="120px"
@@ -438,23 +482,38 @@
                   >
                     <v-item v-slot:default="{ active, toggle }">
                       <v-card
+                        max-width="400"
                         :color="active ? 'primary' : ''"
-                        class="d-flex align-center"
+                        class="mx-auto"
                         height="200"
                         @click="toggle"
                       >
-                        <v-scroll-y-transition>
-                          <div
-                            v-if="item.selected"
-                            class="display-1 flex-grow-1 text-center"
-                          >
-                            {{ item.name }}
-                          </div>
-                          <div v-else class="display-1 flex-grow-1 text-center">
-                            {{ item.name }}
-                          </div>
-                        </v-scroll-y-transition>
+                        <v-img
+                          class="white--text align-end"
+                          height="200px"
+                          src="/static/images/rahat.png"
+                        >
+                        </v-img>
+                        <v-card-title> {{ item.name }} </v-card-title>
                       </v-card>
+                      <!--                      <v-card-->
+                      <!--                        :color="active ? 'primary' : ''"-->
+                      <!--                        class="d-flex align-center"-->
+                      <!--                        height="200"-->
+                      <!--                        @click="toggle"-->
+                      <!--                      >-->
+                      <!--                        <v-scroll-y-transition>-->
+                      <!--                          <div-->
+                      <!--                            v-if="item.selected"-->
+                      <!--                            class="display-1 flex-grow-1 text-center"-->
+                      <!--                          >-->
+                      <!--                            {{ item.name }}-->
+                      <!--                          </div>-->
+                      <!--                          <div v-else class="display-1 flex-grow-1 text-center">-->
+                      <!--                            {{ item.name }}-->
+                      <!--                          </div>-->
+                      <!--                        </v-scroll-y-transition>-->
+                      <!--                      </v-card>-->
                     </v-item>
                   </v-col>
                 </v-row>
@@ -498,8 +557,8 @@
           </v-slide-group>
         </v-card-text>
       </v-card>
-      <v-row style="background-color: #fff;">
-        <v-col cols="4" class="mx-auto">
+      <v-row style="background-color: #fff;" class="mx-md-auto">
+        <v-col cols="4" class="">
           <v-card flat class="keyboard-background px-10 weight-keyboard">
             <v-row>
               <v-col cols="9" class="pl-0">
@@ -607,6 +666,31 @@
             <h1 class="font-weight-medium">Total</h1>
           </v-btn>
         </v-col>
+        <div class="col-md-6">
+          <v-row>
+            <v-col cols="6"><h3>SubTotal</h3></v-col>
+            <v-col cols="6"
+              ><h3>{{ subTotalPrice | money }} сум</h3></v-col
+            >
+          </v-row>
+          <v-row>
+            <v-col cols="6"><h3>Discount</h3></v-col>
+            <v-col cols="6"
+              ><h3>{{ discountValue }} %</h3></v-col
+            >
+          </v-row>
+          <v-row>
+            <v-col cols="6"> <h2 class="text-uppercase">Total Price</h2></v-col>
+            <v-col cols="6"
+              ><h1 class="display-3 font-weight-bold">
+                {{ totalPrice | money }} сум
+              </h1></v-col
+            >
+          </v-row>
+          <v-col class="pt-6">
+            <div class="text-right"></div>
+          </v-col>
+        </div>
       </v-row>
     </v-dialog>
   </v-app>
@@ -616,9 +700,11 @@
 import { format } from "date-fns";
 import product from "@/store/index";
 export default {
-  layout: "cash",
   data: () => ({
     currentWeight: "",
+    operator: null,
+    previous: null,
+    operatorClicked: false,
     showSearchDialog: false,
     set: false,
     searchText: "",
@@ -631,21 +717,28 @@ export default {
         sortable: false,
         value: "name",
       },
+      {
+        text: "Image",
+        sortable: false,
+        value: "img",
+      },
       { text: "Price", value: "price", sortable: false },
       { text: "Weight", value: "weight", sortable: false },
       { text: "Total Price", value: "totalPrice" },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    items: [
+    cartItems: [
       {
         name: "Rahat Lokum",
         weight: "2",
+        img: "/static/images/rahat.png",
         price: 25000,
         totalPrice: 50000,
       },
       {
         name: "Chocolate",
         weight: "3.500",
+        img: "https://cdn.vuetifyjs.com/images/john.jpg",
         price: 15000,
         totalPrice: 52500,
       },
@@ -655,7 +748,7 @@ export default {
   }),
   computed: {
     subTotalPrice() {
-      return this.items.reduce((previousValue, currentValue) => {
+      return this.cartItems.reduce((previousValue, currentValue) => {
         return (
           previousValue.price * +previousValue.weight +
           currentValue.price * +currentValue.weight
@@ -663,12 +756,14 @@ export default {
       });
     },
     totalPrice() {
-      const totalPrice = this.items.reduce((previousValue, currentValue) => {
-        return (
-          previousValue.price * +previousValue.weight +
-          currentValue.price * +currentValue.weight
-        );
-      });
+      const totalPrice = this.cartItems.reduce(
+        (previousValue, currentValue) => {
+          return (
+            previousValue.price * +previousValue.weight +
+            currentValue.price * +currentValue.weight
+          );
+        }
+      );
 
       return totalPrice * ((100 - this.discountValue) / 100);
     },
@@ -722,8 +817,12 @@ export default {
       this.currentWeight = this.currentWeight + number;
     },
     dot() {
-      if (this.currentWeight.includes(",") === -1) {
+      if (this.currentWeight.indexOf(",") === -1) {
+        this.append(",");
       }
+    },
+    equal() {
+      this.currentWeight = eval(this.currentWeight);
     },
     changeItem(key, val) {},
     categoryToggle(id) {

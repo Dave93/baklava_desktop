@@ -85,7 +85,7 @@ export default {
 
 <style scoped>
 .auth-back {
-  background-image: url("../assets/images/auth.png");
+  background-image: url("/static/images/auth.png");
   background-size: contain;
   width: 100%;
   height: 100vh;
