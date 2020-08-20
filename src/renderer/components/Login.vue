@@ -55,14 +55,20 @@
         <v-card>
           <v-card-title class="headline">Site Configs</v-card-title>
           <v-card-text>
-            <v-form>
-              <v-text-field label="Site address" outlined rounded />
+            <v-form @submit.prevent="saveSettings">
+              <v-text-field
+                :value="webHook"
+                ref="webHook"
+                label="Site address"
+                outlined
+                rounded
+              />
               <v-text-field label="API Token" outlined rounded />
             </v-form>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="dialog = false"
+            <v-btn color="green darken-1" text @click="saveSettings"
               >Save</v-btn
             >
           </v-card-actions>
@@ -73,6 +79,7 @@
 </template>
 
 <script>
+import settings from "@/store/index";
 export default {
   name: "Login",
   layout: "auth",
@@ -80,6 +87,19 @@ export default {
     dialog: false,
     managers: ["Manager 1", "Manager 2", "Manager 3"],
   }),
+  computed: {
+    webHook: () => {
+      return settings.getters.webHook;
+    },
+  },
+  methods: {
+    saveSettings() {
+      this.dialog = false;
+      settings.dispatch("setWebHook", {
+        val: this.$refs.webHook.value,
+      });
+    },
+  },
 };
 </script>
 
