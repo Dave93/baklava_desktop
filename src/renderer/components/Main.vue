@@ -244,8 +244,11 @@
                       </v-row>
                       <v-row class="mb-n4">
                         <v-col cols="12">
-                          <v-btn @click="clear" fab color="black"
-                            ><h1 class="font-weight-bold green--text">
+                          <v-btn fab color="black"
+                            ><h1
+                              @click="clear"
+                              class="font-weight-bold green--text"
+                            >
                               C
                             </h1></v-btn
                           >
@@ -744,7 +747,7 @@ export default {
 }
 .selected-product-weight {
   flex: 1;
-}
+  color: black;
 .weight-keyboard {
   flex: 1;
 }
