@@ -60,7 +60,6 @@
                   class="d-flex flex-column justify-space-between"
                   style="height: 90%;"
                 >
-                  {{ cartItems }}
                   <ejs-grid allowEditing ref="cartItemsGrid" allowDeleting>
                     <e-columns>
                       <e-column
@@ -740,6 +739,7 @@ export default {
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
+      cartItems: "cartItems",
     }),
     domainUrl() {
       console.log(this.webHook);
@@ -779,12 +779,12 @@ export default {
     categories: () => {
       return product.getters.categories;
     },
-    cartItems: () => {
-      this.$refs.cartItemsGrid.ej2Instances.setProperties({
-        dataSource: product.getters.cartItems,
-      });
-      return product.getters.cartItems;
-    },
+    // cartItems: () => {
+    //   this.$refs.cartItemsGrid.ej2Instances.setProperties({
+    //     dataSource: product.getters.cartItems,
+    //   });
+    //   return product.getters.cartItems;
+    // },
     filteredProducts() {
       if (this.currentCategoryId > 0) {
         return this.items.filter(
@@ -812,7 +812,7 @@ export default {
       this.time = new Date();
     }, 1000);
 
-    this.$refs.cartItemsGrid.hideSpinner();
+    // this.$refs.cartItemsGrid.hideSpinner();
   },
   methods: {
     ...mapActions(["toggleProduct", "toggleProductCart"]),
@@ -902,6 +902,14 @@ export default {
         this.cardBtn = true;
         this.cashBtn = false;
       }
+    },
+  },
+  watch: {
+    cartItems(newValue, oldValue) {
+      console.log(newValue);
+      this.$refs.cartItemsGrid.ej2Instances.setProperties({
+        dataSource: newValue,
+      });
     },
   },
   filters: {
