@@ -6,7 +6,8 @@ const state = {
 
 const getters = {
   items: (state) => state.items,
-  categories: (state) => state.categories
+  categories: (state) => state.categories,
+  cartItems: (state) => state.cartItems
 }
 
 const mutations = {
@@ -23,6 +24,31 @@ const mutations = {
   },
   SET_ITEMS(state, { val }) {
     state.items = val
+  },
+  TOGGLE_PRODUCT(state, { item }) {
+    state.items = state.items.map(prod => {
+      if(prod.id === item.id) {
+        prod.selected = !prod.selected
+      }
+      return prod
+    })
+  },
+  TOGGLE_PRODUCT_CART(state, {item}) {
+    const foundIndex = state.cartItems.findIndex(prod => {
+      return item.id === prod.id
+    });
+    console.log(foundIndex)
+    if (foundIndex < 0) {
+      state.cartItems.push({
+        id: item.id,
+        name: item.name,
+        img: item.image,
+        price: item.price,
+        weight: 0
+      })
+    } else {
+      state.cartItems.splice(foundIndex, 1)
+    }
   }
 }
 
@@ -35,6 +61,12 @@ const actions = {
   },
   setProducts({ commit }, { val }) {
     commit('SET_ITEMS', { val })
+  },
+  toggleProduct({ commit }, { item }) {
+    commit('TOGGLE_PRODUCT', { item })
+  },
+  toggleProductCart({commit}, {item}) {
+    commit('TOGGLE_PRODUCT_CART', {item})
   }
 }
 

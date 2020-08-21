@@ -60,7 +60,8 @@
                   class="d-flex flex-column justify-space-between"
                   style="height: 90%;"
                 >
-                  <ejs-grid :dataSource="cartItems" ref="grid">
+                  {{ cartItems }}
+                  <ejs-grid allowEditing ref="cartItemsGrid" allowDeleting>
                     <e-columns>
                       <e-column
                         field="name"
@@ -485,10 +486,10 @@
                       <v-item v-slot:default="{ active, toggle }">
                         <v-card
                           max-width="200"
-                          :color="active ? 'primary' : ''"
+                          :color="item.selected ? 'primary' : ''"
                           class="mx-auto"
                           height="200"
-                          @click="toggle"
+                          @click="() => selectProduct(item)"
                         >
                           <v-img
                             class="white--text align-end"
@@ -503,11 +504,6 @@
                 </v-item-group>
               </div>
             </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary">Ok</v-btn>
-            </v-card-actions>
           </v-card>
         </div>
       </v-dialog>
@@ -720,24 +716,6 @@ export default {
     searchText: "",
     currentCategoryId: 0,
     showPayMethodDialog: false,
-    headers: [
-      {
-        text: "Name",
-        align: "start",
-        sortable: false,
-        value: "name",
-      },
-      {
-        text: "Image",
-        sortable: false,
-        value: "img",
-      },
-      { text: "Price", value: "price", sortable: false },
-      { text: "Weight", value: "weight", sortable: false },
-      { text: "Total Price", value: "totalPrice" },
-      { text: "Actions", value: "actions", sortable: false },
-    ],
-    cartItems: [],
     discountValue: 10,
     time: new Date(),
     cTemplate: function () {
@@ -801,10 +779,12 @@ export default {
     categories: () => {
       return product.getters.categories;
     },
-    // ...mapGetters({
-    //   categories: "product/categories",
-    //   items: "product/items",
-    // }),
+    cartItems: () => {
+      this.$refs.cartItemsGrid.ej2Instances.setProperties({
+        dataSource: product.getters.cartItems,
+      });
+      return product.getters.cartItems;
+    },
     filteredProducts() {
       if (this.currentCategoryId > 0) {
         return this.items.filter(
@@ -832,10 +812,24 @@ export default {
       this.time = new Date();
     }, 1000);
 
-    this.$refs.grid.hideSpinner();
-    console.log(this.items);
+    this.$refs.cartItemsGrid.hideSpinner();
   },
   methods: {
+    ...mapActions(["toggleProduct", "toggleProductCart"]),
+    selectProduct(item) {
+      // const foundIndex = this.cartItems.findIndex((prod) => {
+      //   return item.id === prod.id;
+      // });
+      // window.davr = this.$refs.cartItemsGrid;
+      // if (foundIndex < 0) {
+      //   console.log(foundIndex);
+      //   this.$refs.cartItemsGrid.addRecord(item);
+      // } else {
+      //   this.$refs.cartItemsGrid.deleteRecord("id", item);
+      // }
+      this.toggleProduct({ item });
+      this.toggleProductCart({ item });
+    },
     getHostname: (url) => {
       // use URL constructor and return hostname
       return new URL(url).hostname;

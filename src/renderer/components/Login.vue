@@ -145,7 +145,7 @@ export default {
         this.managers = [];
         this.isManagersFound = false;
         const { data } = await this.$http.get(
-          this.webHook + "myuser.getList?filter[UF_MANAGER]=1"
+          this.webHook + "mymanager.user.getList?filter[UF_MANAGER]=1"
         );
         if (data.result && data.result.length) {
           this.managers = data.result.map((item) => ({
@@ -191,6 +191,7 @@ export default {
               selected: false,
               categoryId: item.ELEMENT_IBLOCK_SECTION_ID,
               image: item.PREVIEW_PICTURE,
+              price: item.BASE_PRICE,
             })),
           });
           this.isAuthLoading = false;
