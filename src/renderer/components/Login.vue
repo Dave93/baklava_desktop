@@ -131,7 +131,12 @@ export default {
     }),
   },
   methods: {
-    ...mapActions(["setWebHook", "setUserId", "setCategories", "setProducts"]),
+    ...mapActions({
+      setWebHook: "settings/setWebHook",
+      setUserId: "settings/setUserId",
+      setCategories: "setCategories",
+      setProducts: "setProducts",
+    }),
     saveSettings(val) {
       this.setWebHook({ val });
     },
