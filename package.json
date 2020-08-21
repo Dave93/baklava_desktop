@@ -58,10 +58,13 @@
     }
   },
   "dependencies": {
+    "@syncfusion/ej2-vue-grids": "^18.2.54",
     "axios": "^0.18.0",
     "date-fns": "^2.15.0",
     "electron-log": "^4.2.4",
+    "electron-store": "^6.0.0",
     "electron-updater": "^4.3.4",
+    "psl": "^1.8.0",
     "serialport": "^9.0.1",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
@@ -100,6 +103,7 @@
     "sass-loader": "^7.0.3",
     "style-loader": "^0.21.0",
     "url-loader": "^1.0.1",
+    "vue-devtools": "^5.1.4",
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^15.2.4",
     "vue-style-loader": "^4.1.0",

@@ -1,5 +1,8 @@
 import Vue from 'vue'
 import axios from 'axios'
+import { GridPlugin } from '@syncfusion/ej2-vue-grids';
+
+Vue.use(GridPlugin);
 
 import App from './App'
 import router from './router'

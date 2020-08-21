@@ -19,29 +19,50 @@
             </div>
             <div class="auth-right-side">
               <v-row align="center" justify="center">
-                <v-col cols="9" class="pt-16">
-                  <v-form>
+                <v-col cols="9" class="pt-16 block-relative">
+                  <v-form v-model="authForm">
+                    <v-overlay :value="!isManagersFound" absolute>
+                      <v-progress-circular
+                        indeterminate
+                        size="64"
+                      ></v-progress-circular>
+                    </v-overlay>
                     <v-card flat align="center">
                       <v-card-title class="headline justify-center"
                         >Sign In</v-card-title
                       >
+                      <v-alert type="error" v-show="authError.length">{{
+                        authError
+                      }}</v-alert>
                       <v-card-text>
                         <v-select
                           :items="managers"
                           label="Manager"
+                          v-model="manager"
+                          :rules="managerRules"
                           outlined
+                          required
                           rounded
                           placeholder="Choose your account"
                         ></v-select>
                         <v-text-field
                           label="Password"
                           type="password"
+                          v-model="password"
+                          :rules="passwordRules"
+                          required
                           outlined
                           rounded
                         />
-                        <router-link to="/main">
-                          <v-btn color="primary" rounded x-large>Sign In</v-btn>
-                        </router-link>
+                        <v-btn
+                          color="primary"
+                          :disabled="!authForm"
+                          rounded
+                          x-large
+                          @click="tryLogin"
+                          :loading="isAuthLoading"
+                          >Sign In</v-btn
+                        >
                       </v-card-text>
                     </v-card>
                   </v-form>
@@ -62,13 +83,18 @@
                 label="Site address"
                 outlined
                 rounded
+                @change="saveSettings"
               />
               <v-text-field label="API Token" outlined rounded />
             </v-form>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="saveSettings"
+            <v-btn
+              color="green darken-1"
+              :loading="isSavingSettings"
+              text
+              @click="closeDialog"
               >Save</v-btn
             >
           </v-card-actions>
@@ -79,25 +105,105 @@
 </template>
 
 <script>
-import settings from "@/store/index";
+import { mapGetters, mapActions } from "vuex";
 export default {
   name: "Login",
   layout: "auth",
   data: () => ({
     dialog: false,
-    managers: ["Manager 1", "Manager 2", "Manager 3"],
+    managers: [],
+    isSavingSettings: false,
+    isManagersFound: false,
+    authForm: false,
+    manager: "",
+    password: "",
+    managerRules: [(v) => !!v || "Выберите менеджера"],
+    passwordRules: [(v) => !!v || "Введите пароль"],
+    authError: "",
+    isAuthLoading: false,
   }),
+  async mounted() {
+    await this.tryGetManagers();
+  },
   computed: {
-    webHook: () => {
-      return settings.getters.webHook;
-    },
+    ...mapGetters({
+      webHook: "settings/webHook",
+    }),
   },
   methods: {
-    saveSettings() {
+    ...mapActions(["setWebHook", "setUserId", "setCategories", "setProducts"]),
+    saveSettings(val) {
+      this.setWebHook({ val });
+    },
+    async closeDialog() {
+      this.isSavingSettings = true;
+      await this.tryGetManagers();
       this.dialog = false;
-      settings.dispatch("setWebHook", {
-        val: this.$refs.webHook.value,
-      });
+    },
+    async tryGetManagers() {
+      try {
+        this.managers = [];
+        this.isManagersFound = false;
+        const { data } = await this.$http.get(
+          this.webHook + "myuser.getList?filter[UF_MANAGER]=1"
+        );
+        if (data.result && data.result.length) {
+          this.managers = data.result.map((item) => ({
+            value: item.LOGIN,
+            text: `${item.LAST_NAME} ${item.NAME}`,
+          }));
+          this.isManagersFound = true;
+        } else {
+          this.isManagersFound = false;
+        }
+      } catch (e) {
+        this.isManagersFound = false;
+      }
+    },
+    async tryLogin() {
+      this.authError = "";
+      this.isAuthLoading = true;
+      try {
+        let { data } = await this.$http.get(
+          `${this.webHook}myuser.manager.auth?login=${
+            this.manager
+          }&password=${btoa(this.password)}`
+        );
+        if (data.result && data.result.id) {
+          await this.setUserId({ val: data.result.id });
+          let { data: categoriesData } = await this.$http.get(
+            `${this.webHook}mycatalog.section.list`
+          );
+          await this.setCategories({
+            val: categoriesData.result.map((item) => ({
+              id: item.ID,
+              name: item.NAME,
+            })),
+          });
+          let { data: productsData } = await this.$http.get(
+            `${this.webHook}mycatalog.product.list`
+          );
+          await this.setProducts({
+            val: productsData.result.map((item) => ({
+              id: item.ID,
+              name: item.ELEMENT_NAME,
+              barcode: item.BARCODE_BARCODE,
+              selected: false,
+              categoryId: item.ELEMENT_IBLOCK_SECTION_ID,
+              image: item.PREVIEW_PICTURE,
+            })),
+          });
+          this.isAuthLoading = false;
+          await this.$router.push("/main");
+        } else {
+          this.isAuthLoading = false;
+          this.authError = "Неверный пароль";
+        }
+      } catch (e) {
+        console.log(e);
+        this.isAuthLoading = false;
+        this.authError = "Неверный пароль";
+      }
     },
   },
 };
@@ -116,5 +222,8 @@ export default {
 .auth-right-side {
   height: 85vh;
   margin-bottom: -25px;
+}
+.block-relative {
+  position: relative;
 }
 </style>

@@ -1,37 +1,7 @@
 const state = {
-    items: [
-      {
-        id: 1,
-        name: 'item',
-        barcode: 4444555,
-        categoryId: 1,
-        selected: false
-      },
-      {
-        id: 2,
-        name: 'item 2',
-        barcode: 808,
-        categoryId: 1,
-        selected: false
-      },
-      {
-        id: 3,
-        name: 'item 3',
-        barcode: 97979,
-        categoryId: 2,
-        selected: false
-      }
-    ],
-    categories: [
-      {
-        id: 1,
-        name: 'Category'
-      },
-      {
-        id: 2,
-        name: 'Category 2'
-      }
-    ]
+    items: [],
+    categories: [],
+    cartItems: []
 }
 
 const getters = {
@@ -47,12 +17,24 @@ const mutations = {
       }
       return item
     })
+  },
+  SET_CATEGORIES(state, { val }) {
+    state.categories = val
+  },
+  SET_ITEMS(state, { val }) {
+    state.items = val
   }
 }
 
 const actions = {
   changeItem({ commit }, { index, key, val }) {
     commit('CHANGE_ITEM', { index, key, val })
+  },
+  setCategories({ commit }, { val }) {
+    commit('SET_CATEGORIES', { val })
+  },
+  setProducts({ commit }, { val }) {
+    commit('SET_ITEMS', { val })
   }
 }
 

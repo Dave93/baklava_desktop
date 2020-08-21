@@ -19,7 +19,7 @@ const { VueLoaderPlugin } = require('vue-loader')
  * that provide pure *.vue files that need compiling
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
-let whiteListedModules = ['vue','vuetify']
+let whiteListedModules = ['vue','vuetify', '@syncfusion/ej2-vue-grids']
 
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
@@ -147,7 +147,8 @@ let rendererConfig = {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
       'vue$': 'vue/dist/vue.esm.js',
-      '^vuetify': path.resolve(__dirname, 'node_modules/vuetify')
+      '^vuetify': path.resolve(__dirname, 'node_modules/vuetify'),
+      '^ejs': path.resolve(__dirname, 'node_modules/@syncfusion/ej2-vue-grids')
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node']
   },

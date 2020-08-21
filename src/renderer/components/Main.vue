@@ -60,38 +60,36 @@
                   class="d-flex flex-column justify-space-between"
                   style="height: 90%;"
                 >
-                  <v-data-table
-                    :headers="headers"
-                    :items="cartItems"
-                    disable-pagination
-                    hide-default-footer
-                    class="elevation-1"
-                  >
-                    <template v-slot:item.img="{ item }">
-                      <v-list-item>
-                        <v-list-item-avatar
-                          size="40"
-                          rounded
-                          class="manager-avatar"
-                        >
-                          <img :src="item.img" alt="photo" />
-                        </v-list-item-avatar>
-                      </v-list-item>
-                    </template>
-                    <template v-slot:item.price="{ item }">
-                      {{ item.price | money }}
-                    </template>
-                    <template v-slot:item.totalPrice="{ item }">
-                      {{ item.totalPrice | money }}
-                    </template>
-                    <template v-slot:item.actions="">
-                      <v-btn fab x-small color="red">
-                        <v-icon color="white">
-                          mdi-delete
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                  </v-data-table>
+                  <ejs-grid :dataSource="cartItems" ref="grid">
+                    <e-columns>
+                      <e-column
+                        field="name"
+                        headerText="Название"
+                        width="90"
+                      ></e-column>
+                      <e-column
+                        field="img"
+                        headerText="Фото"
+                        width="90"
+                        :template="cTemplate"
+                      ></e-column>
+                      <e-column
+                        field="price"
+                        headerText="Цена"
+                        width="90"
+                      ></e-column>
+                      <e-column
+                        field="weight"
+                        headerText="Вес"
+                        width="90"
+                      ></e-column>
+                      <e-column
+                        field="totalPrice"
+                        headerText="Итоговая цена"
+                        width="90"
+                      ></e-column>
+                    </e-columns>
+                  </ejs-grid>
                   <div>
                     <v-divider></v-divider>
                     <v-row>
@@ -486,7 +484,7 @@
                     >
                       <v-item v-slot:default="{ active, toggle }">
                         <v-card
-                          max-width="400"
+                          max-width="200"
                           :color="active ? 'primary' : ''"
                           class="mx-auto"
                           height="200"
@@ -494,8 +492,7 @@
                         >
                           <v-img
                             class="white--text align-end"
-                            height="200px"
-                            src="/static/images/rahat.png"
+                            :src="(item.image ? domainUrl + item.image : '')"
                           >
                           </v-img>
                           <v-card-title> {{ item.name }} </v-card-title>
@@ -703,7 +700,9 @@
 
 <script>
 import { format } from "date-fns";
+import psl from "psl";
 import product from "@/store/index";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   data: () => ({
@@ -738,33 +737,44 @@ export default {
       { text: "Total Price", value: "totalPrice" },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    cartItems: [
-      {
-        name: "Rahat Lokum",
-        weight: "2",
-        img: "/static/images/rahat.png",
-        price: 25000,
-        totalPrice: 50000,
-      },
-      {
-        name: "Chocolate",
-        weight: "3.500",
-        img: "https://cdn.vuetifyjs.com/images/john.jpg",
-        price: 15000,
-        totalPrice: 52500,
-      },
-    ],
+    cartItems: [],
     discountValue: 10,
     time: new Date(),
+    cTemplate: function () {
+      return {
+        template: Vue.component("columnTemplate", {
+          template: ` <v-list-item-avatar
+                          size="40"
+                          rounded
+                          class="manager-avatar"
+                        >
+                          <img :src="data.img" alt="photo" />
+                        </v-list-item-avatar>`,
+          data: function () {
+            return {
+              data: {},
+            };
+          },
+        }),
+      };
+    },
   }),
   computed: {
+    ...mapGetters({
+      webHook: "settings/webHook",
+    }),
+    domainUrl() {
+      console.log(this.webHook);
+      console.log(this.getHostname(this.webHook));
+      return "https://" + this.getHostname(this.webHook);
+    },
     subTotalPrice() {
       return this.cartItems.reduce((previousValue, currentValue) => {
         return (
           previousValue.price * +previousValue.weight +
           currentValue.price * +currentValue.weight
         );
-      });
+      }, 0);
     },
     totalPrice() {
       const totalPrice = this.cartItems.reduce(
@@ -773,7 +783,8 @@ export default {
             previousValue.price * +previousValue.weight +
             currentValue.price * +currentValue.weight
           );
-        }
+        },
+        0
       );
 
       return totalPrice * ((100 - this.discountValue) / 100);
@@ -820,8 +831,15 @@ export default {
     setInterval(() => {
       this.time = new Date();
     }, 1000);
+
+    this.$refs.grid.hideSpinner();
+    console.log(this.items);
   },
   methods: {
+    getHostname: (url) => {
+      // use URL constructor and return hostname
+      return new URL(url).hostname;
+    },
     logout() {
       this.$router.push("/login");
     },
@@ -837,7 +855,16 @@ export default {
       }
     },
     append(number) {
-      this.currentWeight = this.currentWeight + number;
+      if (["+", "-"].includes(number)) {
+        if (!this.currentWeight) {
+          return;
+        }
+        if (this.currentWeight.indexOf(number) === -1) {
+          this.currentWeight = this.currentWeight + number;
+        }
+      } else {
+        this.currentWeight = this.currentWeight + number;
+      }
     },
     shopAppend(number) {
       if (this.cashBtn) {
@@ -893,7 +920,7 @@ export default {
 
 <style scoped>
 .keyboard-background {
-  background-color: #79808a;
+  background-color: #79808a !important;
 }
 .selected-product-info {
   flex: 1;
@@ -909,7 +936,7 @@ export default {
   border: 2px solid #4caf50 !important;
 }
 .header-background-color {
-  background-color: #4a4a4a;
+  background-color: #4a4a4a !important;
 }
 .white-text {
   color: #fff !important;
