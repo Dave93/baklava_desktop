@@ -10,8 +10,6 @@ const MinifyPlugin = require("babel-minify-webpack-plugin")
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { VueLoaderPlugin } = require('vue-loader')
-
 /**
  * List of node_modules to include in webpack bundle
  *
@@ -19,7 +17,9 @@ const { VueLoaderPlugin } = require('vue-loader')
  * that provide pure *.vue files that need compiling
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
-let whiteListedModules = ['vue','vuetify', '@syncfusion/ej2-vue-grids']
+let whiteListedModules = ['vue','vuetify', 'ag-grid-community', 'ag-grid-vue', 'vue-class-component', 'vue-property-decorator']
+
+const { VueLoaderPlugin } = require('vue-loader')
 
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
@@ -148,12 +148,14 @@ let rendererConfig = {
       '@': path.join(__dirname, '../src/renderer'),
       'vue$': 'vue/dist/vue.esm.js',
       '^vuetify': path.resolve(__dirname, 'node_modules/vuetify'),
-      '^ejs': path.resolve(__dirname, 'node_modules/@syncfusion/ej2-vue-grids')
+      '^ag-grid-community': path.resolve(__dirname, 'node_modules/ag-grid-community'),
+      '^ag-grid-vue': path.resolve(__dirname, 'node_modules/ag-grid-vue')
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node']
   },
   target: 'electron-renderer'
 }
+
 
 /**
  * Adjust rendererConfig for development settings

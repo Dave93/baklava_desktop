@@ -42,8 +42,10 @@ const mutations = {
       state.cartItems.push({
         id: item.id,
         name: item.name,
+        barcode: item.barcode,
         img: item.image,
         price: item.price,
+        totalPrice: 0,
         weight: 0
       })
     } else {

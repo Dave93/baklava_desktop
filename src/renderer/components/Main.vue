@@ -60,36 +60,19 @@
                   class="d-flex flex-column justify-space-between"
                   style="height: 90%;"
                 >
-                  <ejs-grid allowEditing ref="cartItemsGrid" allowDeleting>
-                    <e-columns>
-                      <e-column
-                        field="name"
-                        headerText="Название"
-                        width="90"
-                      ></e-column>
-                      <e-column
-                        field="img"
-                        headerText="Фото"
-                        width="90"
-                        :template="cTemplate"
-                      ></e-column>
-                      <e-column
-                        field="price"
-                        headerText="Цена"
-                        width="90"
-                      ></e-column>
-                      <e-column
-                        field="weight"
-                        headerText="Вес"
-                        width="90"
-                      ></e-column>
-                      <e-column
-                        field="totalPrice"
-                        headerText="Итоговая цена"
-                        width="90"
-                      ></e-column>
-                    </e-columns>
-                  </ejs-grid>
+                  <ag-grid-vue
+                    style="width: 100%; height: 500px;"
+                    class="ag-theme-material"
+                    :columnDefs="cartColumns"
+                    :rowData="cartItems"
+                    rowSelection="single"
+                    :context="context"
+                    :frameworkComponents="frameworkComponents"
+                    :modules="modules"
+                    @selection-changed="cartItemSelected"
+                    :gridOptions="gridOptions"
+                  >
+                  </ag-grid-vue>
                   <div>
                     <v-divider></v-divider>
                     <v-row>
@@ -129,13 +112,18 @@
                     <v-img
                       class="white--text align-end"
                       height="140px"
-                      src="static/images/rahat.png"
+                      :src="(selectedCartItem.img ? domainUrl + selectedCartItem.img : '')"
                     >
                     </v-img>
-                    <v-card-title>Rahat Lokum</v-card-title>
-                    <v-card-subtitle>Code: 44788523314</v-card-subtitle>
+                    <v-card-title>{{ selectedCartItem.name }}</v-card-title>
+                    <v-card-subtitle v-show="selectedCartItem.barcode"
+                      >Штрих-код:
+                      {{ selectedCartItem.barcode }}</v-card-subtitle
+                    >
                     <v-card-text>
-                      <div class="display-1">50 000 сум</div>
+                      <div class="display-1" v-show="selectedCartItem.price">
+                        {{ selectedCartItem.price | money }} сум
+                      </div>
                     </v-card-text>
                   </v-card>
                   <v-card
@@ -698,9 +686,17 @@ import { format } from "date-fns";
 import psl from "psl";
 import product from "@/store/index";
 import { mapGetters, mapActions } from "vuex";
+import { AgGridVue } from "ag-grid-vue";
+import { AllCommunityModules } from "@ag-grid-community/all-modules";
+import currency from "currency.js";
+import CartItemDelete from "./CartItemDelete";
+import MoneyColumn from "./MoneyColumn";
 
 export default {
   data: () => ({
+    gridOptions: null,
+    gridApi: null,
+    columnApi: null,
     cashPrice: "",
     cardPrice: "",
     changePrice: "",
@@ -717,40 +713,37 @@ export default {
     showPayMethodDialog: false,
     discountValue: 10,
     time: new Date(),
-    cTemplate: function () {
-      return {
-        template: Vue.component("columnTemplate", {
-          template: ` <v-list-item-avatar
-                          size="40"
-                          rounded
-                          class="manager-avatar"
-                        >
-                          <img :src="data.img" alt="photo" />
-                        </v-list-item-avatar>`,
-          data: function () {
-            return {
-              data: {},
-            };
-          },
-        }),
-      };
-    },
+    cartColumns: [
+      { headerName: "Название", field: "name" },
+      {
+        headerName: "Цена",
+        field: "price",
+        width: 150,
+        cellRenderer: "MoneyColumn",
+      },
+      { headerName: "Вес", field: "weight", width: 100 },
+      { headerName: "Итоговая цена", field: "totalPrice", width: 150 },
+      { headerName: "Действие", field: "id", cellRenderer: "CartItemDelete" },
+    ],
+    context: null,
+    frameworkComponents: null,
+    modules: AllCommunityModules,
+    selectedCartItem: {},
   }),
+  components: { AgGridVue },
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
       cartItems: "cartItems",
     }),
     domainUrl() {
-      console.log(this.webHook);
-      console.log(this.getHostname(this.webHook));
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       return this.cartItems.reduce((previousValue, currentValue) => {
         return (
-          previousValue.price * +previousValue.weight +
-          currentValue.price * +currentValue.weight
+          +previousValue.price * +previousValue.weight +
+          +currentValue.price * +currentValue.weight
         );
       }, 0);
     },
@@ -758,8 +751,8 @@ export default {
       const totalPrice = this.cartItems.reduce(
         (previousValue, currentValue) => {
           return (
-            previousValue.price * +previousValue.weight +
-            currentValue.price * +currentValue.weight
+            +previousValue.price * +previousValue.weight +
+            +currentValue.price * +currentValue.weight
           );
         },
         0
@@ -779,12 +772,6 @@ export default {
     categories: () => {
       return product.getters.categories;
     },
-    // cartItems: () => {
-    //   this.$refs.cartItemsGrid.ej2Instances.setProperties({
-    //     dataSource: product.getters.cartItems,
-    //   });
-    //   return product.getters.cartItems;
-    // },
     filteredProducts() {
       if (this.currentCategoryId > 0) {
         return this.items.filter(
@@ -801,34 +788,42 @@ export default {
       return this.items;
     },
     change() {
-      // if (res < 0) {
-      //   return 0;
-      // }
       return +this.cashPrice + +this.cardPrice - +this.totalPrice;
     },
+  },
+  beforeMount() {
+    this.gridOptions = {};
+    this.context = { componentParent: this };
+    this.frameworkComponents = {
+      CartItemDelete,
+      MoneyColumn,
+    };
   },
   mounted() {
     setInterval(() => {
       this.time = new Date();
     }, 1000);
 
-    // this.$refs.cartItemsGrid.hideSpinner();
+    this.gridApi = this.gridOptions.api;
+    this.gridColumnApi = this.gridOptions.columnApi;
   },
   methods: {
     ...mapActions(["toggleProduct", "toggleProductCart"]),
     selectProduct(item) {
-      // const foundIndex = this.cartItems.findIndex((prod) => {
-      //   return item.id === prod.id;
-      // });
-      // window.davr = this.$refs.cartItemsGrid;
-      // if (foundIndex < 0) {
-      //   console.log(foundIndex);
-      //   this.$refs.cartItemsGrid.addRecord(item);
-      // } else {
-      //   this.$refs.cartItemsGrid.deleteRecord("id", item);
-      // }
       this.toggleProduct({ item });
       this.toggleProductCart({ item });
+    },
+    removeCartItem(node) {
+      this.toggleProduct({ item: node.data });
+      this.toggleProductCart({ item: node.data });
+    },
+    cartItemSelected() {
+      const selectedRows = this.gridApi.getSelectedRows();
+      if (selectedRows.length) {
+        this.selectedCartItem = selectedRows[0];
+      } else {
+        this.selectedCartItem = {};
+      }
     },
     getHostname: (url) => {
       // use URL constructor and return hostname
@@ -870,10 +865,9 @@ export default {
     },
     substr(param) {
       if (param === "currentWeight") {
-        this.currentWeight = this.currentWeight.substring(
-          0,
-          this.currentWeight.length - 1
-        );
+        this.currentWeight = this.currentWeight
+          .toString()
+          .substring(0, this.currentWeight.length - 1);
       }
       if (param.includes("cashPrice") && this.cashBtn) {
         this.cashPrice = this.cashPrice.substring(0, this.cashPrice.length - 1);
@@ -883,8 +877,8 @@ export default {
       }
     },
     dot() {
-      if (this.currentWeight.indexOf(",") === -1) {
-        this.append(",");
+      if (this.currentWeight.toString().indexOf(".") === -1) {
+        this.append(".");
       }
     },
     equal() {
@@ -904,17 +898,12 @@ export default {
       }
     },
   },
-  watch: {
-    cartItems(newValue, oldValue) {
-      console.log(newValue);
-      this.$refs.cartItemsGrid.ej2Instances.setProperties({
-        dataSource: newValue,
-      });
-    },
-  },
   filters: {
     money: (value) => {
-      return value && value.toLocaleString();
+      return (
+        value &&
+        currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
+      );
     },
   },
 };

@@ -119,7 +119,9 @@ let webConfig = {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
       'vue$': 'vue/dist/vue.esm.js',
-      '^vuetify': path.resolve(__dirname, 'node_modules/vuetify')
+      '^vuetify': path.resolve(__dirname, 'node_modules/vuetify'),
+      'ag-grid-community': path.resolve(__dirname, '../node_modules/ag-grid-community'),
+      'ag-grid-vue': path.resolve(__dirname, '../node_modules/ag-grid-vue')
     },
     extensions: ['.js', '.vue', '.json', '.css']
   },
