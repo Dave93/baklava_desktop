@@ -7,9 +7,6 @@ import Vue from "vue";
 import currency from "currency.js";
 
 export default Vue.extend({
-  mounted() {
-    console.log(this.params);
-  },
   computed: {
     printValue() {
       const val = this.params.value || 0;

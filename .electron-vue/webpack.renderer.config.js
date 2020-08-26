@@ -17,7 +17,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
  * that provide pure *.vue files that need compiling
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
-let whiteListedModules = ['vue','vuetify', 'ag-grid-community', 'ag-grid-vue', 'vue-class-component', 'vue-property-decorator']
+let whiteListedModules = ['vue','vuetify', 'ag-grid-community', 'ag-grid-vue', 'vue-class-component', 'vue-property-decorator', '@ag-grid-community/all-modules',
+  '@ag-grid-community/client-side-row-model',
+  '@ag-grid-enterprise/all-modules',
+  'ag-grid-enterprise','vue-select']
 
 const { VueLoaderPlugin } = require('vue-loader')
 
@@ -155,6 +158,8 @@ let rendererConfig = {
   },
   target: 'electron-renderer'
 }
+
+console.log(rendererConfig.externals);
 
 
 /**

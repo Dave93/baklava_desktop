@@ -7,7 +7,7 @@ import { app, BrowserWindow, dialog, Menu } from 'electron'
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
-
+app.allowRendererProcessReuse = false
 
 Menu.setApplicationMenu(false);
 let mainWindow

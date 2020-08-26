@@ -52,7 +52,7 @@
                       x-large
                       width="100%"
                       @click="showSearchDialog = true"
-                      >Enter or Search Product</v-btn
+                      >Поиск товара</v-btn
                     >
                   </v-col>
                 </v-row>
@@ -61,16 +61,33 @@
                   style="height: 90%;"
                 >
                   <ag-grid-vue
-                    style="width: 100%; height: 500px;"
+                    style="width: 100%; height: 200px;"
                     class="ag-theme-material"
                     :columnDefs="cartColumns"
-                    :rowData="cartItems"
+                    :rowData="singleProducts"
                     rowSelection="single"
                     :context="context"
                     :frameworkComponents="frameworkComponents"
-                    :modules="modules"
                     @selection-changed="cartItemSelected"
                     :gridOptions="gridOptions"
+                    :detailCellRendererParams="detailCellRendererParams"
+                    :defaultColDef="defaultColDef"
+                  >
+                  </ag-grid-vue>
+                  <h2>Сеты</h2>
+                  <ag-grid-vue
+                    style="width: 100%; height: 250px;"
+                    class="ag-theme-material"
+                    :columnDefs="cartColumns"
+                    :rowData="setProducts"
+                    rowSelection="single"
+                    :context="context"
+                    :frameworkComponents="frameworkComponents"
+                    @selection-changed="cartSetItemSelected"
+                    :gridOptions="gridSetOptions"
+                    :masterDetail="true"
+                    :detailCellRendererParams="detailCellRendererParams"
+                    :defaultColDef="defaultColDef"
                   >
                   </ag-grid-vue>
                   <div>
@@ -78,13 +95,13 @@
                     <v-row>
                       <v-col cols="6">
                         <v-row>
-                          <v-col cols="6"><h3>SubTotal</h3></v-col>
+                          <v-col cols="6"><h3>Сумма</h3></v-col>
                           <v-col cols="6"
                             ><h3>{{ subTotalPrice | money }} сум</h3></v-col
                           >
                         </v-row>
                         <v-row>
-                          <v-col cols="6"><h3>Discount</h3></v-col>
+                          <v-col cols="6"><h3>Скидка</h3></v-col>
                           <v-col cols="6"
                             ><h3>{{ discountValue }} %</h3></v-col
                           >
@@ -92,7 +109,7 @@
                       </v-col>
                       <v-col class="pt-6">
                         <div class="text-right">
-                          <h2 class="text-uppercase">Total Price</h2>
+                          <h2 class="text-uppercase">Итоговая сумма</h2>
                           <h1 class="display-3 font-weight-bold">
                             {{ totalPrice | money }} сум
                           </h1>
@@ -106,28 +123,142 @@
           </v-col>
           <v-col cols="5" class="mt-n3">
             <v-row>
-              <v-col cols="7">
-                <div>
-                  <v-card class="mx-auto selected-product-info" elevation="5">
-                    <v-img
-                      class="white--text align-end"
-                      height="140px"
-                      :src="(selectedCartItem.img ? domainUrl + selectedCartItem.img : '')"
-                    >
-                    </v-img>
+              <v-col cols="5">
+                <v-card
+                  class="mx-auto selected-product-info"
+                  elevation="5"
+                  min-height="150px"
+                >
+                  <div v-if="selectedCartItem.id">
                     <v-card-title>{{ selectedCartItem.name }}</v-card-title>
                     <v-card-subtitle v-show="selectedCartItem.barcode"
                       >Штрих-код:
                       {{ selectedCartItem.barcode }}</v-card-subtitle
                     >
                     <v-card-text>
-                      <div class="display-1" v-show="selectedCartItem.price">
+                      <div class="headline" v-show="selectedCartItem.price">
                         {{ selectedCartItem.price | money }} сум
                       </div>
                     </v-card-text>
+                  </div>
+                  <div v-else>
+                    <div class="title text-center pt-16">
+                      Продукт не выбран
+                    </div>
+                  </div>
+                </v-card>
+                <div class="mt-6">
+                  <v-card rounded elevation="5" min-height="300px">
+                    <v-card-text v-if="showClientEditor || showAddEditor">
+                      <div class="title">
+                        {{
+                          showClientEditor && currentClient.ID
+                            ? "Редактирование"
+                            : "Добавление"
+                        }}
+                      </div>
+                      <v-form ref="form" v-model="valid">
+                        <v-text-field
+                          v-model="clientFirstName"
+                          :rules="firstNameRules"
+                          label="Фамилия"
+                          required
+                        ></v-text-field>
+                        <v-text-field
+                          v-model="clientName"
+                          :rules="nameRules"
+                          label="Имя"
+                          required
+                        ></v-text-field>
+                        <v-text-field
+                          v-model="clientPhone"
+                          label="Телефон"
+                        ></v-text-field>
+                        <v-text-field
+                          v-model="clientEmail"
+                          label="Email"
+                        ></v-text-field>
+                        <v-btn
+                          :disabled="!valid"
+                          :loading="savingClientLoading"
+                          color="green"
+                          class="mr-4 accent-3"
+                          @click="saveClient"
+                        >
+                          Сохранить
+                        </v-btn>
+                      </v-form>
+                    </v-card-text>
+                    <v-card-text v-else>
+                      <vue-select
+                        label="NAME"
+                        placeholder="Поиск клиента"
+                        class="mb-4"
+                        v-model="currentClient"
+                        :options="options"
+                        :clearable="false"
+                        @search="onSearch"
+                      >
+                        <template slot="no-options">
+                          Введите имя клиента
+                        </template>
+                      </vue-select>
+                      <div v-if="currentClient.ID">
+                        <div class="mb-4">
+                          <div>Client # {{ currentClient.ID }}</div>
+                          <h2 class="font-weight-medium text--primary">
+                            {{ currentClient.NAME }}
+                          </h2>
+                        </div>
+                        <div class="mb-4">
+                          <div>
+                            Phone
+                          </div>
+                          <div class="font-weight-bold">
+                            {{ currentClient.PERSONAL_PHONE }}
+                          </div>
+                        </div>
+                        <div class="mb-4">
+                          <div>
+                            Email
+                          </div>
+                          <div class="font-weight-bold">
+                            {{ currentClient.EMAIL }}
+                          </div>
+                        </div>
+                      </div>
+                      <div v-else>
+                        <div class="title text-center">Клиент не выбран</div>
+                      </div>
+                    </v-card-text>
+                    <v-card-actions class="justify-lg-space-around">
+                      <v-btn
+                        :icon="!showClientEditor"
+                        :x-large="!showClientEditor"
+                        :fab="showClientEditor"
+                        color="success"
+                        :disabled="!currentClient.ID"
+                        @click="onEditClient"
+                      >
+                        <v-icon>mdi-pencil-outline</v-icon>
+                      </v-btn>
+                      <v-btn
+                        :icon="!showAddEditor"
+                        :x-large="!showAddEditor"
+                        :fab="showAddEditor"
+                        color="success"
+                        @click="onAddClient"
+                      >
+                        <v-icon>mdi-account-plus-outline</v-icon>
+                      </v-btn>
+                    </v-card-actions>
                   </v-card>
+                </div>
+              </v-col>
+              <v-col cols="7" class="d-flex flex-column justify-space-between">
+                <div>
                   <v-card
-                    class="keyboard-background px-10 selected-product-weight my-3"
+                    class="keyboard-background px-10 selected-product-weight mb-4"
                     elevation="5"
                   >
                     <h1 class="font-weight-medium black--text">
@@ -306,51 +437,10 @@
                     </v-row>
                   </v-card>
                 </div>
-              </v-col>
-              <v-col cols="5" class="d-flex flex-column justify-space-between">
-                <div class="mx-n3">
-                  <v-card rounded elevation="5">
-                    <v-card-text>
-                      <div class="mb-4">
-                        <div>Client # 33045059</div>
-                        <h2 class="font-weight-medium text--primary">
-                          Client Name
-                        </h2>
-                      </div>
-                      <div class="mb-4">
-                        <div>
-                          Phone
-                        </div>
-                        <div class="font-weight-bold">
-                          +998900000000
-                        </div>
-                      </div>
-                      <div class="mb-4">
-                        <div>
-                          Email
-                        </div>
-                        <div class="font-weight-bold">
-                          info@gavali.com
-                        </div>
-                      </div>
-                    </v-card-text>
-                    <v-card-actions class="justify-lg-space-around">
-                      <v-btn icon x-large color="success">
-                        <v-icon>mdi-magnify</v-icon>
-                      </v-btn>
-                      <v-btn icon x-large color="success">
-                        <v-icon>mdi-pencil-outline</v-icon>
-                      </v-btn>
-                      <v-btn icon x-large color="success">
-                        <v-icon>mdi-account-plus-outline</v-icon>
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </div>
                 <div>
                   <v-row>
-                    <v-col cols="4"></v-col>
-                    <v-col cols="4">
+                    <v-col cols="6"></v-col>
+                    <v-col cols="3">
                       <v-btn
                         color="grey darken-3"
                         class="green--text"
@@ -360,7 +450,7 @@
                         <v-icon large>mdi-printer</v-icon>
                       </v-btn>
                     </v-col>
-                    <v-col cols="4" class="pr-0">
+                    <v-col cols="3" class="pr-0">
                       <v-btn
                         color="grey darken-3"
                         class="red--text"
@@ -380,7 +470,7 @@
                         @click="showPayMethodDialog = true"
                       >
                         <v-icon large>mdi-cart-outline</v-icon>
-                        <h1 class="font-weight-medium">Shop</h1>
+                        <h1 class="font-weight-medium">Оплата</h1>
                       </v-btn>
                     </v-col>
                   </v-row>
@@ -398,24 +488,25 @@
                 <v-col cols="10">
                   <v-text-field
                     v-model="searchText"
-                    placeholder="Search..."
+                    placeholder="Поиск..."
                     rounded
                     outlined
                     dense
                   />
                 </v-col>
                 <v-col cols="2">
-                  <v-switch v-model="set" label="Set" dense></v-switch>
+                  <v-switch v-model="set" label="Режим сета" dense></v-switch>
                 </v-col>
               </v-row>
               <v-row v-show="set">
                 <v-col cols="12">
                   <v-text-field
-                    label="Set Name"
-                    placeholder="Type set name"
+                    label="Заголовок сета"
+                    placeholder="Укажите название сета"
                     rounded
                     outlined
                     dense
+                    v-model="setName"
                   />
                 </v-col>
               </v-row>
@@ -425,7 +516,7 @@
                   <v-card
                     height="75"
                     width="90"
-                    :color="active ? 'primary' : ''"
+                    :color="active ? 'green accent-3' : ''"
                     class="d-flex align-center mx-2 justify-center my-2"
                     @click="
                       (e) => {
@@ -434,7 +525,7 @@
                       }
                     "
                   >
-                    <v-card-title class="subtitle-2">All</v-card-title>
+                    <v-card-title class="subtitle-2">Все</v-card-title>
                   </v-card>
                 </v-slide-item>
                 <v-slide-item
@@ -445,7 +536,7 @@
                   <v-card
                     height="75"
                     width="90"
-                    :color="active ? 'primary' : ''"
+                    :color="active ? 'green accent-3' : ''"
                     class="d-flex align-center mx-2 justify-center my-2"
                     @click="
                       (e) => {
@@ -473,17 +564,28 @@
                       <v-item v-slot:default="{ active, toggle }">
                         <v-card
                           max-width="200"
-                          :color="item.selected ? 'primary' : ''"
+                          :color="item.selected ? 'green accent-3' : ''"
                           class="mx-auto"
-                          height="200"
+                          height="180"
                           @click="() => selectProduct(item)"
                         >
-                          <v-img
-                            class="white--text align-end"
-                            :src="(item.image ? domainUrl + item.image : '')"
-                          >
-                          </v-img>
-                          <v-card-title> {{ item.name }} </v-card-title>
+                          <v-list-item style="height: 70%;">
+                            <v-list-item-content>
+                              <v-list-item-title class="text-wrap">{{
+                                item.name
+                              }}</v-list-item-title>
+                              <v-list-item-subtitle
+                                >Штрих-код:
+                                {{ item.barcode }}</v-list-item-subtitle
+                              >
+                            </v-list-item-content>
+                          </v-list-item>
+                          <v-spacer></v-spacer>
+                          <v-card-actions>
+                            <span class="title"
+                              >{{ item.price | money }} сум</span
+                            >
+                          </v-card-actions>
                         </v-card>
                       </v-item>
                     </v-col>
@@ -491,6 +593,12 @@
                 </v-item-group>
               </div>
             </v-card-text>
+            <v-divider></v-divider>
+            <v-card-actions>
+              <v-btn color="green accent-3" large @click="addChosenProducts"
+                >Добавить</v-btn
+              >
+            </v-card-actions>
           </v-card>
         </div>
       </v-dialog>
@@ -687,15 +795,32 @@ import psl from "psl";
 import product from "@/store/index";
 import { mapGetters, mapActions } from "vuex";
 import { AgGridVue } from "ag-grid-vue";
-import { AllCommunityModules } from "@ag-grid-community/all-modules";
+import "ag-grid-enterprise";
+import { ModuleRegistry } from "@ag-grid-community/core";
+import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
+import { MasterDetailModule } from "@ag-grid-enterprise/master-detail";
 import currency from "currency.js";
+import vSelect from "vue-select";
 import CartItemDelete from "./CartItemDelete";
 import MoneyColumn from "./MoneyColumn";
 
+ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
+
 export default {
   data: () => ({
+    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
+    valid: false,
+    showAddEditor: false,
+    clientFirstName: "",
+    clientName: "",
+    clientPhone: "",
+    clientEmail: "",
+    showClientEditor: false,
     gridOptions: null,
     gridApi: null,
+    gridSetOptions: null,
+    gridSetApi: null,
     columnApi: null,
     cashPrice: "",
     cardPrice: "",
@@ -714,7 +839,11 @@ export default {
     discountValue: 10,
     time: new Date(),
     cartColumns: [
-      { headerName: "Название", field: "name" },
+      {
+        headerName: "Название",
+        field: "name",
+        cellRenderer: "agGroupCellRenderer",
+      },
       {
         headerName: "Цена",
         field: "price",
@@ -727,36 +856,47 @@ export default {
     ],
     context: null,
     frameworkComponents: null,
-    modules: AllCommunityModules,
+    // modules: AllModules,
     selectedCartItem: {},
+    options: [],
+    currentClient: {},
+    setName: "",
+    detailCellRendererParams: null,
+    defaultColDef: null,
+    savingClientLoading: false,
   }),
-  components: { AgGridVue },
+  components: { AgGridVue, "vue-select": vSelect },
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
       cartItems: "cartItems",
     }),
+    singleProducts() {
+      return this.cartItems.filter((item) => item.type !== "set");
+    },
+    setProducts() {
+      return this.cartItems.filter((item) => item.type === "set");
+    },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
-      return this.cartItems.reduce((previousValue, currentValue) => {
-        return (
-          +previousValue.price * +previousValue.weight +
-          +currentValue.price * +currentValue.weight
-        );
-      }, 0);
+      let totalPrice = 0;
+      this.cartItems.map((item) => {
+        const curPrice = item.price || 0;
+        const curWeight = item.weight || 0;
+        totalPrice += curPrice * curWeight;
+      });
+      return totalPrice;
     },
     totalPrice() {
-      const totalPrice = this.cartItems.reduce(
-        (previousValue, currentValue) => {
-          return (
-            +previousValue.price * +previousValue.weight +
-            +currentValue.price * +currentValue.weight
-          );
-        },
-        0
-      );
+      let totalPrice = 0;
+
+      this.cartItems.map((item) => {
+        const curPrice = item.price || 0;
+        const curWeight = item.weight || 0;
+        totalPrice += curPrice * curWeight;
+      });
 
       return totalPrice * ((100 - this.discountValue) / 100);
     },
@@ -793,10 +933,41 @@ export default {
   },
   beforeMount() {
     this.gridOptions = {};
+    this.gridSetOptions = {};
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
       MoneyColumn,
+    };
+
+    this.defaultColDef = { flex: 1 };
+    this.detailCellRendererParams = {
+      detailGridOptions: {
+        columnDefs: [
+          { headerName: "Название", field: "name" },
+          {
+            headerName: "Цена",
+            field: "price",
+            width: 150,
+            cellRenderer: "MoneyColumn",
+          },
+          { headerName: "Вес", field: "weight", width: 100 },
+          { headerName: "Итоговая цена", field: "totalPrice", width: 150 },
+          {
+            headerName: "Действие",
+            field: "id",
+            cellRenderer: "CartItemDelete",
+          },
+        ],
+        defaultColDef: { flex: 1 },
+        frameworkComponents: {
+          CartItemDelete,
+          MoneyColumn,
+        },
+      },
+      getDetailRowData: (params) => {
+        params.successCallback(params.data.childs);
+      },
     };
   },
   mounted() {
@@ -805,25 +976,98 @@ export default {
     }, 1000);
 
     this.gridApi = this.gridOptions.api;
+    this.gridSetApi = this.gridSetOptions.api;
     this.gridColumnApi = this.gridOptions.columnApi;
+    document.removeEventListener("setWeight", this.setScaleWeight);
+    document.addEventListener("setWeight", this.setScaleWeight);
+    // let { data } = await this.$http.get(this.webHook + `myuser.getList`);
+    // this.options = data.result;
+    // console.log(data);
   },
   methods: {
-    ...mapActions(["toggleProduct", "toggleProductCart"]),
+    ...mapActions([
+      "toggleProduct",
+      "toggleProductCart",
+      "addProductToCart",
+      "removeProductCart",
+      "unselectAllItems",
+      "setWeight",
+    ]),
+    setScaleWeight(data) {
+      if (this.selectedCartItem.id && data.detail) {
+        this.append(data.detail.weight);
+        this.equal();
+      }
+    },
+    async saveClient() {
+      this.savingClientLoading = true;
+      if (this.currentClient.ID) {
+        let { data } = await this.$http.get(
+          this.webHook +
+            `myuser.updateUser?id=${this.currentClient.ID}&PHONE=${this.clientPhone}&EMAIL=${this.clientEmail}&NAME=${this.clientName}&LAST_NAME=${this.clientFirstName}`
+        );
+        this.currentClient = data.result.user;
+      } else {
+        let { data } = await this.$http.get(
+          this.webHook +
+            `myuser.addUser?PHONE=${this.clientPhone}&EMAIL=${this.clientEmail}&NAME=${this.clientName}&LAST_NAME=${this.clientFirstName}`
+        );
+        this.currentClient = data.result.user;
+      }
+      this.savingClientLoading = false;
+      this.showClientEditor = false;
+      this.showAddEditor = false;
+    },
+    onEditClient() {
+      if (!this.showClientEditor) {
+        this.clientFirstName = this.currentClient.LAST_NAME;
+        this.clientName = this.currentClient.NAME;
+        this.clientPhone = this.currentClient.PERSONAL_PHONE;
+        this.clientEmail = this.currentClient.EMAIL;
+      }
+      this.showClientEditor = !this.showClientEditor;
+    },
+    onAddClient() {
+      this.currentClient = {};
+      this.clientFirstName = "";
+      this.clientName = "";
+      this.clientPhone = "";
+      this.clientEmail = "";
+      this.showClientEditor = !this.showAddEditor;
+      this.showAddEditor = !this.showAddEditor;
+    },
     selectProduct(item) {
       this.toggleProduct({ item });
-      this.toggleProductCart({ item });
+      // this.toggleProductCart({ item });
     },
     removeCartItem(node) {
-      this.toggleProduct({ item: node.data });
-      this.toggleProductCart({ item: node.data });
+      this.removeProductCart({ item: node.data });
+      // this.toggleProductCart({ item: node.data });
     },
     cartItemSelected() {
-      const selectedRows = this.gridApi.getSelectedRows();
-      if (selectedRows.length) {
-        this.selectedCartItem = selectedRows[0];
-      } else {
-        this.selectedCartItem = {};
-      }
+      console.log("product");
+      // this.gridSetApi.deselectAll();
+      setTimeout(() => {
+        const selectedRows = this.gridApi.getSelectedRows();
+        if (selectedRows.length) {
+          this.selectedCartItem = selectedRows[0];
+        } else {
+          this.selectedCartItem = {};
+        }
+      });
+    },
+    cartSetItemSelected() {
+      console.log(arguments);
+      // this.gridApi.deselectAll();
+      setTimeout(() => {
+        const selectedSetRows = this.gridSetApi.getSelectedRows();
+        if (selectedSetRows.length) {
+          console.log(selectedSetRows[0]);
+          this.selectedCartItem = selectedSetRows[0];
+        } else {
+          this.selectedCartItem = {};
+        }
+      });
     },
     getHostname: (url) => {
       // use URL constructor and return hostname
@@ -883,6 +1127,11 @@ export default {
     },
     equal() {
       this.currentWeight = eval(this.currentWeight);
+      this.setWeight({
+        id: this.selectedCartItem.id,
+        weight: this.currentWeight,
+      });
+      this.currentWeight = 0;
     },
     changeItem(key, val) {},
     categoryToggle(id) {
@@ -896,6 +1145,53 @@ export default {
         this.cardBtn = true;
         this.cashBtn = false;
       }
+    },
+
+    async onSearch(search, loading) {
+      try {
+        loading(true);
+        let { data } = await this.$http.get(
+          this.webHook + `myuser.getList?filter[NAME]=${search}`
+        );
+        this.options = data.result;
+        loading(false);
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    addChosenProducts() {
+      if (this.set) {
+        const item = {
+          name: this.setName,
+          weight: 1,
+          childs: [],
+          price: 0,
+          totalPrice: 0,
+          type: "set",
+          id: Math.floor(Math.random() * Math.floor(99999)),
+        };
+        this.items.map((prod) => {
+          if (prod.selected) {
+            item.childs.push(prod);
+          }
+        });
+        this.addProductToCart({ item });
+      } else {
+        this.items.map((item) => {
+          if (item.selected) {
+            const foundIndex = this.cartItems.findIndex((prod) => {
+              return item.id === prod.id;
+            });
+            if (foundIndex < 0) {
+              this.addProductToCart({ item: { ...item, type: "product" } });
+            }
+          }
+        });
+      }
+      this.set = false;
+      this.setName = "";
+      this.unselectAllItems();
+      this.showSearchDialog = false;
     },
   },
   filters: {
@@ -933,7 +1229,22 @@ export default {
   color: #fff !important;
 }
 .product-list-block {
-  height: 400px;
+  height: 350px;
   overflow-y: auto;
+}
+.style-chooser .vs__dropdown-menu {
+  padding-left: 0 !important;
+}
+.product-card-title {
+  font-weight: 500;
+  letter-spacing: 0.0125em;
+  line-height: 2rem;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active до версии 2.1.8 */ {
+  opacity: 0;
 }
 </style>

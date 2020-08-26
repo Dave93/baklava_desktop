@@ -37,7 +37,6 @@ const mutations = {
     const foundIndex = state.cartItems.findIndex(prod => {
       return item.id === prod.id
     });
-    console.log(foundIndex)
     if (foundIndex < 0) {
       state.cartItems.push({
         id: item.id,
@@ -51,6 +50,41 @@ const mutations = {
     } else {
       state.cartItems.splice(foundIndex, 1)
     }
+  },
+  ADD_PRODUCT_TO_CART(state, {item}) {
+    const newItem = {
+      id: item.id,
+      name: item.name,
+      barcode: item.barcode,
+      img: item.image,
+      price: item.price,
+      totalPrice: 0,
+      weight: 0,
+      type: item.type
+    };
+    if(item.childs) {
+      newItem.childs = item.childs
+    }
+    state.cartItems.push(newItem)
+  },
+  REMOVE_PRODUCT_CART(state, { item }) {
+    state.cartItems = state.cartItems.filter(prod => item.id !== prod.id)
+  },
+  UNSELECT_ALL_ITEMS(state) {
+    state.items = state.items.map(item => {
+      item.selected = false;
+      return item;
+    })
+  },
+  SET_WEIGHT(state, {id, weight, parentItem}) {
+    console.log(id, weight)
+    state.cartItems = state.cartItems.map(item => {
+      if(item.id === id) {
+        item.weight = +weight;
+        item.totalPrice = +weight * +item.price
+      }
+      return item;
+    });
   }
 }
 
@@ -69,6 +103,18 @@ const actions = {
   },
   toggleProductCart({commit}, {item}) {
     commit('TOGGLE_PRODUCT_CART', {item})
+  },
+  addProductToCart({commit}, {item}) {
+    commit('ADD_PRODUCT_TO_CART', {item})
+  },
+  removeProductCart({commit}, {item}) {
+    commit('REMOVE_PRODUCT_CART', {item})
+  },
+  unselectAllItems({commit}) {
+    commit('UNSELECT_ALL_ITEMS');
+  },
+  setWeight({commit}, {id, weight, parentItem}) {
+    commit('SET_WEIGHT', {id, weight, parentItem})
   }
 }
 
