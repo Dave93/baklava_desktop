@@ -51,7 +51,12 @@
                       color="grey"
                       x-large
                       width="100%"
-                      @click="showSearchDialog = true"
+                      @click="
+                        () => {
+                          this.showSearchDialog = true;
+                          this.selectedCartItem = {};
+                        }
+                      "
                       >Поиск товара</v-btn
                     >
                   </v-col>
@@ -518,6 +523,7 @@
                     width="90"
                     :color="active ? 'green accent-3' : ''"
                     class="d-flex align-center mx-2 justify-center my-2"
+                    :elevation="active ? 1 : 6"
                     @click="
                       (e) => {
                         toggle(e);
@@ -538,6 +544,7 @@
                     width="90"
                     :color="active ? 'green accent-3' : ''"
                     class="d-flex align-center mx-2 justify-center my-2"
+                    :elevation="active ? 1 : 6"
                     @click="
                       (e) => {
                         toggle(e);
@@ -568,6 +575,7 @@
                           class="mx-auto"
                           height="180"
                           @click="() => selectProduct(item)"
+                          :elevation="item.selected ? 1 : 8"
                         >
                           <v-list-item style="height: 70%;">
                             <v-list-item-content>
@@ -983,6 +991,21 @@ export default {
     // let { data } = await this.$http.get(this.webHook + `myuser.getList`);
     // this.options = data.result;
     // console.log(data);
+    window.addEventListener("keydown", (event) => {
+      if (this.selectedCartItem.id) {
+        if (event.code.indexOf("Numpad") >= 0 && !isNaN(+event.key)) {
+          this.append(event.key);
+        } else if (event.code.indexOf("Digit") >= 0) {
+          this.append(event.key);
+        } else if (event.code == "Backspace") {
+          this.substr("currentWeight");
+        } else if (event.code == "Escape") {
+          this.clear("currentWeight");
+        } else if (["Enter", "NumpadEnter"].includes(event.code)) {
+          this.equal();
+        }
+      }
+    });
   },
   methods: {
     ...mapActions([
@@ -1131,7 +1154,7 @@ export default {
         id: this.selectedCartItem.id,
         weight: this.currentWeight,
       });
-      this.currentWeight = 0;
+      this.currentWeight = "";
     },
     changeItem(key, val) {},
     categoryToggle(id) {
