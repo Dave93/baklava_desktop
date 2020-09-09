@@ -108,7 +108,13 @@
                         <v-row>
                           <v-col cols="6"><h3>Скидка</h3></v-col>
                           <v-col cols="6"
-                            ><h3>{{ discountValue }} %</h3></v-col
+                            ><h3>
+                              {{ discountValue }}
+                              <template v-if="discountToggle === 'percent'"
+                                >%</template
+                              >
+                              <template v-else>сум</template>
+                            </h3></v-col
                           >
                         </v-row>
                       </v-col>
@@ -441,6 +447,59 @@
                       </v-col>
                     </v-row>
                   </v-card>
+                </div>
+                <div>
+                  <v-row class="d-flex flex-column mx-auto pt-3">
+                    <v-card class="elevation-5">
+                      <v-row>
+                        <v-col cols="8" class="mx-auto">
+                          <v-card-actions>
+                            <v-btn-toggle
+                              v-model="discountToggle"
+                              @change="focusDiscountInput"
+                            >
+                              <v-btn
+                                width="100%"
+                                class="elevation-5"
+                                value="percent"
+                              >
+                                <v-icon>mdi-percent-outline</v-icon>
+                              </v-btn>
+
+                              <v-btn
+                                width="100%"
+                                class="elevation-5"
+                                value="cash"
+                              >
+                                <v-icon>mdi-cash-multiple</v-icon>
+                              </v-btn>
+                            </v-btn-toggle>
+                          </v-card-actions>
+                        </v-col>
+                      </v-row>
+                      <v-row class="mx-auto d-flex flex-row">
+                        <v-col cols="10">
+                          <v-text-field
+                            label="Введите скидку"
+                            hide-details
+                            ref="discountInput"
+                            outlined
+                            rows="1"
+                            row-height="10"
+                            v-model="discountValue"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="2" class="d-flex">
+                          <template v-if="discountToggle === 'percent'"
+                            ><v-icon>mdi-percent-outline</v-icon></template
+                          >
+                          <template v-else
+                            ><v-icon>mdi-cash-multiple</v-icon></template
+                          >
+                        </v-col>
+                      </v-row>
+                    </v-card>
+                  </v-row>
                 </div>
                 <div>
                   <v-row>
@@ -816,6 +875,7 @@ ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
 
 export default {
   data: () => ({
+    discountToggle: "percent",
     firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
     nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
     valid: false,
@@ -844,7 +904,7 @@ export default {
     searchText: "",
     currentCategoryId: 0,
     showPayMethodDialog: false,
-    discountValue: 10,
+    discountValue: "",
     time: new Date(),
     cartColumns: [
       {
@@ -905,8 +965,11 @@ export default {
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
       });
-
-      return totalPrice * ((100 - this.discountValue) / 100);
+      if (this.discountToggle === "percent") {
+        return totalPrice * ((100 - this.discountValue) / 100);
+      } else {
+        return totalPrice - this.discountValue;
+      }
     },
     currentDate() {
       return format(this.time, "d MMM YYY");
@@ -991,21 +1054,25 @@ export default {
     // let { data } = await this.$http.get(this.webHook + `myuser.getList`);
     // this.options = data.result;
     // console.log(data);
-    window.addEventListener("keydown", (event) => {
-      if (this.selectedCartItem.id) {
-        if (event.code.indexOf("Numpad") >= 0 && !isNaN(+event.key)) {
-          this.append(event.key);
-        } else if (event.code.indexOf("Digit") >= 0) {
-          this.append(event.key);
-        } else if (event.code == "Backspace") {
-          this.substr("currentWeight");
-        } else if (event.code == "Escape") {
-          this.clear("currentWeight");
-        } else if (["Enter", "NumpadEnter"].includes(event.code)) {
-          this.equal();
-        }
-      }
-    });
+    // window.addEventListener("keydown", (event) => {
+    //   if (this.selectedCartItem.id) {
+    //     if (event.code.indexOf("Numpad") >= 0 && !isNaN(+event.key)) {
+    //       this.append(event.key);
+    //     } else if (event.code.indexOf("Digit") >= 0) {
+    //       this.append(event.key);
+    //     } else if (event.code == "Backspace") {
+    //       this.substr("currentWeight");
+    //     } else if (event.code == "Escape") {
+    //       this.clear("currentWeight");
+    //     } else if (["Enter", "NumpadEnter"].includes(event.code)) {
+    //       this.equal();
+    //     }
+    //   }
+    // });
+    this.listenForBarcode();
+  },
+  beforeDestroy() {
+    document.removeEventListener("setWeight", this.setScaleWeight);
   },
   methods: {
     ...mapActions([
@@ -1016,6 +1083,32 @@ export default {
       "unselectAllItems",
       "setWeight",
     ]),
+    listenForBarcode() {
+      let pressed = false;
+      let chars = [];
+      window.removeEventListener("keypress", () => {});
+      window.addEventListener("keypress", (e) => {
+        if (
+          e.which == 71 ||
+          e.which == 85 ||
+          (e.which >= 48 && e.which <= 57)
+        ) {
+          chars.push(String.fromCharCode(e.which));
+        }
+
+        if (pressed === false) {
+          setTimeout(function () {
+            const barcode = chars.join("");
+            if (/GU\d{4}/gm.test(barcode)) {
+            }
+            chars = [];
+            pressed = false;
+          }, 200);
+        }
+
+        pressed = true;
+      });
+    },
     setScaleWeight(data) {
       if (this.selectedCartItem.id && data.detail) {
         this.append(data.detail.weight);
@@ -1215,6 +1308,9 @@ export default {
       this.setName = "";
       this.unselectAllItems();
       this.showSearchDialog = false;
+    },
+    focusDiscountInput() {
+      this.$refs.discountInput.focus();
     },
   },
   filters: {
