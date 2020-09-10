@@ -110,12 +110,14 @@
                           <v-col cols="6"
                             ><h3>
                               {{ discountValue }}
-                              <template v-if="discountToggle === 'percent'"
-                                >%</template
+                              <template v-if="discountValue > 0"
+                                ><template v-if="discountToggle === 'percent'"
+                                  >%</template
+                                >
+                                <template v-else>сум</template></template
                               >
-                              <template v-else>сум</template>
-                            </h3></v-col
-                          >
+                              <template v-else></template></h3
+                          ></v-col>
                         </v-row>
                       </v-col>
                       <v-col class="pt-6">
@@ -268,14 +270,23 @@
               </v-col>
               <v-col cols="7" class="d-flex flex-column justify-space-between">
                 <div>
-                  <v-card
-                    class="keyboard-background px-10 selected-product-weight mb-4"
-                    elevation="5"
-                  >
-                    <h1 class="font-weight-medium black--text">
-                      {{ currentWeight || "0" }}
-                    </h1>
-                  </v-card>
+                  <v-text-field
+                    v-model="currentWeight"
+                    clearable
+                    type="number"
+                    outlined
+                    hide-details
+                    class="keyboard-background selected-product-weight mb-2 text-h5"
+                    elevation
+                  ></v-text-field>
+                  <!--                  <v-card-->
+                  <!--                    class="keyboard-background px-10 selected-product-weight mb-4"-->
+                  <!--                    elevation="5"-->
+                  <!--                  >-->
+                  <!--                    <h1 class="font-weight-medium black&#45;&#45;text">-->
+                  <!--                      {{  || "0" }}-->
+                  <!--                    </h1>currentWeight-->
+                  <!--                  </v-card>-->
                   <v-card
                     class="keyboard-background px-10 weight-keyboard"
                     elevation="5"
@@ -487,6 +498,7 @@
                             rows="1"
                             row-height="10"
                             v-model="discountValue"
+                            type="number"
                           ></v-text-field>
                         </v-col>
                         <v-col cols="2" class="d-flex">
@@ -939,6 +951,7 @@ export default {
       webHook: "settings/webHook",
       cartItems: "cartItems",
     }),
+
     singleProducts() {
       return this.cartItems.filter((item) => item.type !== "set");
     },
