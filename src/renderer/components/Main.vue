@@ -44,7 +44,7 @@
         <v-row>
           <v-col cols="7" class="d-flex flex-row">
             <v-card width="100%">
-              <v-card-text style="height: 100%;">
+              <v-card-text style="height: 100%;" class="pb-0">
                 <v-row>
                   <v-col cols="12" class="mt-n3">
                     <v-btn
@@ -66,7 +66,7 @@
                   style="height: 90%;"
                 >
                   <ag-grid-vue
-                    style="width: 100%; height: 200px;"
+                    :style="(showSetsGrid ? 'width: 100%; height: 200px;' : 'width: 100%; height: 500px;')"
                     class="ag-theme-material"
                     :columnDefs="cartColumns"
                     :rowData="singleProducts"
@@ -79,22 +79,24 @@
                     :defaultColDef="defaultColDef"
                   >
                   </ag-grid-vue>
-                  <h2>Сеты</h2>
-                  <ag-grid-vue
-                    style="width: 100%; height: 250px;"
-                    class="ag-theme-material"
-                    :columnDefs="cartColumns"
-                    :rowData="setProducts"
-                    rowSelection="single"
-                    :context="context"
-                    :frameworkComponents="frameworkComponents"
-                    @selection-changed="cartSetItemSelected"
-                    :gridOptions="gridSetOptions"
-                    :masterDetail="true"
-                    :detailCellRendererParams="detailCellRendererParams"
-                    :defaultColDef="defaultColDef"
-                  >
-                  </ag-grid-vue>
+                  <div v-if="showSetsGrid">
+                    <h2>Сеты</h2>
+                    <ag-grid-vue
+                      :style="(showSetsGrid ? 'width: 100%; height: 250px;' : '')"
+                      class="ag-theme-material"
+                      :columnDefs="cartColumns"
+                      :rowData="setProducts"
+                      rowSelection="single"
+                      :context="context"
+                      :frameworkComponents="frameworkComponents"
+                      @selection-changed="cartSetItemSelected"
+                      :gridOptions="gridSetOptions"
+                      :masterDetail="true"
+                      :detailCellRendererParams="detailCellRendererParams"
+                      :defaultColDef="defaultColDef"
+                    >
+                    </ag-grid-vue>
+                  </div>
                   <div>
                     <v-divider></v-divider>
                     <v-row>
@@ -143,7 +145,9 @@
                   min-height="150px"
                 >
                   <div v-if="selectedCartItem.id">
-                    <v-card-title>{{ selectedCartItem.name }}</v-card-title>
+                    <v-card-title class="text-break">{{
+                      selectedCartItem.name
+                    }}</v-card-title>
                     <v-card-subtitle v-show="selectedCartItem.barcode"
                       >Штрих-код:
                       {{ selectedCartItem.barcode }}</v-card-subtitle
@@ -463,7 +467,7 @@
                   <v-row class="d-flex flex-column mx-auto pt-3">
                     <v-card class="elevation-5">
                       <v-row>
-                        <v-col cols="8" class="mx-auto">
+                        <v-col cols="8" class="mx-auto py-0">
                           <v-card-actions>
                             <v-btn-toggle
                               v-model="discountToggle"
@@ -489,7 +493,7 @@
                         </v-col>
                       </v-row>
                       <v-row class="mx-auto d-flex flex-row">
-                        <v-col cols="10">
+                        <v-col cols="10" class="pt-0">
                           <v-text-field
                             label="Введите скидку"
                             hide-details
@@ -501,7 +505,7 @@
                             type="number"
                           ></v-text-field>
                         </v-col>
-                        <v-col cols="2" class="d-flex">
+                        <v-col cols="2" class="d-flex pt-0">
                           <template v-if="discountToggle === 'percent'"
                             ><v-icon>mdi-percent-outline</v-icon></template
                           >
@@ -543,7 +547,7 @@
                         color="green accent-3"
                         width="100%"
                         height="70"
-                        @click="showPayMethodDialog = true"
+                        @click="showPayDialog"
                       >
                         <v-icon large>mdi-cart-outline</v-icon>
                         <h1 class="font-weight-medium">Оплата</h1>
@@ -864,6 +868,24 @@
           </div>
         </v-row>
       </v-dialog>
+      <v-snackbar
+        v-model="cartWeightRequiredSnack"
+        top
+        color="error"
+        timeout="6000"
+      >
+        В корзине есть товар без указанного веса. Указание веса обязательно
+        <template v-slot:action="{ attrs }">
+          <v-btn
+            dark
+            text
+            v-bind="attrs"
+            @click="cartWeightRequiredSnack = false"
+          >
+            Закрыть
+          </v-btn>
+        </template>
+      </v-snackbar>
     </v-main>
   </v-app>
 </template>
@@ -887,6 +909,7 @@ ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
 
 export default {
   data: () => ({
+    cartWeightRequiredSnack: false,
     discountToggle: "percent",
     firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
     nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
@@ -951,7 +974,15 @@ export default {
       webHook: "settings/webHook",
       cartItems: "cartItems",
     }),
-
+    showSetsGrid() {
+      let res = false;
+      this.cartItems.map((item) => {
+        if (item.type === "set") {
+          res = true;
+        }
+      });
+      return res;
+    },
     singleProducts() {
       return this.cartItems.filter((item) => item.type !== "set");
     },
@@ -1054,39 +1085,6 @@ export default {
       },
     };
   },
-  mounted() {
-    setInterval(() => {
-      this.time = new Date();
-    }, 1000);
-
-    this.gridApi = this.gridOptions.api;
-    this.gridSetApi = this.gridSetOptions.api;
-    this.gridColumnApi = this.gridOptions.columnApi;
-    document.removeEventListener("setWeight", this.setScaleWeight);
-    document.addEventListener("setWeight", this.setScaleWeight);
-    // let { data } = await this.$http.get(this.webHook + `myuser.getList`);
-    // this.options = data.result;
-    // console.log(data);
-    // window.addEventListener("keydown", (event) => {
-    //   if (this.selectedCartItem.id) {
-    //     if (event.code.indexOf("Numpad") >= 0 && !isNaN(+event.key)) {
-    //       this.append(event.key);
-    //     } else if (event.code.indexOf("Digit") >= 0) {
-    //       this.append(event.key);
-    //     } else if (event.code == "Backspace") {
-    //       this.substr("currentWeight");
-    //     } else if (event.code == "Escape") {
-    //       this.clear("currentWeight");
-    //     } else if (["Enter", "NumpadEnter"].includes(event.code)) {
-    //       this.equal();
-    //     }
-    //   }
-    // });
-    this.listenForBarcode();
-  },
-  beforeDestroy() {
-    document.removeEventListener("setWeight", this.setScaleWeight);
-  },
   methods: {
     ...mapActions([
       "toggleProduct",
@@ -1099,6 +1097,7 @@ export default {
     listenForBarcode() {
       let pressed = false;
       let chars = [];
+      let vm = this;
       window.removeEventListener("keypress", () => {});
       window.addEventListener("keypress", (e) => {
         if (
@@ -1113,6 +1112,7 @@ export default {
           setTimeout(function () {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
+              vm.addByQrCode(barcode);
             }
             chars = [];
             pressed = false;
@@ -1121,6 +1121,37 @@ export default {
 
         pressed = true;
       });
+    },
+    addByQrCode(code) {
+      const items = [...this.items];
+      const foundItem = items.filter((item) => item.barcode === code)[0];
+      const foundIndex = this.cartItems.findIndex((prod) => {
+        return foundItem.id === prod.id;
+      });
+      if (foundIndex < 0) {
+        this.addProductToCart({ item: { ...foundItem, type: "product" } });
+      }
+    },
+    showPayDialog() {
+      this.cartWeightRequiredSnack = false;
+      let res = true;
+      this.cartItems.map((item) => {
+        if (item.type !== "set" && item.weight === 0) {
+          res = false;
+        }
+
+        if (item.type === "set") {
+          item.childs.map((child) => {
+            if (child.weight === 0) {
+              res = false;
+            }
+          });
+        }
+      });
+      if (!res) {
+        this.cartWeightRequiredSnack = true;
+      }
+      this.showPayMethodDialog = res;
     },
     setScaleWeight(data) {
       if (this.selectedCartItem.id && data.detail) {
@@ -1325,6 +1356,39 @@ export default {
     focusDiscountInput() {
       this.$refs.discountInput.focus();
     },
+  },
+  mounted() {
+    setInterval(() => {
+      this.time = new Date();
+    }, 1000);
+
+    this.gridApi = this.gridOptions.api;
+    this.gridSetApi = this.gridSetOptions.api;
+    this.gridColumnApi = this.gridOptions.columnApi;
+    document.removeEventListener("setWeight", this.setScaleWeight);
+    document.addEventListener("setWeight", this.setScaleWeight);
+    // let { data } = await this.$http.get(this.webHook + `myuser.getList`);
+    // this.options = data.result;
+    // console.log(data);
+    // window.addEventListener("keydown", (event) => {
+    //   if (this.selectedCartItem.id) {
+    //     if (event.code.indexOf("Numpad") >= 0 && !isNaN(+event.key)) {
+    //       this.append(event.key);
+    //     } else if (event.code.indexOf("Digit") >= 0) {
+    //       this.append(event.key);
+    //     } else if (event.code == "Backspace") {
+    //       this.substr("currentWeight");
+    //     } else if (event.code == "Escape") {
+    //       this.clear("currentWeight");
+    //     } else if (["Enter", "NumpadEnter"].includes(event.code)) {
+    //       this.equal();
+    //     }
+    //   }
+    // });
+    this.listenForBarcode();
+  },
+  beforeDestroy() {
+    document.removeEventListener("setWeight", this.setScaleWeight);
   },
   filters: {
     money: (value) => {
