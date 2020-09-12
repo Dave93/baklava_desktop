@@ -24,6 +24,7 @@ Vue.config.productionTip = false
 
 const listenForScale = async () => {
   const ports = await Serialport.list();
+  console.log(ports);
   ports.map((port) => {
     const localPort = new Serialport(port.comName, {
       baudRate: 9600,

@@ -4,12 +4,14 @@ const eStore = new Store();
 
 const state = {
     webHook: '',
-    authUserId: ''
+    authUserId: '',
+    managerData: {}
 }
 
 const getters = {
     webHook: (state) => state.webHook,
-    authUserId: (state) => state.authUserId
+    authUserId: (state) => state.authUserId,
+    managerData: (state) => state.managerData
 }
 
 const mutations = {
@@ -20,6 +22,10 @@ const mutations = {
     SET_USER_ID(state, { val }) {
         state.authUserId = val
         eStore.set('authUserId', JSON.stringify(val))
+    },
+    SET_MANAGER_DATA(state, { val }) {
+        state.managerData = val
+        eStore.set('manageData', JSON.stringify(val))
     }
 }
 
@@ -32,6 +38,9 @@ const actions = {
     },
     setUserId({ commit }, { val }) {
         commit('SET_USER_ID', { val })
+    },
+    setManagerData({ commit }, { val }) {
+        commit('SET_MANAGER_DATA', { val })
     }
 }
 

@@ -5,14 +5,10 @@
         <v-col cols="4" class="py-0">
           <v-card class="mx-auto header-background-color" flat>
             <v-list-item>
-              <v-list-item-avatar size="40" rounded class="manager-avatar">
-                <img
-                  src="https://cdn.vuetifyjs.com/images/john.jpg"
-                  alt="John"
-                />
-              </v-list-item-avatar>
               <div class="flex">
-                <div class="font-weight-medium white-text">Seller's name</div>
+                <div class="font-weight-medium white-text">
+                  Менеджер: {{ managerData.LAST_NAME }} {{ managerData.NAME }}
+                </div>
               </div>
             </v-list-item>
           </v-card>
@@ -842,13 +838,13 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="6"><h3>Cash</h3></v-col>
+              <v-col cols="6"><h3>Наличными</h3></v-col>
               <v-col cols="6"
                 ><h3>{{ parseInt(cashPrice, 10) || 0 | money }} сум</h3></v-col
               >
             </v-row>
             <v-row>
-              <v-col cols="6"><h3>Card</h3></v-col>
+              <v-col cols="6"><h3>Картой</h3></v-col>
               <v-col cols="6"
                 ><h3>{{ parseInt(cardPrice, 10) || 0 | money }} сум</h3></v-col
               >
@@ -862,9 +858,24 @@
               >
             </v-row>
 
-            <v-col class="pt-6">
-              <div class="text-right"></div>
-            </v-col>
+            <v-row>
+              <v-col cols="6">
+                <v-btn
+                  color="green accent-3"
+                  width="100%"
+                  height="70"
+                  :loading="savingOrderLoading"
+                  @click="saveOrder"
+                >
+                  <h1 class="font-weight-medium">Оплатить</h1>
+                </v-btn>
+              </v-col>
+              <v-col cols="6">
+                <v-btn color="green accent-3" width="100%" height="70">
+                  <h1 class="font-weight-medium">Распечатать</h1>
+                </v-btn>
+              </v-col>
+            </v-row>
           </div>
         </v-row>
       </v-dialog>
@@ -874,7 +885,7 @@
         color="error"
         timeout="6000"
       >
-        В корзине есть товар без указанного веса. Указание веса обязательно
+        {{ cartError }}
         <template v-slot:action="{ attrs }">
           <v-btn
             dark
@@ -910,6 +921,7 @@ ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
 export default {
   data: () => ({
     cartWeightRequiredSnack: false,
+    cartError: "",
     discountToggle: "percent",
     firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
     nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
@@ -967,12 +979,14 @@ export default {
     detailCellRendererParams: null,
     defaultColDef: null,
     savingClientLoading: false,
+    savingOrderLoading: false,
   }),
   components: { AgGridVue, "vue-select": vSelect },
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
       cartItems: "cartItems",
+      managerData: "settings/managerData",
     }),
     showSetsGrid() {
       let res = false;
@@ -1094,6 +1108,22 @@ export default {
       "unselectAllItems",
       "setWeight",
     ]),
+    async saveOrder() {
+      this.savingOrderLoading = true;
+      let orderData = {
+        client: this.currentClient,
+        cartItems: this.cartItems,
+        cashPrice: this.cashPrice,
+        cardPrice: this.cardPrice,
+        discount: this.discountValue,
+        managerId: this.managerData.ID,
+      };
+      let { data } = await this.$http.post(
+        this.webHook + `mysale.order.create`,
+        orderData
+      );
+      this.savingOrderLoading = false;
+    },
     listenForBarcode() {
       let pressed = false;
       let chars = [];
@@ -1123,18 +1153,38 @@ export default {
       });
     },
     addByQrCode(code) {
+      this.cartWeightRequiredSnack = false;
       const items = [...this.items];
       const foundItem = items.filter((item) => item.barcode === code)[0];
       const foundIndex = this.cartItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
-      if (foundIndex < 0) {
-        this.addProductToCart({ item: { ...foundItem, type: "product" } });
+
+      if (foundItem.totalAmountCount > 0) {
+        if (foundIndex < 0) {
+          this.addProductToCart({ item: { ...foundItem, type: "product" } });
+        }
+      } else {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = `Товар "#${foundItem.barcode}: ${foundItem.name}" отсутствует в складах`;
       }
     },
     showPayDialog() {
       this.cartWeightRequiredSnack = false;
       let res = true;
+
+      if (this.totalPrice <= 0) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = "Корзина пуста";
+        return;
+      }
+
+      if (!this.currentClient.ID) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = "Не указан клиент";
+        return;
+      }
+
       this.cartItems.map((item) => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
@@ -1150,6 +1200,8 @@ export default {
       });
       if (!res) {
         this.cartWeightRequiredSnack = true;
+        this.cartError =
+          "В корзине есть товар без указанного веса. Указание веса обязательно";
       }
       this.showPayMethodDialog = res;
     },
@@ -1332,7 +1384,12 @@ export default {
         };
         this.items.map((prod) => {
           if (prod.selected) {
-            item.childs.push(prod);
+            if (prod.totalAmountCount > 0) {
+              item.childs.push(prod);
+            } else {
+              this.cartWeightRequiredSnack = true;
+              this.cartError = `Товар "#${prod.barcode}: ${prod.name}" отсутствует в складах`;
+            }
           }
         });
         this.addProductToCart({ item });
@@ -1342,8 +1399,14 @@ export default {
             const foundIndex = this.cartItems.findIndex((prod) => {
               return item.id === prod.id;
             });
-            if (foundIndex < 0) {
-              this.addProductToCart({ item: { ...item, type: "product" } });
+
+            if (item.totalAmountCount > 0) {
+              if (foundIndex < 0) {
+                this.addProductToCart({ item: { ...item, type: "product" } });
+              }
+            } else {
+              this.cartWeightRequiredSnack = true;
+              this.cartError = `Товар "#${item.barcode}: ${item.name}" отсутствует в складах`;
             }
           }
         });
@@ -1367,25 +1430,8 @@ export default {
     this.gridColumnApi = this.gridOptions.columnApi;
     document.removeEventListener("setWeight", this.setScaleWeight);
     document.addEventListener("setWeight", this.setScaleWeight);
-    // let { data } = await this.$http.get(this.webHook + `myuser.getList`);
-    // this.options = data.result;
-    // console.log(data);
-    // window.addEventListener("keydown", (event) => {
-    //   if (this.selectedCartItem.id) {
-    //     if (event.code.indexOf("Numpad") >= 0 && !isNaN(+event.key)) {
-    //       this.append(event.key);
-    //     } else if (event.code.indexOf("Digit") >= 0) {
-    //       this.append(event.key);
-    //     } else if (event.code == "Backspace") {
-    //       this.substr("currentWeight");
-    //     } else if (event.code == "Escape") {
-    //       this.clear("currentWeight");
-    //     } else if (["Enter", "NumpadEnter"].includes(event.code)) {
-    //       this.equal();
-    //     }
-    //   }
-    // });
     this.listenForBarcode();
+    window.davr = this;
   },
   beforeDestroy() {
     document.removeEventListener("setWeight", this.setScaleWeight);
