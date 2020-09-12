@@ -134,6 +134,7 @@ export default {
     ...mapActions({
       setWebHook: "settings/setWebHook",
       setUserId: "settings/setUserId",
+      setManagerData: "settings/setManagerData",
       setCategories: "setCategories",
       setProducts: "setProducts",
     }),
@@ -174,8 +175,9 @@ export default {
             this.manager
           }&password=${btoa(this.password)}`
         );
-        if (data.result && data.result.id) {
-          await this.setUserId({ val: data.result.id });
+        if (data.result && data.result.ID) {
+          await this.setUserId({ val: data.result.ID });
+          await this.setManagerData({ val: data.result });
           let { data: categoriesData } = await this.$http.get(
             `${this.webHook}mycatalog.section.list`
           );
@@ -186,7 +188,7 @@ export default {
             })),
           });
           let { data: productsData } = await this.$http.get(
-            `${this.webHook}mycatalog.product.list`
+            `${this.webHook}mycatalog.product.list?managerId=${data.result.ID}`
           );
           await this.setProducts({
             val: productsData.result.map((item) => ({
@@ -197,6 +199,7 @@ export default {
               categoryId: item.ELEMENT_IBLOCK_SECTION_ID,
               image: item.PREVIEW_PICTURE,
               price: item.BASE_PRICE,
+              totalAmountCount: item.TOTAL_AMOUNT_COUNT,
             })),
           });
           this.isAuthLoading = false;
