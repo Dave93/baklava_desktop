@@ -522,6 +522,7 @@
                         class="green--text"
                         width="60"
                         height="70"
+                        @click="printOrder"
                       >
                         <v-icon large>mdi-printer</v-icon>
                       </v-btn>
@@ -871,7 +872,7 @@
                 </v-btn>
               </v-col>
               <v-col cols="6">
-                <v-btn color="green accent-3" width="100%" height="70">
+                <v-btn color="green accent-3" width="100%" height="70" @click="printOrder">
                   <h1 class="font-weight-medium">Распечатать</h1>
                 </v-btn>
               </v-col>
@@ -915,6 +916,7 @@ import currency from "currency.js";
 import vSelect from "vue-select";
 import CartItemDelete from "./CartItemDelete";
 import MoneyColumn from "./MoneyColumn";
+const {ipcRenderer} = require('electron');
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
 
@@ -987,6 +989,7 @@ export default {
       webHook: "settings/webHook",
       cartItems: "cartItems",
       managerData: "settings/managerData",
+      chosenPrinter: 'settings/chosenPrinter'
     }),
     showSetsGrid() {
       let res = false;
@@ -1108,6 +1111,109 @@ export default {
       "unselectAllItems",
       "setWeight",
     ]),
+    printOrder() {
+      const cartItems = [...this.cartItems];
+      const cartItemsTable = [];
+      const subTotalPrice = this.subTotalPrice
+      const totalPrice = this.totalPrice;
+      const discountValue = this.discountValue
+
+      cartItems.map(item => {
+        cartItemsTable.push([item.name, item.price, item.weight, item.totalPrice])
+      });
+
+      console.log(cartItemsTable)
+      const data = [
+        {
+          type: 'text', value: 'g', style: "font-size: 36px; color: 3CAF50; text-align: center; "
+        },
+        {
+          type: 'text', value: 'gavali', style: "font-size: 26px; color: 3CAF50; text-align: center;"
+        },
+        {
+          type: 'text', value: 'OOO "Gavali Sweets"', style: "font-size: 12px; color: 3CAF50; text-align: center;"
+        },
+        {
+          type: 'text', value: 'г.Ташкент, ул.Шахрисабзкая, дом 5-А Бизнес центр SEOUL PLAZA', style: "font-size: 10px; color: 3CAF50; text-align: left"
+        },
+        {
+          type: 'table',
+          // style the table
+          style: 'border: none',
+          // list of the columns to be rendered in the table header
+          tableHeader: ['Название', 'Цена', 'Вес', 'Сумма'],
+          // multi dimensional array depicting the rows and columns of the table body
+          tableBody: cartItemsTable,
+          // list of columns to be rendered in the table footer
+          tableFooter: [],
+          // custom style for the table header
+          tableHeaderStyle: 'background-color: white; color: black;',
+          // custom style for the table body
+          tableBodyStyle: 'border: none',
+          // custom style for the table footer
+          tableFooterStyle: 'background-color: #white; color: black;',
+        },
+        {
+          type: 'text', value: subTotalPrice, style: "font-size: 14px; color: 3CAF50; text-align: right;"
+        },
+        {
+          type: 'table',
+          // style the table
+          style: 'border: none',
+          // list of the columns to be rendered in the table header
+          tableHeader: ['', '', '', ''],
+          // multi dimensional array depicting the rows and columns of the table body
+          tableBody: [['Скидка:', '', '', discountValue], ['итог:', '', '', totalPrice]],
+          // list of columns to be rendered in the table footer
+          tableFooter: [],
+          // custom style for the table header
+          tableHeaderStyle: 'background-color: white; color: black;',
+          // custom style for the table body
+          tableBodyStyle: 'border: none',
+          // custom style for the table footer
+          tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
+        },
+        // {
+        //   type: 'text', value: 'Скидка', style: "font-size: 12px; color: 3CAF50; text-align: left;"
+        // },
+        // {
+        //   type: 'text', value: discountValue, style: "font-size: 14px; color: 3CAF50; text-align: left;"
+        // },
+        // {
+        //   type: 'text', value: 'итог', style: "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase"
+        // },
+        // {
+        //   type: 'text', value: totalPrice, style: "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase"
+        // },
+        {
+          type: 'text', value: 'Спасибо за покупку!', style: "font-size: 12px; color: 3CAF50; text-align: right; text-transform: uppercase"
+        },
+        {
+          type: 'table',
+          // style the table
+          style: 'border: none',
+          // list of the columns to be rendered in the table header
+          tableHeader: [],
+          // multi dimensional array depicting the rows and columns of the table body
+          tableBody: [['+998 97 444 1100', 'www.gavali.uz'],
+          ['gavali_uzbekistan'],],
+          // list of columns to be rendered in the table footer
+          tableFooter: [],
+          // custom style for the table header
+          tableHeaderStyle: 'background-color: white; color: black;',
+          // custom style for the table body
+          tableBodyStyle: 'border: none',
+          // custom style for the table footer
+          tableFooterStyle: 'background-color: #white; color: black;',
+        },
+
+
+      ]
+      ipcRenderer.send('print', JSON.stringify({
+        printerName: this.chosenPrinter,
+        data
+      }));
+    },
     async saveOrder() {
       this.savingOrderLoading = true;
       let orderData = {
