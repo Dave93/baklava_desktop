@@ -5,13 +5,15 @@ const eStore = new Store();
 const state = {
     webHook: '',
     authUserId: '',
-    managerData: {}
+    managerData: {},
+    chosenPrinter: ''
 }
 
 const getters = {
     webHook: (state) => state.webHook,
     authUserId: (state) => state.authUserId,
-    managerData: (state) => state.managerData
+    managerData: (state) => state.managerData,
+    chosenPrinter: (state) => state.chosenPrinter
 }
 
 const mutations = {
@@ -26,6 +28,10 @@ const mutations = {
     SET_MANAGER_DATA(state, { val }) {
         state.managerData = val
         eStore.set('manageData', JSON.stringify(val))
+    },
+    SET_PRINTER(state, { val }) {
+        state.chosenPrinter = val
+        eStore.set('chosenPrinter', JSON.stringify(val))
     }
 }
 
@@ -41,6 +47,9 @@ const actions = {
     },
     setManagerData({ commit }, { val }) {
         commit('SET_MANAGER_DATA', { val })
+    },
+    setPrinter({ commit }, { val }) {
+        commit('SET_PRINTER', { val })
     }
 }
 

@@ -1,4 +1,5 @@
-import { app, BrowserWindow, dialog, Menu } from 'electron'
+import { app, BrowserWindow, dialog, Menu, ipcMain } from 'electron'
+const {PosPrinter} = require('electron-pos-printer');
 
 /**
  * Set `__static` path to static files in production
@@ -95,5 +96,12 @@ app.on('ready', () => {
     require('vue-devtools').install()
   }
 })
-
+ipcMain.on('print', (event, arg) => {
+  const args = JSON.parse(arg);
+  PosPrinter.print(args.data, {
+    printerName: args.printerName,
+    silent: true,
+    preview: true
+  }).catch(error => console.error(error));
+})
 import store from '../renderer/store'

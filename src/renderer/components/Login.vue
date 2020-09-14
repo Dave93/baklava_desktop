@@ -85,7 +85,10 @@
                 rounded
                 @change="saveSettings"
               />
-              <v-text-field label="API Token" outlined rounded />
+              <v-select outlined rounded :items="printers" :value="chosenPrinter" label="Выберите принтер"
+                        @change="savePrinter">
+
+              </v-select>
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -106,6 +109,10 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+let { remote } = require("electron");
+let webContents = remote.getCurrentWebContents();
+let printers = webContents.getPrinters(); //list the printers
+let printerNames = printers.map(item => item.name);
 export default {
   name: "Login",
   layout: "auth",
@@ -121,6 +128,7 @@ export default {
     passwordRules: [(v) => !!v || "Введите пароль"],
     authError: "",
     isAuthLoading: false,
+    printers: printerNames
   }),
   async mounted() {
     await this.tryGetManagers();
@@ -128,6 +136,7 @@ export default {
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
+      chosenPrinter: 'settings/chosenPrinter'
     }),
   },
   methods: {
@@ -135,15 +144,20 @@ export default {
       setWebHook: "settings/setWebHook",
       setUserId: "settings/setUserId",
       setManagerData: "settings/setManagerData",
+      setPrinter: "settings/setPrinter",
       setCategories: "setCategories",
       setProducts: "setProducts",
     }),
     saveSettings(val) {
       this.setWebHook({ val });
     },
+    savePrinter(val) {
+      this.setPrinter({ val });
+    },
     async closeDialog() {
       this.isSavingSettings = true;
       await this.tryGetManagers();
+      this.isSavingSettings = false;
       this.dialog = false;
     },
     async tryGetManagers() {
