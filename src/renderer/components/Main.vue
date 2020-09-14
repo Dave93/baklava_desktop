@@ -1117,6 +1117,7 @@ export default {
         cardPrice: this.cardPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
+        discountType: this.discountToggle,
       };
       let { data } = await this.$http.post(
         this.webHook + `mysale.order.create`,
