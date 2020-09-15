@@ -20,7 +20,7 @@
             <div class="auth-right-side">
               <v-row align="center" justify="center">
                 <v-col cols="9" class="pt-16 block-relative">
-                  <v-form v-model="authForm">
+                  <v-form v-model="authForm" @submit="tryLogin">
                     <v-overlay :value="!isManagersFound" absolute>
                       <v-progress-circular
                         indeterminate
@@ -85,9 +85,14 @@
                 rounded
                 @change="saveSettings"
               />
-              <v-select outlined rounded :items="printers" :value="chosenPrinter" label="Выберите принтер"
-                        @change="savePrinter">
-
+              <v-select
+                outlined
+                rounded
+                :items="printers"
+                :value="chosenPrinter"
+                label="Выберите принтер"
+                @change="savePrinter"
+              >
               </v-select>
             </v-form>
           </v-card-text>
@@ -112,7 +117,7 @@ import { mapGetters, mapActions } from "vuex";
 let { remote } = require("electron");
 let webContents = remote.getCurrentWebContents();
 let printers = webContents.getPrinters(); //list the printers
-let printerNames = printers.map(item => item.name);
+let printerNames = printers.map((item) => item.name);
 export default {
   name: "Login",
   layout: "auth",
@@ -128,7 +133,7 @@ export default {
     passwordRules: [(v) => !!v || "Введите пароль"],
     authError: "",
     isAuthLoading: false,
-    printers: printerNames
+    printers: printerNames,
   }),
   async mounted() {
     await this.tryGetManagers();
@@ -136,7 +141,7 @@ export default {
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
-      chosenPrinter: 'settings/chosenPrinter'
+      chosenPrinter: "settings/chosenPrinter",
     }),
   },
   methods: {
