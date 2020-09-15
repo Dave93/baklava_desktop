@@ -101,7 +101,8 @@ ipcMain.on('print', (event, arg) => {
   PosPrinter.print(args.data, {
     printerName: args.printerName,
     silent: true,
-    preview: true
+    preview: true,
+    width: '75mm'
   }).catch(error => console.error(error));
 })
 import store from '../renderer/store'

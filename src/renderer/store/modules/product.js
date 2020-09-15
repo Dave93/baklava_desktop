@@ -85,6 +85,9 @@ const mutations = {
       return item;
     })
   },
+  CLEAR_CART(state) {
+    state.cartItems = []
+  },
   SET_WEIGHT(state, {id, weight, parentId}) {
     if (parentId) {
       state.cartItems = state.cartItems.map(parent => {
@@ -119,13 +122,6 @@ const mutations = {
         return item;
       });
     }
-    // state.cartItems = state.cartItems.map(item => {
-    //   if(item.id === id) {
-    //     item.weight = +weight;
-    //     item.totalPrice = +weight * +item.price
-    //   }
-    //   return item;
-    // });
   }
 }
 
@@ -156,6 +152,9 @@ const actions = {
   },
   setWeight({commit}, {id, weight, parentId}) {
     commit('SET_WEIGHT', {id, weight, parentId})
+  },
+  clearCart({commit}) {
+    commit('CLEAR_CART')
   }
 }
 

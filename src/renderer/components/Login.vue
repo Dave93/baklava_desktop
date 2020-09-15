@@ -29,7 +29,7 @@
                     </v-overlay>
                     <v-card flat align="center">
                       <v-card-title class="headline justify-center"
-                        >Sign In</v-card-title
+                        >Авторизация</v-card-title
                       >
                       <v-alert type="error" v-show="authError.length">{{
                         authError
@@ -43,10 +43,10 @@
                           outlined
                           required
                           rounded
-                          placeholder="Choose your account"
+                          placeholder="Выберите менеджера"
                         ></v-select>
                         <v-text-field
-                          label="Password"
+                          label="Пароль"
                           type="password"
                           v-model="password"
                           :rules="passwordRules"
@@ -61,7 +61,7 @@
                           x-large
                           @click="tryLogin"
                           :loading="isAuthLoading"
-                          >Sign In</v-btn
+                          >Войти</v-btn
                         >
                       </v-card-text>
                     </v-card>
@@ -74,13 +74,13 @@
       </v-container>
       <v-dialog v-model="dialog" persistent max-width="500">
         <v-card>
-          <v-card-title class="headline">Site Configs</v-card-title>
+          <v-card-title class="headline">Настройки приложения</v-card-title>
           <v-card-text>
             <v-form @submit.prevent="saveSettings">
               <v-text-field
                 :value="webHook"
                 ref="webHook"
-                label="Site address"
+                label="Адрес API"
                 outlined
                 rounded
                 @change="saveSettings"
@@ -103,7 +103,7 @@
               :loading="isSavingSettings"
               text
               @click="closeDialog"
-              >Save</v-btn
+              >Сохранить</v-btn
             >
           </v-card-actions>
         </v-card>
