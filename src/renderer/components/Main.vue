@@ -1116,7 +1116,11 @@ export default {
       const cartItemsTable = [];
       const subTotalPrice = this.subTotalPrice
       const totalPrice = this.totalPrice;
-      const discountValue = this.discountValue
+      const discountValue = this.discountValue;
+      const currentTime = this.currentTime;
+      const currentDate = this.currentDate;
+      const managerName = this.managerData.NAME;
+      const managerLastName = this.managerData.LAST_NAME
 
       cartItems.map(item => {
         cartItemsTable.push([item.name, item.price, item.weight, item.totalPrice])
@@ -1131,15 +1135,49 @@ export default {
           type: 'text', value: 'gavali', style: "font-size: 26px; color: 3CAF50; text-align: center;"
         },
         {
-          type: 'text', value: 'OOO "Gavali Sweets"', style: "font-size: 12px; color: 3CAF50; text-align: center;"
-        },
-        {
-          type: 'text', value: 'г.Ташкент, ул.Шахрисабзкая, дом 5-А Бизнес центр SEOUL PLAZA', style: "font-size: 10px; color: 3CAF50; text-align: left"
+          type: 'text', value: 'OOO "Gavali Sweets"', style: "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;"
         },
         {
           type: 'table',
           // style the table
+          style: 'border: 0; margin-bottom: -50px;',
+          // list of the columns to be rendered in the table header
+          //tableHeader: ['', '', '', ''],
+          // multi dimensional array depicting the rows and columns of the table body
+          tableBody: [[{type: 'image', path:'src/images/icons8-location-100.png', position: 'center', height: '40px', weight: '40px'}, {type: 'text', value: 'г.Ташкент, ул.Шахрисабзкая, дом 5-А Бизнес центр SEOUL PLAZA', style: 'font-size: 14px; color: 3CAF50; text-align: left'}]],
+          // list of columns to be rendered in the table footer
+          //tableFooter: [],
+          // custom style for the table header
+          //tableHeaderStyle: 'background-color: white; color: black;',
+          // custom style for the table body
+          tableBodyStyle: 'background-color: white; color: black;',
+          // custom style for the table footer
+          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
+        },
+        // {
+        //   type: 'text', value: 'г.Ташкент, ул.Шахрисабзкая, дом 5-А Бизнес центр SEOUL PLAZA', style: "font-size: 14px; color: 3CAF50; text-align: left"
+        // },
+        {
+          type: 'table',
+          // style the table
           style: 'border: none',
+          // list of the columns to be rendered in the table header
+          //tableHeader: ['', ''],
+          // multi dimensional array depicting the rows and columns of the table body
+          tableBody: [[{type: 'text', value: currentDate}, {type: 'text', value: currentTime}, '#', {type: 'text', value: managerName}, {type: 'text', value: managerLastName}]],
+          // list of columns to be rendered in the table footer
+          //tableFooter: [],
+          // custom style for the table header
+          //tableHeaderStyle: 'background-color: white; color: black;',
+          // custom style for the table body
+          tableBodyStyle: 'border: none; text-transformation: uppercase; font-size: 10px;',
+          // custom style for the table footer
+          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
+        },
+        {
+          type: 'table',
+          // style the table
+          style: 'border: none;margin-top: -50px;',
           // list of the columns to be rendered in the table header
           tableHeader: ['Название', 'Цена', 'Вес', 'Сумма'],
           // multi dimensional array depicting the rows and columns of the table body
@@ -1154,24 +1192,58 @@ export default {
           tableFooterStyle: 'background-color: #white; color: black;',
         },
         {
-          type: 'text', value: subTotalPrice, style: "font-size: 14px; color: 3CAF50; text-align: right;"
+          type: 'table',
+          // style the table
+          style: 'border: none; margin-top: -15px;',
+          // list of the columns to be rendered in the table header
+          //tableHeader: ['', '', '', ''],
+          // multi dimensional array depicting the rows and columns of the table body
+          tableBody: [[{type: 'text', value: 'сумма с ндс, 15%', style: 'text-align: left;'}, {type: 'text', value: subTotalPrice, style: 'text-align: right'}]],
+          // list of columns to be rendered in the table footer
+          //tableFooter: [],
+          // custom style for the table header
+          //tableHeaderStyle: 'background-color: white; color: black;',
+          // custom style for the table body
+          tableBodyStyle: 'background-color: white; color: black;',
+          // custom style for the table footer
+          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
+        },
+        // {
+        //   type: 'text', value: subTotalPrice, style: "font-size: 14px; color: 3CAF50; text-align: right;"
+        // },
+        {
+          type: 'table',
+          // style the table
+          style: 'border: none; margin-top: -70px;',
+          // list of the columns to be rendered in the table header
+          //tableHeader: ['', '', '', ''],
+          // multi dimensional array depicting the rows and columns of the table body
+          tableBody: [[{type: 'text', value: 'Скидка:', style: 'text-align: left'}, {type: 'text', value: discountValue, style: 'text-align: right;'}]],
+          // list of columns to be rendered in the table footer
+          //tableFooter: [],
+          // custom style for the table header
+          //tableHeaderStyle: 'background-color: white; color: black;',
+          // custom style for the table body
+          tableBodyStyle: 'border: none',
+          // custom style for the table footer
+          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
         {
           type: 'table',
           // style the table
-          style: 'border: none',
+          style: 'border: none; margin-top: -70px;',
           // list of the columns to be rendered in the table header
-          tableHeader: ['', '', '', ''],
+          //tableHeader: ['', ''],
           // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [['Скидка:', '', '', discountValue], ['итог:', '', '', totalPrice]],
+          tableBody: [[{type: 'text', value: 'итог:', style: 'text-align: left; text-transformation: uppercase; font-size: 16px; font-weight: bold;'}, {type: 'text', value: totalPrice, style: 'text-align: right; font-size: 16px; font-weight: bold;'}]],
           // list of columns to be rendered in the table footer
-          tableFooter: [],
+          //tableFooter: [],
           // custom style for the table header
-          tableHeaderStyle: 'background-color: white; color: black;',
+          //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: 'border: none',
+          tableBodyStyle: 'border: none;',
           // custom style for the table footer
-          tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
+          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
         // {
         //   type: 'text', value: 'Скидка', style: "font-size: 12px; color: 3CAF50; text-align: left;"
@@ -1186,25 +1258,25 @@ export default {
         //   type: 'text', value: totalPrice, style: "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase"
         // },
         {
-          type: 'text', value: 'Спасибо за покупку!', style: "font-size: 12px; color: 3CAF50; text-align: right; text-transform: uppercase"
+          type: 'text', value: 'Спасибо за покупку!', style: "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;"
         },
         {
           type: 'table',
           // style the table
-          style: 'border: none',
+          style: 'border: none;',
           // list of the columns to be rendered in the table header
-          tableHeader: [],
+          //tableHeader: [],
           // multi dimensional array depicting the rows and columns of the table body
           tableBody: [['+998 97 444 1100', 'www.gavali.uz'],
           ['gavali_uzbekistan'],],
           // list of columns to be rendered in the table footer
-          tableFooter: [],
+          //tableFooter: [],
           // custom style for the table header
-          tableHeaderStyle: 'background-color: white; color: black;',
+          //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: 'border: none',
+          tableBodyStyle: "border: none;  text-align: center;",
           // custom style for the table footer
-          tableFooterStyle: 'background-color: #white; color: black;',
+          //tableFooterStyle: 'background-color: #white; color: black;',
         },
 
 
