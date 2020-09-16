@@ -60,6 +60,7 @@
                 <div
                   class="d-flex flex-column justify-space-between"
                   style="height: 90%;"
+
                 >
                   <ag-grid-vue
                     :style="(showSetsGrid ? 'width: 100%; height: 200px;' : 'width: 100%; height: 500px;')"
@@ -72,6 +73,7 @@
                     @selection-changed="cartItemSelected"
                     :gridOptions="gridOptions"
                     :defaultColDef="defaultColDef"
+                    @change="focusWeightInput"
                   >
                   </ag-grid-vue>
                   <div v-if="showSetsGrid">
@@ -269,7 +271,9 @@
               </v-col>
               <v-col cols="7" class="d-flex flex-column justify-space-between">
                 <div>
+                  <v-form @submit.prevent="equal">
                   <v-text-field
+                    ref="weightInput"
                     v-model="currentWeight"
                     clearable
                     type="number"
@@ -277,7 +281,8 @@
                     hide-details
                     class="keyboard-background selected-product-weight mb-2 text-h5"
                     elevation
-                  ></v-text-field>
+                    ></v-text-field>
+                  </v-form>
                   <v-card
                     class="keyboard-background px-10 weight-keyboard"
                     elevation="5"
@@ -1050,6 +1055,14 @@ export default {
       });
       return totalPrice;
     },
+    // cardPrice() {
+    //   let cardPrice = 0;
+    //   if(this.togglePaymentType === "cash"){
+    //     return this.totalPrice - this.cashPrice
+    //   }else{
+    //     return this.totalPrice - this.cardPrice
+    //   }
+    // },
     totalPrice() {
       let totalPrice = 0;
 
@@ -1706,9 +1719,11 @@ export default {
     shopAppend(number) {
       if (this.cashBtn) {
         this.cashPrice = this.cashPrice + number;
+        this.cardPrice = this.totalPrice - this.cashPrice
       }
       if (this.cardBtn) {
         this.cardPrice = this.cardPrice + number;
+        this.cashPrice = this.totalPrice - this.cardPrice
       }
     },
     substr(param) {
@@ -1816,6 +1831,9 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
+    },
+    focusWeightInput() {
+      this.$refs.weightInput.focus();
     },
   },
   mounted() {
