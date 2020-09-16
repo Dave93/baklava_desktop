@@ -68,7 +68,16 @@ const mutations = {
     state.cartItems.push(newItem)
   },
   REMOVE_PRODUCT_CART(state, { item }) {
-    state.cartItems = state.cartItems.filter(prod => item.id !== prod.id)
+    if(item.parentId) {
+      state.cartItems = state.cartItems.map(parent => {
+        if (parent.id === item.parentId) {
+          parent.childs = parent.childs.filter(child => child.id !== item.id)
+        }
+        return parent
+      })
+    } else {
+      state.cartItems = state.cartItems.filter(prod => item.id !== prod.id)
+    }
   },
   UNSELECT_ALL_ITEMS(state) {
     state.items = state.items.map(item => {
@@ -76,15 +85,43 @@ const mutations = {
       return item;
     })
   },
-  SET_WEIGHT(state, {id, weight, parentItem}) {
-    console.log(id, weight)
-    state.cartItems = state.cartItems.map(item => {
-      if(item.id === id) {
-        item.weight = +weight;
-        item.totalPrice = +weight * +item.price
-      }
-      return item;
-    });
+  CLEAR_CART(state) {
+    state.cartItems = []
+  },
+  SET_WEIGHT(state, {id, weight, parentId}) {
+    if (parentId) {
+      state.cartItems = state.cartItems.map(parent => {
+        parent.totalPrice = 0
+        parent.price = 0
+        parent.weight = 1
+        if (parent.id === parentId) {
+          parent.childs = parent.childs.map(child => {
+            if (child.id === id) {
+              child.weight = +weight;
+              child.totalPrice = +weight * +child.price
+            }
+            parent.totalPrice += child.totalPrice || 0
+            parent.price += child.totalPrice || 0
+            return child
+          });
+        } else if (parent.childs) {
+          parent.childs = parent.childs.map(child => {
+            parent.totalPrice += child.totalPrice || 0
+            parent.price += child.totalPrice || 0
+            return child
+          });
+        }
+        return parent
+      })
+    } else {
+      state.cartItems = state.cartItems.map(item => {
+        if(item.id === id) {
+          item.weight = +weight;
+          item.totalPrice = +weight * +item.price
+        }
+        return item;
+      });
+    }
   }
 }
 
@@ -113,8 +150,11 @@ const actions = {
   unselectAllItems({commit}) {
     commit('UNSELECT_ALL_ITEMS');
   },
-  setWeight({commit}, {id, weight, parentItem}) {
-    commit('SET_WEIGHT', {id, weight, parentItem})
+  setWeight({commit}, {id, weight, parentId}) {
+    commit('SET_WEIGHT', {id, weight, parentId})
+  },
+  clearCart({commit}) {
+    commit('CLEAR_CART')
   }
 }
 

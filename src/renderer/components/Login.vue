@@ -20,7 +20,7 @@
             <div class="auth-right-side">
               <v-row align="center" justify="center">
                 <v-col cols="9" class="pt-16 block-relative">
-                  <v-form v-model="authForm">
+                  <v-form v-model="authForm" @submit="tryLogin">
                     <v-overlay :value="!isManagersFound" absolute>
                       <v-progress-circular
                         indeterminate
@@ -29,7 +29,7 @@
                     </v-overlay>
                     <v-card flat align="center">
                       <v-card-title class="headline justify-center"
-                        >Sign In</v-card-title
+                        >Авторизация</v-card-title
                       >
                       <v-alert type="error" v-show="authError.length">{{
                         authError
@@ -43,10 +43,10 @@
                           outlined
                           required
                           rounded
-                          placeholder="Choose your account"
+                          placeholder="Выберите менеджера"
                         ></v-select>
                         <v-text-field
-                          label="Password"
+                          label="Пароль"
                           type="password"
                           v-model="password"
                           :rules="passwordRules"
@@ -61,7 +61,7 @@
                           x-large
                           @click="tryLogin"
                           :loading="isAuthLoading"
-                          >Sign In</v-btn
+                          >Войти</v-btn
                         >
                       </v-card-text>
                     </v-card>
@@ -74,20 +74,25 @@
       </v-container>
       <v-dialog v-model="dialog" persistent max-width="500">
         <v-card>
-          <v-card-title class="headline">Site Configs</v-card-title>
+          <v-card-title class="headline">Настройки приложения</v-card-title>
           <v-card-text>
             <v-form @submit.prevent="saveSettings">
               <v-text-field
                 :value="webHook"
                 ref="webHook"
-                label="Site address"
+                label="Адрес API"
                 outlined
                 rounded
                 @change="saveSettings"
               />
-              <v-select outlined rounded :items="printers" :value="chosenPrinter" label="Выберите принтер"
-                        @change="savePrinter">
-
+              <v-select
+                outlined
+                rounded
+                :items="printers"
+                :value="chosenPrinter"
+                label="Выберите принтер"
+                @change="savePrinter"
+              >
               </v-select>
             </v-form>
           </v-card-text>
@@ -98,7 +103,7 @@
               :loading="isSavingSettings"
               text
               @click="closeDialog"
-              >Save</v-btn
+              >Сохранить</v-btn
             >
           </v-card-actions>
         </v-card>
@@ -112,7 +117,7 @@ import { mapGetters, mapActions } from "vuex";
 let { remote } = require("electron");
 let webContents = remote.getCurrentWebContents();
 let printers = webContents.getPrinters(); //list the printers
-let printerNames = printers.map(item => item.name);
+let printerNames = printers.map((item) => item.name);
 export default {
   name: "Login",
   layout: "auth",
@@ -128,7 +133,7 @@ export default {
     passwordRules: [(v) => !!v || "Введите пароль"],
     authError: "",
     isAuthLoading: false,
-    printers: printerNames
+    printers: printerNames,
   }),
   async mounted() {
     await this.tryGetManagers();
@@ -136,7 +141,7 @@ export default {
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
-      chosenPrinter: 'settings/chosenPrinter'
+      chosenPrinter: "settings/chosenPrinter",
     }),
   },
   methods: {

@@ -7,7 +7,7 @@
             <v-list-item>
               <div class="flex">
                 <div class="font-weight-medium white-text">
-                  Менеджер: {{ managerData.LAST_NAME }} {{ managerData.NAME }}
+                  Кассир: {{ managerData.LAST_NAME }} {{ managerData.NAME }}
                 </div>
               </div>
             </v-list-item>
@@ -71,7 +71,6 @@
                     :frameworkComponents="frameworkComponents"
                     @selection-changed="cartItemSelected"
                     :gridOptions="gridOptions"
-                    :detailCellRendererParams="detailCellRendererParams"
                     :defaultColDef="defaultColDef"
                   >
                   </ag-grid-vue>
@@ -279,14 +278,6 @@
                     class="keyboard-background selected-product-weight mb-2 text-h5"
                     elevation
                   ></v-text-field>
-                  <!--                  <v-card-->
-                  <!--                    class="keyboard-background px-10 selected-product-weight mb-4"-->
-                  <!--                    elevation="5"-->
-                  <!--                  >-->
-                  <!--                    <h1 class="font-weight-medium black&#45;&#45;text">-->
-                  <!--                      {{  || "0" }}-->
-                  <!--                    </h1>currentWeight-->
-                  <!--                  </v-card>-->
                   <v-card
                     class="keyboard-background px-10 weight-keyboard"
                     elevation="5"
@@ -517,25 +508,41 @@
                   <v-row>
                     <v-col cols="6"></v-col>
                     <v-col cols="3">
-                      <v-btn
-                        color="grey darken-3"
-                        class="green--text"
-                        width="60"
-                        height="70"
-                        @click="printOrder"
-                      >
-                        <v-icon large>mdi-printer</v-icon>
-                      </v-btn>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            color="grey darken-3"
+                            class="green--text"
+                            width="60"
+                            height="70"
+                            @click="printOrder"
+                            v-bind="attrs"
+                            v-on="on"
+                            disabled
+                          >
+                            <v-icon large>mdi-printer</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Сохранить сеты и распечатать</span>
+                      </v-tooltip>
                     </v-col>
                     <v-col cols="3" class="pr-0">
-                      <v-btn
-                        color="grey darken-3"
-                        class="red--text"
-                        width="60"
-                        height="70"
-                      >
-                        <v-icon large>mdi-close</v-icon>
-                      </v-btn>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            color="grey darken-3"
+                            class="red--text"
+                            width="60"
+                            height="70"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="clearBasket"
+                          >
+                            <v-icon large>mdi-close</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Очистить корзину</span>
+                      </v-tooltip>
                     </v-col>
                   </v-row>
                   <v-row>
@@ -694,7 +701,9 @@
                   class="d-flex align-center mx-2 justify-center my-2"
                   @click="() => togglePaymentType('cash')"
                 >
-                  <v-card-title class="subtitle-2">Cash</v-card-title>
+                  <v-card-title class="subtitle-2 text-no-wrap"
+                    >Наличными</v-card-title
+                  >
                 </v-card>
               </v-slide-item>
               <v-slide-item v-slot:default="{ active, toggle }">
@@ -705,7 +714,7 @@
                   class="d-flex align-center mx-2 justify-center my-2"
                   @click="() => togglePaymentType('card')"
                 >
-                  <v-card-title class="subtitle-2">Card</v-card-title>
+                  <v-card-title class="subtitle-2">Картой</v-card-title>
                 </v-card>
               </v-slide-item>
             </v-slide-group>
@@ -825,13 +834,18 @@
               </v-row>
             </v-card>
 
-            <v-btn color="green accent-3" width="100%" height="70">
-              <h1 class="font-weight-medium">Total</h1>
+            <v-btn
+              color="green accent-3"
+              width="100%"
+              height="70"
+              @click="payTotalSumm"
+            >
+              <h1 class="font-weight-medium">Всю сумму</h1>
             </v-btn>
           </v-col>
           <div class="col-md-4">
             <v-row>
-              <v-col cols="6"> <h2>Total Price</h2></v-col>
+              <v-col cols="6"> <h2>Итоговая сумма</h2></v-col>
               <v-col cols="6"
                 ><div class="display-1 font-weight-bold">
                   {{ totalPrice | money }} сум
@@ -851,10 +865,10 @@
               >
             </v-row>
             <v-row>
-              <v-col cols="6"><h3>Change</h3></v-col>
+              <v-col cols="6"><h3>Сдача</h3></v-col>
               <v-col cols="6"
                 ><div class="display-1 font-weight-bold">
-                  {{ change }} сум
+                  {{ changePrice }} сум
                 </div></v-col
               >
             </v-row>
@@ -866,15 +880,33 @@
                   width="100%"
                   height="70"
                   :loading="savingOrderLoading"
+                  :disabled="changePrice < 0 || +orderData.orderId > 0"
                   @click="saveOrder"
                 >
                   <h1 class="font-weight-medium">Оплатить</h1>
                 </v-btn>
               </v-col>
               <v-col cols="6">
-                <v-btn color="green accent-3" width="100%" height="70" @click="printOrder">
-                  <h1 class="font-weight-medium">Распечатать</h1>
-                </v-btn>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      color="green accent-3"
+                      width="100%"
+                      height="70"
+                      @click="printOrder"
+                      :disabled="!orderData.orderId"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <h1 class="font-weight-medium">Распечатать</h1>
+                    </v-btn>
+                  </template>
+                  <span>{{
+                    orderData.orderId
+                      ? "Распечатать чек"
+                      : "Необходимо сначала оплатить заказ"
+                  }}</span>
+                </v-tooltip>
               </v-col>
             </v-row>
           </div>
@@ -916,7 +948,7 @@ import currency from "currency.js";
 import vSelect from "vue-select";
 import CartItemDelete from "./CartItemDelete";
 import MoneyColumn from "./MoneyColumn";
-const {ipcRenderer} = require('electron');
+const { ipcRenderer } = require("electron");
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
 
@@ -941,7 +973,6 @@ export default {
     columnApi: null,
     cashPrice: "",
     cardPrice: "",
-    changePrice: "",
     cashBtn: true,
     cardBtn: false,
     currentWeight: "",
@@ -982,6 +1013,7 @@ export default {
     defaultColDef: null,
     savingClientLoading: false,
     savingOrderLoading: false,
+    orderData: {},
   }),
   components: { AgGridVue, "vue-select": vSelect },
   computed: {
@@ -989,7 +1021,7 @@ export default {
       webHook: "settings/webHook",
       cartItems: "cartItems",
       managerData: "settings/managerData",
-      chosenPrinter: 'settings/chosenPrinter'
+      chosenPrinter: "settings/chosenPrinter",
     }),
     showSetsGrid() {
       let res = false;
@@ -1033,7 +1065,7 @@ export default {
       }
     },
     currentDate() {
-      return format(this.time, "d MMM YYY");
+      return format(this.time, "d.MM.YYY");
     },
     currentTime() {
       return format(this.time, "HH:mm:ss");
@@ -1051,15 +1083,16 @@ export default {
         );
       }
       if (this.searchText.length > 0) {
-        return this.items.filter(
-          (item) =>
+        return this.items.filter((item) => {
+          return (
             item.name.toLowerCase().includes(this.searchText) ||
-            item.barcode.toString().indexOf(this.searchText) === 0
-        );
+            (item.barcode && item.barcode.indexOf(this.searchText) === 0)
+          );
+        });
       }
       return this.items;
     },
-    change() {
+    changePrice() {
       return +this.cashPrice + +this.cardPrice - +this.totalPrice;
     },
   },
@@ -1091,11 +1124,17 @@ export default {
             cellRenderer: "CartItemDelete",
           },
         ],
+        context: { componentParent: this },
         defaultColDef: { flex: 1 },
         frameworkComponents: {
           CartItemDelete,
           MoneyColumn,
         },
+        rowSelection: "single",
+        onRowSelected: this.cartSetItemSelected,
+        // events: {
+        //   "selection-changed": this.cartSetItemSelected,
+        // },
       },
       getDetailRowData: (params) => {
         params.successCallback(params.data.childs);
@@ -1110,47 +1149,141 @@ export default {
       "removeProductCart",
       "unselectAllItems",
       "setWeight",
+      "clearCart",
     ]),
+    clearBasket() {
+      this.clearCart();
+      this.discountValue = "";
+      this.currentClient = {};
+      this.clientFirstName = "";
+      this.clientName = "";
+      this.clientPhone = "";
+      this.clientEmail = "";
+    },
+    payTotalSumm() {
+      if (this.cashBtn) {
+        this.cashPrice = this.totalPrice;
+        this.cardPrice = 0;
+      } else {
+        this.cashPrice = 0;
+        this.cardPrice = this.totalPrice;
+      }
+    },
     printOrder() {
       const cartItems = [...this.cartItems];
       const cartItemsTable = [];
-      const subTotalPrice = this.subTotalPrice
+      const subTotalPrice = this.subTotalPrice;
       const totalPrice = this.totalPrice;
       const discountValue = this.discountValue;
       const currentTime = this.currentTime;
       const currentDate = this.currentDate;
       const managerName = this.managerData.NAME;
-      const managerLastName = this.managerData.LAST_NAME
+      const managerLastName = this.managerData.LAST_NAME;
+      const { orderId, storeData } = this.orderData;
+      const address = storeData ? storeData.ADDRESS : "";
 
-      cartItems.map(item => {
-        cartItemsTable.push([item.name, item.price, item.weight, item.totalPrice])
+      let discountPrintValue = "";
+      if (discountValue) {
+        if (this.discountToggle === "percent") {
+          discountPrintValue = discountValue + "%";
+        } else {
+          discountPrintValue =
+            currency(+discountValue, {
+              symbol: "",
+              separator: ".",
+              decimal: ",",
+            }).format() + " SO'M";
+        }
+      }
+
+      // const sets = [];
+      // cartItems.map((item) => {
+      //   if (item.type === "set") {
+      //     sets.push(item);
+      //   }
+      // });
+
+      // if (!sets.length) {
+      //   this.cartWeightRequiredSnack = true;
+      //   this.cartError = `В корзине нет сетов`;
+      //   return;
+      // }
+
+      // let { data: setsData } = await this.$http.post(
+      //   this.webHook + `mysale.createSets`,
+      //   {
+      //     sets,
+      //   }
+      // );
+
+      cartItems.map((item) => {
+        cartItemsTable.push([
+          item.name,
+          currency(+item.price, {
+            symbol: "",
+            separator: ".",
+            decimal: ",",
+          }).format(),
+          item.weight,
+          currency(+item.totalPrice, {
+            symbol: "",
+            separator: ".",
+            decimal: ",",
+          }).format(),
+        ]);
       });
 
-      console.log(cartItemsTable)
       const data = [
         {
-          type: 'text', value: 'g', style: "font-size: 36px; color: 3CAF50; text-align: center; "
+          type: "text",
+          value: "g",
+          style: "font-size: 36px; color: 3CAF50; text-align: center; ",
         },
         {
-          type: 'text', value: 'gavali', style: "font-size: 26px; color: 3CAF50; text-align: center;"
+          type: "text",
+          value: "gavali",
+          style: "font-size: 26px; color: 3CAF50; text-align: center;",
         },
         {
-          type: 'text', value: 'OOO "Gavali Sweets"', style: "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;"
+          type: "text",
+          value: 'OOO "Gavali Sweets"',
+          style:
+            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;",
         },
         {
-          type: 'table',
+          type: "table",
           // style the table
-          style: 'border: 0; margin-bottom: -50px;',
+          style: "border: 0; margin-bottom: -50px;",
           // list of the columns to be rendered in the table header
-          //tableHeader: ['', '', '', ''],
+          // tableHeader: ["", ""],
           // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [[{type: 'image', path:'src/images/icons8-location-100.png', position: 'center', height: '40px', weight: '40px'}, {type: 'text', value: 'г.Ташкент, ул.Шахрисабзкая, дом 5-А Бизнес центр SEOUL PLAZA', style: 'font-size: 14px; color: 3CAF50; text-align: left'}]],
+          tableBody: [
+            [
+              // {
+              //   type: "text",
+              //   value: "<img :src='~static/images/icons8-location-100.png' />",
+              //   style: "font-size: 14px; color: 3CAF50; text-align: left",
+              // },
+              // {
+              //   type: "image",
+              //   path: "src/images/icons8-location-100.png",
+              //   position: "center",
+              //   height: "40px",
+              //   weight: "40px",
+              // },
+              {
+                type: "text",
+                value: address,
+                style: "font-size: 14px; color: 3CAF50;",
+              },
+            ],
+          ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: 'background-color: white; color: black;',
+          tableBodyStyle: "background-color: white; color: black;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1158,53 +1291,85 @@ export default {
         //   type: 'text', value: 'г.Ташкент, ул.Шахрисабзкая, дом 5-А Бизнес центр SEOUL PLAZA', style: "font-size: 14px; color: 3CAF50; text-align: left"
         // },
         {
-          type: 'table',
+          type: "table",
           // style the table
-          style: 'border: none',
+          style: "border: none; margin-top: -50px;",
           // list of the columns to be rendered in the table header
           //tableHeader: ['', ''],
           // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [[{type: 'text', value: currentDate}, {type: 'text', value: currentTime}, '#', {type: 'text', value: managerName}, {type: 'text', value: managerLastName}]],
+          tableBody: [
+            [
+              { type: "text", value: currentDate + " " + currentTime },
+              {
+                type: "text",
+                value: "Чек №: " + orderId,
+                style: "font-weight: bold;",
+              },
+              {
+                type: "text",
+                value: "Кассир:" + managerName + " " + managerLastName,
+              },
+            ],
+          ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: 'border: none; text-transformation: uppercase; font-size: 10px;',
+          tableBodyStyle:
+            "border: none; text-transformation: uppercase; font-size: 10px;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
         {
-          type: 'table',
+          type: "table",
           // style the table
-          style: 'border: none;margin-top: -50px;',
+          style: "border: none;margin-top: -50px;",
           // list of the columns to be rendered in the table header
-          tableHeader: ['Название', 'Цена', 'Вес', 'Сумма'],
+          tableHeader: ["Название", "Цена", "Вес", "Сумма"],
           // multi dimensional array depicting the rows and columns of the table body
           tableBody: cartItemsTable,
           // list of columns to be rendered in the table footer
           tableFooter: [],
           // custom style for the table header
-          tableHeaderStyle: 'background-color: white; color: black;',
+          tableHeaderStyle: "background-color: white; color: black;",
           // custom style for the table body
-          tableBodyStyle: 'border: none',
+          tableBodyStyle: "border: none",
           // custom style for the table footer
-          tableFooterStyle: 'background-color: #white; color: black;',
+          tableFooterStyle: "background-color: #white; color: black;",
         },
         {
-          type: 'table',
+          type: "table",
           // style the table
-          style: 'border: none; margin-top: -15px;',
+          style: "border: none; margin-top: -15px;",
           // list of the columns to be rendered in the table header
           //tableHeader: ['', '', '', ''],
           // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [[{type: 'text', value: 'сумма с ндс, 15%', style: 'text-align: left;'}, {type: 'text', value: subTotalPrice, style: 'text-align: right'}]],
+          tableBody: [
+            [
+              {
+                type: "text",
+                value: "сумма с ндс, 15%",
+                style: "text-align: left;",
+              },
+              {
+                type: "text",
+                value:
+                  currency(+subTotalPrice, {
+                    symbol: "",
+                    separator: ".",
+                    decimal: ",",
+                  }).format() + " SO'M",
+                style: "text-align: right",
+              },
+            ],
+          ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: 'background-color: white; color: black;',
+          tableBodyStyle: "background-color: white; color: black;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1212,36 +1377,64 @@ export default {
         //   type: 'text', value: subTotalPrice, style: "font-size: 14px; color: 3CAF50; text-align: right;"
         // },
         {
-          type: 'table',
+          type: "table",
           // style the table
-          style: 'border: none; margin-top: -70px;',
+          style: "border: none; margin-top: -70px;",
           // list of the columns to be rendered in the table header
           //tableHeader: ['', '', '', ''],
           // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [[{type: 'text', value: 'Скидка:', style: 'text-align: left'}, {type: 'text', value: discountValue, style: 'text-align: right;'}]],
+          tableBody: [
+            [
+              { type: "text", value: "Скидка:", style: "text-align: left" },
+              {
+                type: "text",
+                value: discountPrintValue,
+                style: "text-align: right;",
+              },
+            ],
+          ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: 'border: none',
+          tableBodyStyle: "border: none",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
         {
-          type: 'table',
+          type: "table",
           // style the table
-          style: 'border: none; margin-top: -70px;',
+          style: "border: none; margin-top: -70px;",
           // list of the columns to be rendered in the table header
           //tableHeader: ['', ''],
           // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [[{type: 'text', value: 'итог:', style: 'text-align: left; text-transformation: uppercase; font-size: 16px; font-weight: bold;'}, {type: 'text', value: totalPrice, style: 'text-align: right; font-size: 16px; font-weight: bold;'}]],
+          tableBody: [
+            [
+              {
+                type: "text",
+                value: "итог:",
+                style:
+                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;",
+              },
+              {
+                type: "text",
+                value:
+                  currency(+totalPrice, {
+                    symbol: "",
+                    separator: ".",
+                    decimal: ",",
+                  }).format() + " SO'M",
+                style: "text-align: right; font-size: 16px; font-weight: bold;",
+              },
+            ],
+          ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: 'border: none;',
+          tableBodyStyle: "border: none;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1258,17 +1451,22 @@ export default {
         //   type: 'text', value: totalPrice, style: "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase"
         // },
         {
-          type: 'text', value: 'Спасибо за покупку!', style: "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;"
+          type: "text",
+          value: "Спасибо за покупку!",
+          style:
+            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;",
         },
         {
-          type: 'table',
+          type: "table",
           // style the table
-          style: 'border: none;',
+          style: "border: none;",
           // list of the columns to be rendered in the table header
           //tableHeader: [],
           // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [['+998 97 444 1100', 'www.gavali.uz'],
-          ['gavali_uzbekistan'],],
+          tableBody: [
+            ["+998 97 444 1100", "www.gavali.uz"],
+            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"],
+          ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
@@ -1278,15 +1476,22 @@ export default {
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black;',
         },
-
-
-      ]
-      ipcRenderer.send('print', JSON.stringify({
-        printerName: this.chosenPrinter,
-        data
-      }));
+      ];
+      ipcRenderer.send(
+        "print",
+        JSON.stringify({
+          printerName: this.chosenPrinter,
+          data,
+        })
+      );
     },
     async saveOrder() {
+      if (this.changePrice < 0) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = `Не указаны суммы оплат`;
+        return;
+      }
+
       this.savingOrderLoading = true;
       let orderData = {
         client: this.currentClient,
@@ -1295,12 +1500,24 @@ export default {
         cardPrice: this.cardPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
+        discountType: this.discountToggle,
       };
-      let { data } = await this.$http.post(
+      let {
+        data: { result: order },
+      } = await this.$http.post(
         this.webHook + `mysale.order.create`,
         orderData
       );
+
+      if (order.error) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = order.error;
+      } else {
+        this.orderData = order;
+      }
       this.savingOrderLoading = false;
+      this.printOrder();
+      this.clearBasket();
     },
     listenForBarcode() {
       let pressed = false;
@@ -1380,7 +1597,10 @@ export default {
         this.cartWeightRequiredSnack = true;
         this.cartError =
           "В корзине есть товар без указанного веса. Указание веса обязательно";
+      } else {
+        this.orderData = {};
       }
+
       this.showPayMethodDialog = res;
     },
     setScaleWeight(data) {
@@ -1428,15 +1648,11 @@ export default {
     },
     selectProduct(item) {
       this.toggleProduct({ item });
-      // this.toggleProductCart({ item });
     },
     removeCartItem(node) {
       this.removeProductCart({ item: node.data });
-      // this.toggleProductCart({ item: node.data });
     },
     cartItemSelected() {
-      console.log("product");
-      // this.gridSetApi.deselectAll();
       setTimeout(() => {
         const selectedRows = this.gridApi.getSelectedRows();
         if (selectedRows.length) {
@@ -1446,21 +1662,19 @@ export default {
         }
       });
     },
-    cartSetItemSelected() {
-      console.log(arguments);
-      // this.gridApi.deselectAll();
-      setTimeout(() => {
+    cartSetItemSelected(event) {
+      if (event.node) {
+        this.selectedCartItem = event.node.data;
+      } else {
         const selectedSetRows = this.gridSetApi.getSelectedRows();
         if (selectedSetRows.length) {
-          console.log(selectedSetRows[0]);
           this.selectedCartItem = selectedSetRows[0];
         } else {
           this.selectedCartItem = {};
         }
-      });
+      }
     },
     getHostname: (url) => {
-      // use URL constructor and return hostname
       return new URL(url).hostname;
     },
     logout() {
@@ -1504,10 +1718,14 @@ export default {
           .substring(0, this.currentWeight.length - 1);
       }
       if (param.includes("cashPrice") && this.cashBtn) {
-        this.cashPrice = this.cashPrice.substring(0, this.cashPrice.length - 1);
+        this.cashPrice = this.cashPrice
+          .toString()
+          .substring(0, this.cashPrice.toString().length - 1);
       }
       if (param.includes("cardPrice") && this.cardBtn) {
-        this.cardPrice = this.cardPrice.substring(0, this.cardPrice.length - 1);
+        this.cardPrice = this.cardPrice
+          .toString()
+          .substring(0, this.cardPrice.toString().length - 1);
       }
     },
     dot() {
@@ -1520,6 +1738,7 @@ export default {
       this.setWeight({
         id: this.selectedCartItem.id,
         weight: this.currentWeight,
+        parentId: this.selectedCartItem.parentId,
       });
       this.currentWeight = "";
     },
@@ -1551,6 +1770,7 @@ export default {
     },
     addChosenProducts() {
       if (this.set) {
+        const parentId = Math.floor(Math.random() * Math.floor(99999));
         const item = {
           name: this.setName,
           weight: 1,
@@ -1558,12 +1778,12 @@ export default {
           price: 0,
           totalPrice: 0,
           type: "set",
-          id: Math.floor(Math.random() * Math.floor(99999)),
+          id: parentId,
         };
         this.items.map((prod) => {
           if (prod.selected) {
             if (prod.totalAmountCount > 0) {
-              item.childs.push(prod);
+              item.childs.push({ ...prod, parentId });
             } else {
               this.cartWeightRequiredSnack = true;
               this.cartError = `Товар "#${prod.barcode}: ${prod.name}" отсутствует в складах`;
