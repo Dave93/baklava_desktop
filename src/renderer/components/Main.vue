@@ -73,8 +73,7 @@
                     @selection-changed="cartItemSelected"
                     :gridOptions="gridOptions"
                     :defaultColDef="defaultColDef"
-                    @change="focusWeightInput"
-                  >
+                    >
                   </ag-grid-vue>
                   <div v-if="showSetsGrid">
                     <h2>Сеты</h2>
@@ -122,7 +121,7 @@
                       <v-col class="pt-6">
                         <div class="text-right">
                           <h2 class="text-uppercase">Итоговая сумма</h2>
-                          <h1 class="display-3 font-weight-bold">
+                          <h1 class="display-1 font-weight-bold">
                             {{ totalPrice | money }} сум
                           </h1>
                         </div>
@@ -221,9 +220,9 @@
                         <div class="mb-4">
                           <div>Client # {{ currentClient.ID }}</div>
                           <h2 class="font-weight-medium text--primary">
-                            {{ currentClient.NAME }}
+                            {{ currentClient.NAME + " " +  currentClient.LAST_NAME }}
                           </h2>
-                        </div>
+                         </div>
                         <div class="mb-4">
                           <div>
                             Phone
@@ -273,7 +272,7 @@
                 <div>
                   <v-form @submit.prevent="equal">
                   <v-text-field
-                    ref="weightInput"
+                    ref="cartItemSelectedInput"
                     v-model="currentWeight"
                     clearable
                     type="number"
@@ -1674,6 +1673,7 @@ export default {
           this.selectedCartItem = {};
         }
       });
+      this.$refs.cartItemSelectedInput.focus();
     },
     cartSetItemSelected(event) {
       if (event.node) {
@@ -1686,6 +1686,7 @@ export default {
           this.selectedCartItem = {};
         }
       }
+      this.$refs.cartItemSelectedInput.focus();
     },
     getHostname: (url) => {
       return new URL(url).hostname;
@@ -1831,9 +1832,6 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
-    },
-    focusWeightInput() {
-      this.$refs.weightInput.focus();
     },
   },
   mounted() {
