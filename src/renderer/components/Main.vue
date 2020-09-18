@@ -40,7 +40,7 @@
         <v-row>
           <v-col cols="7" class="d-flex flex-row">
             <v-card width="100%">
-              <v-card-text style="height: 100%;" class="pb-0">
+              <v-card-text style="height: 100%" class="pb-0">
                 <v-row>
                   <v-col cols="12" class="mt-n3">
                     <v-btn
@@ -59,11 +59,14 @@
                 </v-row>
                 <div
                   class="d-flex flex-column justify-space-between"
-                  style="height: 90%;"
-
+                  style="height: 90%"
                 >
                   <ag-grid-vue
-                    :style="(showSetsGrid ? 'width: 100%; height: 200px;' : 'width: 100%; height: 500px;')"
+                    :style="
+                      showSetsGrid
+                        ? 'width: 100%; height: 200px;'
+                        : 'width: 100%; height: 400px;'
+                    "
                     class="ag-theme-material"
                     :columnDefs="cartColumns"
                     :rowData="singleProducts"
@@ -73,12 +76,12 @@
                     @selection-changed="cartItemSelected"
                     :gridOptions="gridOptions"
                     :defaultColDef="defaultColDef"
-                    >
+                  >
                   </ag-grid-vue>
                   <div v-if="showSetsGrid">
                     <h2>Сеты</h2>
                     <ag-grid-vue
-                      :style="(showSetsGrid ? 'width: 100%; height: 250px;' : '')"
+                      :style="showSetsGrid ? 'width: 100%; height: 250px;' : ''"
                       class="ag-theme-material"
                       :columnDefs="cartColumns"
                       :rowData="setProducts"
@@ -155,9 +158,7 @@
                     </v-card-text>
                   </div>
                   <div v-else>
-                    <div class="title text-center pt-16">
-                      Продукт не выбран
-                    </div>
+                    <div class="title text-center pt-16">Продукт не выбран</div>
                   </div>
                 </v-card>
                 <div class="mt-6">
@@ -220,21 +221,19 @@
                         <div class="mb-4">
                           <div>Client # {{ currentClient.ID }}</div>
                           <h2 class="font-weight-medium text--primary">
-                            {{ currentClient.NAME + " " +  currentClient.LAST_NAME }}
+                            {{
+                              currentClient.NAME + " " + currentClient.LAST_NAME
+                            }}
                           </h2>
-                         </div>
+                        </div>
                         <div class="mb-4">
-                          <div>
-                            Phone
-                          </div>
+                          <div>Phone</div>
                           <div class="font-weight-bold">
                             {{ currentClient.PERSONAL_PHONE }}
                           </div>
                         </div>
                         <div class="mb-4">
-                          <div>
-                            Email
-                          </div>
+                          <div>Email</div>
                           <div class="font-weight-bold">
                             {{ currentClient.EMAIL }}
                           </div>
@@ -271,15 +270,14 @@
               <v-col cols="7" class="d-flex flex-column justify-space-between">
                 <div>
                   <v-form @submit.prevent="equal">
-                  <v-text-field
-                    ref="cartItemSelectedInput"
-                    v-model="currentWeight"
-                    clearable
-                    type="number"
-                    outlined
-                    hide-details
-                    class="keyboard-background selected-product-weight mb-2 text-h5"
-                    elevation
+                    <v-text-field
+                      ref="cartItemSelectedInput"
+                      v-model="currentWeight"
+                      outlined
+                      hide-details
+                      dense
+                      class="keyboard-background selected-product-weight mb-2 text-h5"
+                      elevation
                     ></v-text-field>
                   </v-form>
                   <v-card
@@ -287,14 +285,14 @@
                     elevation="5"
                   >
                     <v-row class="mb-n4">
-                      <v-col cols="12" class="pl-0">
+                      <v-col cols="12">
                         <v-row>
                           <v-col cols="6">
                             <v-btn
                               @click="append('-')"
                               color="black"
                               rounded
-                              height="56"
+                              height="40"
                               width="100%"
                               class="justify-center"
                               ><h1 class="font-weight-bold green--text">
@@ -307,7 +305,7 @@
                               @click="append('+')"
                               color="black"
                               rounded
-                              height="56"
+                              height="40"
                               width="100%"
                               class="justify-center"
                               ><h1 class="font-weight-bold green--text">
@@ -322,21 +320,21 @@
                       <v-col cols="9" class="pl-0">
                         <v-row class="mb-n4">
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('7')"
+                            <v-btn fab small color="black" @click="append('7')"
                               ><h1 class="font-weight-bold green--text">
                                 7
                               </h1></v-btn
                             >
                           </v-col>
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('8')"
+                            <v-btn fab small color="black" @click="append('8')"
                               ><h1 class="font-weight-bold green--text">
                                 8
                               </h1></v-btn
                             >
                           </v-col>
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('9')"
+                            <v-btn fab small color="black" @click="append('9')"
                               ><h1 class="font-weight-bold green--text">
                                 9
                               </h1></v-btn
@@ -345,21 +343,21 @@
                         </v-row>
                         <v-row class="mb-n4">
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('4')"
+                            <v-btn fab small color="black" @click="append('4')"
                               ><h1 class="font-weight-bold green--text">
                                 4
                               </h1></v-btn
                             >
                           </v-col>
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('5')"
+                            <v-btn fab small color="black" @click="append('5')"
                               ><h1 class="font-weight-bold green--text">
                                 5
                               </h1></v-btn
                             >
                           </v-col>
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('6')"
+                            <v-btn fab small color="black" @click="append('6')"
                               ><h1 class="font-weight-bold green--text">
                                 6
                               </h1></v-btn
@@ -368,21 +366,21 @@
                         </v-row>
                         <v-row class="mb-n4">
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('1')"
+                            <v-btn fab small color="black" @click="append('1')"
                               ><h1 class="font-weight-bold green--text">
                                 1
                               </h1></v-btn
                             >
                           </v-col>
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('2')"
+                            <v-btn fab small color="black" @click="append('2')"
                               ><h1 class="font-weight-bold green--text">
                                 2
                               </h1></v-btn
                             >
                           </v-col>
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="append('3')"
+                            <v-btn fab small color="black" @click="append('3')"
                               ><h1 class="font-weight-bold green--text">
                                 3
                               </h1></v-btn
@@ -393,7 +391,7 @@
                           <v-col cols="8" class="pr-0">
                             <v-btn
                               rounded
-                              height="56"
+                              height="40"
                               width="100%"
                               color="black"
                               class="justify-start"
@@ -405,7 +403,7 @@
                             ></v-btn>
                           </v-col>
                           <v-col cols="4">
-                            <v-btn fab color="black" @click="dot(',')"
+                            <v-btn fab small color="black" @click="dot(',')"
                               ><h1 class="font-weight-bold green--text">
                                 ,
                               </h1></v-btn
@@ -416,7 +414,7 @@
                       <v-col cols="3">
                         <v-row class="mb-n4">
                           <v-col cols="12">
-                            <v-btn fab color="black"
+                            <v-btn fab small color="black"
                               ><h1
                                 class="font-weight-bold green--text"
                                 @click="substr('currentWeight')"
@@ -428,7 +426,7 @@
                         </v-row>
                         <v-row class="mb-n4">
                           <v-col cols="12">
-                            <v-btn @click="clear" fab color="black"
+                            <v-btn @click="clear" fab small color="black"
                               ><h1 class="font-weight-bold green--text">
                                 C
                               </h1></v-btn
@@ -441,9 +439,9 @@
                               @click="equal"
                               rounded
                               color="black"
-                              height="120px"
-                              width="56"
-                              small
+                              height="88px"
+                              width="40"
+                              x-small
                               ><h1 class="font-weight-bold green--text">
                                 &crarr;
                               </h1></v-btn
@@ -458,7 +456,7 @@
                   <v-row class="d-flex flex-column mx-auto pt-3">
                     <v-card class="elevation-5">
                       <v-row>
-                        <v-col cols="8" class="mx-auto py-0">
+                        <v-col class="mx-auto py-0">
                           <v-card-actions>
                             <v-btn-toggle
                               v-model="discountToggle"
@@ -484,7 +482,7 @@
                         </v-col>
                       </v-row>
                       <v-row class="mx-auto d-flex flex-row">
-                        <v-col cols="10" class="pt-0">
+                        <v-col cols="9">
                           <v-text-field
                             label="Введите скидку"
                             hide-details
@@ -493,7 +491,6 @@
                             rows="1"
                             row-height="10"
                             v-model="discountValue"
-                            type="number"
                           ></v-text-field>
                         </v-col>
                         <v-col cols="2" class="d-flex pt-0">
@@ -510,7 +507,7 @@
                 </div>
                 <div>
                   <v-row>
-                    <v-col cols="6"></v-col>
+                    <v-col cols="4" class="mr-3"></v-col>
                     <v-col cols="3">
                       <v-tooltip top>
                         <template v-slot:activator="{ on, attrs }">
@@ -660,7 +657,7 @@
                           @click="() => selectProduct(item)"
                           :elevation="item.selected ? 1 : 8"
                         >
-                          <v-list-item style="height: 70%;">
+                          <v-list-item style="height: 70%">
                             <v-list-item-content>
                               <v-list-item-title class="text-wrap">{{
                                 item.name
@@ -693,7 +690,7 @@
           </v-card>
         </div>
       </v-dialog>
-      <v-dialog v-model="showPayMethodDialog" style="width: 400px;">
+      <v-dialog v-model="showPayMethodDialog" style="width: 400px">
         <v-card>
           <v-card-text>
             <v-slide-group show-arrows class="py-6">
@@ -724,7 +721,7 @@
             </v-slide-group>
           </v-card-text>
         </v-card>
-        <v-row style="background-color: #ffffff;" class="mx-md-auto">
+        <v-row style="background-color: #ffffff" class="mx-md-auto">
           <v-col cols="4" class="">
             <v-card flat class="keyboard-background px-10 weight-keyboard">
               <v-row>
@@ -994,6 +991,7 @@ export default {
       {
         headerName: "Название",
         field: "name",
+
         cellRenderer: "agGroupCellRenderer",
       },
       {
@@ -1018,6 +1016,7 @@ export default {
     savingClientLoading: false,
     savingOrderLoading: false,
     orderData: {},
+    currentScaleWeight: 0,
   }),
   components: { AgGridVue, "vue-select": vSelect },
   computed: {
@@ -1616,9 +1615,12 @@ export default {
       this.showPayMethodDialog = res;
     },
     setScaleWeight(data) {
-      if (this.selectedCartItem.id && data.detail) {
-        this.append(data.detail.weight);
-        this.equal();
+      if (data.detail) {
+        this.currentScaleWeight = data.detail.weight;
+        if (this.selectedCartItem.id) {
+          this.append(data.detail.weight);
+          this.equal();
+        }
       }
     },
     async saveClient() {
@@ -1669,6 +1671,13 @@ export default {
         const selectedRows = this.gridApi.getSelectedRows();
         if (selectedRows.length) {
           this.selectedCartItem = selectedRows[0];
+          if (this.selectedCartItem.weight) {
+            if (this.currentScaleWeight > 0) {
+              this.currentWeight = this.currentScaleWeight;
+            } else {
+              this.currentWeight = this.selectedCartItem.weight;
+            }
+          }
         } else {
           this.selectedCartItem = {};
         }
@@ -1682,6 +1691,11 @@ export default {
         const selectedSetRows = this.gridSetApi.getSelectedRows();
         if (selectedSetRows.length) {
           this.selectedCartItem = selectedSetRows[0];
+          if (this.currentScaleWeight > 0) {
+            this.currentWeight = this.currentScaleWeight;
+          } else {
+            this.currentWeight = this.selectedCartItem.weight;
+          }
         } else {
           this.selectedCartItem = {};
         }
@@ -1710,7 +1724,7 @@ export default {
         if (!this.currentWeight) {
           return;
         }
-        if (this.currentWeight.indexOf(number) === -1) {
+        if (!["+", "-"].includes(this.currentWeight.substr(-1))) {
           this.currentWeight = this.currentWeight + number;
         }
       } else {
@@ -1720,11 +1734,11 @@ export default {
     shopAppend(number) {
       if (this.cashBtn) {
         this.cashPrice = this.cashPrice + number;
-        this.cardPrice = this.totalPrice - this.cashPrice
+        this.cardPrice = this.totalPrice - this.cashPrice;
       }
       if (this.cardBtn) {
         this.cardPrice = this.cardPrice + number;
-        this.cashPrice = this.totalPrice - this.cardPrice
+        this.cashPrice = this.totalPrice - this.cardPrice;
       }
     },
     substr(param) {
@@ -1902,5 +1916,15 @@ export default {
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active до версии 2.1.8 */ {
   opacity: 0;
+}
+</style>
+
+<style>
+.ag-cell-value,
+.ag-group-value {
+  white-space: initial;
+  text-overflow: inherit;
+  /* overflow-wrap: break-word; */
+  line-height: 14px;
 }
 </style>
