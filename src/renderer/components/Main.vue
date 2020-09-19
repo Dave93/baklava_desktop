@@ -60,7 +60,6 @@
                 <div
                   class="d-flex flex-column justify-space-between"
                   style="height: 90%;"
-
                 >
                   <ag-grid-vue
                     :style="(showSetsGrid ? 'width: 100%; height: 200px;' : 'width: 100%; height: 500px;')"
@@ -272,15 +271,15 @@
               <v-col cols="7" class="d-flex flex-column justify-space-between">
                 <div>
                   <v-form @submit.prevent="equal">
-                  <v-text-field
-                    ref="weightInput"
-                    v-model="currentWeight"
-                    clearable
-                    type="number"
-                    outlined
-                    hide-details
-                    class="keyboard-background selected-product-weight mb-2 text-h5"
-                    elevation
+                    <v-text-field
+                      ref="weightInput"
+                      v-model="currentWeight"
+                      clearable
+                      type="number"
+                      outlined
+                      hide-details
+                      class="keyboard-background selected-product-weight mb-2 text-h5"
+                      elevation
                     ></v-text-field>
                   </v-form>
                   <v-card
@@ -1719,11 +1718,11 @@ export default {
     shopAppend(number) {
       if (this.cashBtn) {
         this.cashPrice = this.cashPrice + number;
-        this.cardPrice = this.totalPrice - this.cashPrice
+        this.cardPrice = this.totalPrice - this.cashPrice;
       }
       if (this.cardBtn) {
         this.cardPrice = this.cardPrice + number;
-        this.cashPrice = this.totalPrice - this.cardPrice
+        this.cashPrice = this.totalPrice - this.cardPrice;
       }
     },
     substr(param) {
