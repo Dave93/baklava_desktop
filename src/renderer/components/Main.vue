@@ -1885,7 +1885,7 @@ export default {
       "downloadProgress",
       ({ progress, bytesPerSecond, percent }) => {
         this.updateSnack = true;
-        this.downloadProgress = progress;
+        this.downloadProgress = percent;
       }
     );
     this.gridApi = this.gridOptions.api;
