@@ -72,12 +72,12 @@ autoUpdater.on('update-downloaded', () => {
   if (process.env.NODE_ENV === 'production') {
     dialog.showMessageBox({
       type: 'info',
-      title: 'Found Updates',
-      message: 'Found updates, do you want update now?',
-      buttons: ['Sure', 'No']
+      title: 'Обновление скачалось',
+      message: 'Нашлось обновление, хотите закрыть приложение и установить обновление?',
+      buttons: ['Да', 'Нет']
     }, (buttonIndex) => {
       if (buttonIndex === 0) {
-        const isSilent = true;
+        const isSilent = false;
         const isForceRunAfter = true;
         autoUpdater.quitAndInstall(isSilent, isForceRunAfter);
       }
@@ -88,7 +88,16 @@ autoUpdater.on('update-downloaded', () => {
     })
   }
 
-})
+});
+
+
+autoUpdater.on('update-available', () => {
+  mainWindow.webContents.send('updateAvailable');
+});
+
+autoUpdater.on('download-progress', (progress, bytesPerSecond, percent) => {
+  mainWindow.webContents.send('downloadProgress', { progress, bytesPerSecond, percent });
+});
 
 app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
