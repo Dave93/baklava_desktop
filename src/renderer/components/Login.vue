@@ -108,13 +108,25 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <v-snackbar v-model="updateSnack" multi-line timeout="-1">
+        Найдено обновление и скачивается
+        <v-progress-circular
+          :rotate="360"
+          :size="100"
+          :width="15"
+          :value="downloadProgress"
+          color="teal"
+        >
+          {{ downloadProgress }}
+        </v-progress-circular>
+      </v-snackbar>
     </v-main>
   </v-app>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-let { remote } = require("electron");
+let { remote, ipcRenderer } = require("electron");
 let webContents = remote.getCurrentWebContents();
 let printers = webContents.getPrinters(); //list the printers
 let printerNames = printers.map((item) => item.name);
@@ -129,6 +141,8 @@ export default {
     authForm: false,
     manager: "",
     password: "",
+    updateSnack: false,
+    downloadProgress: 0,
     managerRules: [(v) => !!v || "Выберите менеджера"],
     passwordRules: [(v) => !!v || "Введите пароль"],
     authError: "",
@@ -137,6 +151,16 @@ export default {
   }),
   async mounted() {
     await this.tryGetManagers();
+    ipcRenderer.on("updateAvailable", () => {
+      this.updateSnack = true;
+    });
+    ipcRenderer.on(
+      "downloadProgress",
+      ({ progress, bytesPerSecond, percent }) => {
+        this.updateSnack = true;
+        this.downloadProgress = progress;
+      }
+    );
   },
   computed: {
     ...mapGetters({

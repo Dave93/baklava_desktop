@@ -931,6 +931,18 @@
           </v-btn>
         </template>
       </v-snackbar>
+      <v-snackbar v-model="updateSnack" multi-line timeout="-1">
+        Найдено обновление и скачивается
+        <v-progress-circular
+          :rotate="360"
+          :size="100"
+          :width="15"
+          :value="downloadProgress"
+          color="teal"
+        >
+          {{ downloadProgress }}
+        </v-progress-circular>
+      </v-snackbar>
     </v-main>
   </v-app>
 </template>
@@ -957,6 +969,8 @@ export default {
   data: () => ({
     cartWeightRequiredSnack: false,
     cartError: "",
+    updateSnack: false,
+    downloadProgress: 0,
     discountToggle: "percent",
     firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
     nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
@@ -1620,7 +1634,7 @@ export default {
       this.showPayMethodDialog = res;
     },
     setScaleWeight(data) {
-      if (data.detail) {
+      if (data.detail && !this.showPayMethodDialog) {
         this.currentScaleWeight = data.detail.weight;
         if (this.selectedCartItem.id) {
           this.append(data.detail.weight);
@@ -1729,7 +1743,7 @@ export default {
         if (!this.currentWeight) {
           return;
         }
-        if (!["+", "-"].includes(this.currentWeight.substr(-1))) {
+        if (!["+", "-"].includes(this.currentWeight.toString().substr(-1))) {
           this.currentWeight = this.currentWeight + number;
         }
       } else {
@@ -1739,11 +1753,17 @@ export default {
     shopAppend(number) {
       if (this.cashBtn) {
         this.cashPrice = this.cashPrice + number;
-        this.cardPrice = this.totalPrice - this.cashPrice;
+        this.cardPrice =
+          this.totalPrice - this.cashPrice > 0
+            ? this.totalPrice - this.cashPrice
+            : 0;
       }
       if (this.cardBtn) {
         this.cardPrice = this.cardPrice + number;
-        this.cashPrice = this.totalPrice - this.cardPrice;
+        this.cashPrice =
+          this.totalPrice - this.cardPrice > 0
+            ? this.totalPrice - this.cardPrice
+            : 0;
       }
     },
     substr(param) {
@@ -1858,13 +1878,22 @@ export default {
       this.time = new Date();
     }, 1000);
 
+    ipcRenderer.on("updateAvailable", () => {
+      this.updateSnack = true;
+    });
+    ipcRenderer.on(
+      "downloadProgress",
+      ({ progress, bytesPerSecond, percent }) => {
+        this.updateSnack = true;
+        this.downloadProgress = progress;
+      }
+    );
     this.gridApi = this.gridOptions.api;
     this.gridSetApi = this.gridSetOptions.api;
     this.gridColumnApi = this.gridOptions.columnApi;
     document.removeEventListener("setWeight", this.setScaleWeight);
     document.addEventListener("setWeight", this.setScaleWeight);
     this.listenForBarcode();
-    window.davr = this;
   },
   beforeDestroy() {
     document.removeEventListener("setWeight", this.setScaleWeight);
