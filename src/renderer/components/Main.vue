@@ -64,7 +64,7 @@
                   <ag-grid-vue
                     :style="
                       showSetsGrid
-                        ? 'width: 100%; height: 200px;'
+                        ? 'width: 100%; height: 150px;'
                         : 'width: 100%; height: 400px;'
                     "
                     class="ag-theme-material"
@@ -81,7 +81,7 @@
                   <div v-if="showSetsGrid">
                     <h2>Сеты</h2>
                     <ag-grid-vue
-                      :style="showSetsGrid ? 'width: 100%; height: 250px;' : ''"
+                      :style="showSetsGrid ? 'width: 100%; height: 400px;' : ''"
                       class="ag-theme-material"
                       :columnDefs="cartColumns"
                       :rowData="setProducts"

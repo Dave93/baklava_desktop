@@ -95,12 +95,18 @@ autoUpdater.on('update-available', () => {
   mainWindow.webContents.send('updateAvailable');
 });
 
-autoUpdater.on('download-progress', (progress, bytesPerSecond, percent) => {
+autoUpdater.on('download-progress', ({progress, bytesPerSecond, percent}) => {
   mainWindow.webContents.send('downloadProgress', { progress, bytesPerSecond, percent });
 });
 
+
+
 app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+  // if (process.env.NODE_ENV === 'production') {
+  console.log(app.getVersion())
+  console.log(autoUpdater);
+    autoUpdater.checkForUpdates()
+  // }
   if (process.env.NODE_ENV !== 'production') {
     require('vue-devtools').install()
   }
