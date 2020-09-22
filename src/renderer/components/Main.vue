@@ -1,41 +1,6 @@
 <template>
   <v-app light>
     <v-main>
-      <v-row class="pa-0 ma-0 header-background-color flex align-center">
-        <v-col cols="4" class="py-0">
-          <v-card class="mx-auto header-background-color" flat>
-            <v-list-item>
-              <div class="flex">
-                <div class="font-weight-medium white-text">
-                  Кассир: {{ managerData.LAST_NAME }} {{ managerData.NAME }}
-                </div>
-              </div>
-            </v-list-item>
-          </v-card>
-        </v-col>
-        <v-col cols="4" class="py-0">
-          <div class="ma-auto">
-            <span
-              class="d-flex headline font-weight-light justify-center ma-auto white-text text-uppercase"
-            >
-              Gavali
-            </span>
-          </div>
-        </v-col>
-        <v-col cols="4" class="d-flex align-center justify-end py-0">
-          <div class="">
-            <div class="white-text px-2">
-              {{ currentDate }}
-            </div>
-            <h2 class="font-weight-medium px-2 white-text">
-              {{ currentTime }}
-            </h2>
-          </div>
-          <v-btn icon color="green" large @click="logout">
-            <v-icon>mdi-lock-open-variant-outline</v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
       <v-container fluid class="grey lighten-3 px-6 py-0">
         <v-row>
           <v-col cols="7" class="d-flex flex-row">
@@ -57,14 +22,11 @@
                     >
                   </v-col>
                 </v-row>
-                <div
-                  class="d-flex flex-column justify-space-between"
-                  style="height: 90%;"
-                >
+                <div class="d-flex flex-column justify-space-between">
                   <ag-grid-vue
                     :style="
                       showSetsGrid
-                        ? 'width: 100%; height: 200px;'
+                        ? 'width: 100%; height: 150px;'
                         : 'width: 100%; height: 400px;'
                     "
                     class="ag-theme-material"
@@ -81,7 +43,7 @@
                   <div v-if="showSetsGrid">
                     <h2>Сеты</h2>
                     <ag-grid-vue
-                      :style="showSetsGrid ? 'width: 100%; height: 250px;' : ''"
+                      :style="showSetsGrid ? 'width: 100%; height: 400px;' : ''"
                       class="ag-theme-material"
                       :columnDefs="cartColumns"
                       :rowData="setProducts"
@@ -101,14 +63,14 @@
                     <v-row>
                       <v-col cols="6">
                         <v-row>
-                          <v-col cols="6"><h3>Сумма</h3></v-col>
-                          <v-col cols="6"
+                          <v-col cols="5" class="pr-0"><h3>Сумма</h3></v-col>
+                          <v-col cols="6" class="px-0"
                             ><h3>{{ subTotalPrice | money }} сум</h3></v-col
                           >
                         </v-row>
                         <v-row>
-                          <v-col cols="6"><h3>Скидка</h3></v-col>
-                          <v-col cols="6"
+                          <v-col cols="5" class="pr-0"><h3>Скидка</h3></v-col>
+                          <v-col cols="6" class="px-0"
                             ><h3>
                               {{ discountValue }}
                               <template v-if="discountValue > 0"
@@ -121,7 +83,7 @@
                           ></v-col>
                         </v-row>
                       </v-col>
-                      <v-col class="pt-6">
+                      <v-col class="pt-6 px-0">
                         <div class="text-right">
                           <h2 class="text-uppercase">Итоговая сумма</h2>
                           <h1 class="display-1 font-weight-bold">
@@ -144,7 +106,7 @@
                   min-height="150px"
                 >
                   <div v-if="selectedCartItem.id">
-                    <v-card-title class="text-break">{{
+                    <v-card-title class="text-break subtitle-2">{{
                       selectedCartItem.name
                     }}</v-card-title>
                     <v-card-subtitle v-show="selectedCartItem.barcode"
@@ -152,7 +114,7 @@
                       {{ selectedCartItem.barcode }}</v-card-subtitle
                     >
                     <v-card-text>
-                      <div class="headline" v-show="selectedCartItem.price">
+                      <div class="subtitle-1" v-show="selectedCartItem.price">
                         {{ selectedCartItem.price | money }} сум
                       </div>
                     </v-card-text>
@@ -264,6 +226,15 @@
                         <v-icon>mdi-account-plus-outline</v-icon>
                       </v-btn>
                     </v-card-actions>
+                  </v-card>
+                  <v-card
+                    class="keyboard-background px-3 py-3 mt-5 weight-keyboard"
+                    elevation="5"
+                  >
+                    <div class="font-weight-medium white-text subtitle-2">
+                      Кассир: {{ managerData.LAST_NAME }} {{ managerData.NAME }}
+                    </div>
+                    <div class="font-weight-medium white-text subtitle-2"></div>
                   </v-card>
                 </div>
               </v-col>
@@ -507,8 +478,7 @@
                 </div>
                 <div>
                   <v-row>
-                    <v-col cols="4" class="mr-3"></v-col>
-                    <v-col cols="3">
+                    <v-col cols="4">
                       <v-tooltip top>
                         <template v-slot:activator="{ on, attrs }">
                           <v-btn
@@ -527,7 +497,7 @@
                         <span>Сохранить сеты и распечатать</span>
                       </v-tooltip>
                     </v-col>
-                    <v-col cols="3" class="pr-0">
+                    <v-col cols="4" class="pr-0">
                       <v-tooltip top>
                         <template v-slot:activator="{ on, attrs }">
                           <v-btn
@@ -543,6 +513,24 @@
                           </v-btn>
                         </template>
                         <span>Очистить корзину</span>
+                      </v-tooltip>
+                    </v-col>
+                    <v-col cols="3" class="pr-0">
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            color="grey darken-3"
+                            class="green--text"
+                            width="60"
+                            height="70"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="logout"
+                          >
+                            <v-icon large>mdi-lock-open-variant-outline</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Выход</span>
                       </v-tooltip>
                     </v-col>
                   </v-row>
@@ -659,7 +647,7 @@
                         >
                           <v-list-item style="height: 70%;">
                             <v-list-item-content>
-                              <v-list-item-title class="text-wrap">{{
+                              <v-list-item-title class="text-wrap subtitle-2">{{
                                 item.name
                               }}</v-list-item-title>
                               <v-list-item-subtitle
@@ -670,7 +658,7 @@
                           </v-list-item>
                           <v-spacer></v-spacer>
                           <v-card-actions>
-                            <span class="title"
+                            <span class="subtitle-1"
                               >{{ item.price | money }} сум</span
                             >
                           </v-card-actions>
@@ -844,7 +832,7 @@
               <h1 class="font-weight-medium">Всю сумму</h1>
             </v-btn>
           </v-col>
-          <div class="col-md-4">
+          <v-col cols="8">
             <v-row>
               <v-col cols="6"> <h2>Итоговая сумма</h2></v-col>
               <v-col cols="6"
@@ -869,7 +857,12 @@
               <v-col cols="6"><h3>Сдача</h3></v-col>
               <v-col cols="6"
                 ><div class="display-1 font-weight-bold">
-                  {{ changePrice }} сум
+                  {{
+                    parseInt(changePrice, 10) > 0
+                      ? parseInt(changePrice, 10)
+                      : 0 | money
+                  }}
+                  сум
                 </div></v-col
               >
             </v-row>
@@ -910,7 +903,7 @@
                 </v-tooltip>
               </v-col>
             </v-row>
-          </div>
+          </v-col>
         </v-row>
       </v-dialog>
       <v-snackbar
@@ -1005,17 +998,26 @@ export default {
       {
         headerName: "Название",
         field: "name",
-        width: 320,
+        width: 450,
         cellRenderer: "agGroupCellRenderer",
+        suppressSizeToFit: true,
+        flex: 3,
+        wrapText: true,
       },
       {
         headerName: "Цена",
         field: "price",
         width: 100,
+        wrapText: true,
         cellRenderer: "MoneyColumn",
       },
       { headerName: "Вес", field: "weight", width: 50 },
-      { headerName: "Итоговая цена", field: "totalPrice", width: 100 },
+      {
+        headerName: "Итоговая цена",
+        field: "totalPrice",
+        width: 100,
+        wrapText: true,
+      },
       {
         headerName: "Действие",
         field: "id",
@@ -1028,7 +1030,10 @@ export default {
     // modules: AllModules,
     selectedCartItem: {},
     options: [],
-    currentClient: {},
+    currentClient: {
+      ID: null,
+      NAME: null,
+    },
     setName: "",
     detailCellRendererParams: null,
     defaultColDef: null,
@@ -1116,7 +1121,7 @@ export default {
         return this.items.filter((item) => {
           return (
             item.name.toLowerCase().includes(this.searchText) ||
-            (item.barcode && item.barcode.indexOf(this.searchText) === 0)
+            (item.barcode && item.barcode.indexOf(this.searchText) >= 0)
           );
         });
       }
@@ -1135,16 +1140,23 @@ export default {
       MoneyColumn,
     };
 
-    this.defaultColDef = { flex: 1 };
+    this.defaultColDef = { flex: 1, resizable: true };
     this.detailCellRendererParams = {
       detailGridOptions: {
         columnDefs: [
-          { headerName: "Название", field: "name" },
+          {
+            headerName: "Название",
+            field: "name",
+            suppressSizeToFit: true,
+            flex: 3,
+            wrapText: true,
+          },
           {
             headerName: "Цена",
             field: "price",
             width: 150,
             cellRenderer: "MoneyColumn",
+            wrapText: true,
           },
           { headerName: "Вес", field: "weight", width: 100 },
           { headerName: "Итоговая цена", field: "totalPrice", width: 150 },
@@ -1155,7 +1167,7 @@ export default {
           },
         ],
         context: { componentParent: this },
-        defaultColDef: { flex: 1 },
+        defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
           MoneyColumn,
@@ -1868,6 +1880,11 @@ export default {
       this.setName = "";
       this.unselectAllItems();
       this.showSearchDialog = false;
+      // setTimeout(() => {
+      //   window.davr = this.gridApi;
+      //   console.log("size");
+      //   this.gridApi.sizeColumnsToFit();
+      // });
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
@@ -1885,7 +1902,7 @@ export default {
       "downloadProgress",
       ({ progress, bytesPerSecond, percent }) => {
         this.updateSnack = true;
-        this.downloadProgress = progress;
+        this.downloadProgress = percent;
       }
     );
     this.gridApi = this.gridOptions.api;
@@ -1960,5 +1977,8 @@ export default {
   text-overflow: inherit;
   /* overflow-wrap: break-word; */
   line-height: 14px;
+}
+.ag-theme-material {
+  font-size: 11px;
 }
 </style>
