@@ -70,22 +70,22 @@ autoUpdater.on('update-downloaded', () => {
   console.log('update-downloaded lats quitAndInstall');
 
   if (process.env.NODE_ENV === 'production') {
-    dialog.showMessageBox({
+    dialog.showMessageBox(mainWindow, {
       type: 'info',
       title: 'Обновление скачалось',
       message: 'Нашлось обновление, хотите закрыть приложение и установить обновление?',
       buttons: ['Да', 'Нет']
-    }, (buttonIndex) => {
+    }).then( (buttonIndex) => {
       if (buttonIndex === 0) {
         const isSilent = false;
         const isForceRunAfter = true;
-        autoUpdater.quitAndInstall(isSilent, isForceRunAfter);
+        autoUpdater.quitAndInstall();
       }
       // else {
       //   autoUpdater.enabled = true
       //   autoUpdater = null
       // }
-    })
+    });
   }
 
 });
@@ -96,6 +96,7 @@ autoUpdater.on('update-available', () => {
 });
 
 autoUpdater.on('download-progress', ({progress, bytesPerSecond, percent}) => {
+  autoUpdater.logger.log('info', {progress, bytesPerSecond, percent});
   mainWindow.webContents.send('downloadProgress', { progress, bytesPerSecond, percent });
 });
 

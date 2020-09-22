@@ -157,9 +157,8 @@ export default {
     ipcRenderer.on(
       "downloadProgress",
       ({ progress, bytesPerSecond, percent }) => {
-        console.log({ progress, bytesPerSecond, percent });
         this.updateSnack = true;
-        this.downloadProgress = percent;
+        this.downloadProgress = { progress, bytesPerSecond, percent };
       }
     );
   },
