@@ -103,11 +103,9 @@ autoUpdater.on('download-progress', ({progress, bytesPerSecond, percent}) => {
 
 
 app.on('ready', () => {
-  // if (process.env.NODE_ENV === 'production') {
-  console.log(app.getVersion())
-  console.log(autoUpdater);
+  if (process.env.NODE_ENV === 'production') {
     autoUpdater.checkForUpdates()
-  // }
+  }
   if (process.env.NODE_ENV !== 'production') {
     require('vue-devtools').install()
   }
@@ -121,4 +119,24 @@ ipcMain.on('print', (event, arg) => {
     width: '75mm'
   }).catch(error => console.error(error));
 })
+
+
+const ThermalPrinter = require("node-thermal-printer").printer;
+const PrinterTypes = require("node-thermal-printer").types;
+const electron = typeof process !== 'undefined' && process.versions && !!process.versions.electron;
+
+let printer = new ThermalPrinter({
+  type: PrinterTypes.EPSON,
+  interface: 'printer:auto',
+  driver: require(electron ? 'electron-printer' : 'printer')
+});
+printer.alignCenter();
+printer.println("Hello world");
+printer.cut();
+try {
+  let execute = printer.execute()
+  console.error("Print done!");
+} catch (error) {
+  console.log("Print failed:", error);
+}
 import store from '../renderer/store'
