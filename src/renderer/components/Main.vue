@@ -594,7 +594,7 @@
                     class="d-flex align-center mx-2 justify-center my-2"
                     :elevation="active ? 1 : 6"
                     @click="
-                      e => {
+                      (e) => {
                         toggle(e);
                         categoryToggle(0);
                       }
@@ -615,7 +615,7 @@
                     class="d-flex align-center mx-2 justify-center my-2"
                     :elevation="active ? 1 : 6"
                     @click="
-                      e => {
+                      (e) => {
                         toggle(e);
                         categoryToggle(category.id);
                       }
@@ -966,8 +966,8 @@ export default {
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [v => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [v => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -1003,7 +1003,7 @@ export default {
         cellRenderer: "agGroupCellRenderer",
         suppressSizeToFit: true,
         flex: 3,
-        wrapText: true
+        wrapText: true,
       },
       {
         headerName: "Цена",
@@ -1011,7 +1011,7 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       { headerName: "Вес", field: "weight", width: 50 },
       {
@@ -1020,14 +1020,14 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       {
         headerName: "Действие",
         field: "id",
         cellRenderer: "CartItemDelete",
-        width: 40
-      }
+        width: 40,
+      },
     ],
     context: null,
     frameworkComponents: null,
@@ -1036,7 +1036,7 @@ export default {
     options: [],
     currentClient: {
       ID: null,
-      NAME: null
+      NAME: null,
     },
     setName: "",
     detailCellRendererParams: null,
@@ -1044,7 +1044,7 @@ export default {
     savingClientLoading: false,
     savingOrderLoading: false,
     orderData: {},
-    currentScaleWeight: 0
+    currentScaleWeight: 0,
   }),
   components: { AgGridVue, "vue-select": vSelect },
   computed: {
@@ -1052,11 +1052,11 @@ export default {
       webHook: "settings/webHook",
       cartItems: "cartItems",
       managerData: "settings/managerData",
-      chosenPrinter: "settings/chosenPrinter"
+      chosenPrinter: "settings/chosenPrinter",
     }),
     showSetsGrid() {
       let res = false;
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         if (item.type === "set") {
           res = true;
         }
@@ -1064,17 +1064,17 @@ export default {
       return res;
     },
     singleProducts() {
-      return this.cartItems.filter(item => item.type !== "set");
+      return this.cartItems.filter((item) => item.type !== "set");
     },
     setProducts() {
-      return this.cartItems.filter(item => item.type === "set");
+      return this.cartItems.filter((item) => item.type === "set");
     },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       let totalPrice = 0;
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1092,7 +1092,7 @@ export default {
     totalPrice() {
       let totalPrice = 0;
 
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1118,11 +1118,11 @@ export default {
     filteredProducts() {
       if (this.currentCategoryId > 0) {
         return this.items.filter(
-          item => item.categoryId === this.currentCategoryId
+          (item) => item.categoryId === this.currentCategoryId
         );
       }
       if (this.searchText.length > 0) {
-        return this.items.filter(item => {
+        return this.items.filter((item) => {
           return (
             item.name.toLowerCase().includes(this.searchText) ||
             (item.barcode && item.barcode.indexOf(this.searchText) >= 0)
@@ -1133,7 +1133,7 @@ export default {
     },
     changePrice() {
       return +this.cashPrice + +this.cardPrice - +this.totalPrice;
-    }
+    },
   },
   beforeMount() {
     this.gridOptions = {};
@@ -1141,7 +1141,7 @@ export default {
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
-      MoneyColumn
+      MoneyColumn,
     };
 
     this.defaultColDef = { flex: 1, resizable: true };
@@ -1153,7 +1153,7 @@ export default {
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
-            wrapText: true
+            wrapText: true,
           },
           {
             headerName: "Цена",
@@ -1161,36 +1161,36 @@ export default {
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
-            wrapText: true
+            wrapText: true,
           },
           { headerName: "Вес", field: "weight", width: 100 },
           {
             headerName: "Итоговая цена",
             field: "totalPrice",
             width: 150,
-            flex: 2
+            flex: 2,
           },
           {
             headerName: "Действие",
             field: "id",
-            cellRenderer: "CartItemDelete"
-          }
+            cellRenderer: "CartItemDelete",
+          },
         ],
         context: { componentParent: this },
         defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
-          MoneyColumn
+          MoneyColumn,
         },
         rowSelection: "single",
-        onRowSelected: this.cartSetItemSelected
+        onRowSelected: this.cartSetItemSelected,
         // events: {
         //   "selection-changed": this.cartSetItemSelected,
         // },
       },
-      getDetailRowData: params => {
+      getDetailRowData: (params) => {
         params.successCallback(params.data.childs);
-      }
+      },
     };
   },
   mounted() {
@@ -1227,7 +1227,7 @@ export default {
       "removeProductCart",
       "unselectAllItems",
       "setWeight",
-      "clearCart"
+      "clearCart",
     ]),
     clearBasket() {
       this.clearCart();
@@ -1269,7 +1269,7 @@ export default {
             currency(+discountValue, {
               symbol: "",
               separator: ".",
-              decimal: ","
+              decimal: ",",
             }).format() + " SO'M";
         }
       }
@@ -1294,20 +1294,20 @@ export default {
       //   }
       // );
 
-      cartItems.map(item => {
+      cartItems.map((item) => {
         cartItemsTable.push([
           item.name,
           currency(+item.price, {
             symbol: "",
             separator: ".",
-            decimal: ","
+            decimal: ",",
           }).format(),
           item.weight,
           currency(+item.totalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ","
-          }).format()
+            decimal: ",",
+          }).format(),
         ]);
       });
 
@@ -1315,18 +1315,18 @@ export default {
         {
           type: "text",
           value: "g",
-          style: "font-size: 36px; color: 3CAF50; text-align: center; "
+          style: "font-size: 36px; color: 3CAF50; text-align: center; ",
         },
         {
           type: "text",
           value: "gavali",
-          style: "font-size: 26px; color: 3CAF50; text-align: center;"
+          style: "font-size: 26px; color: 3CAF50; text-align: center;",
         },
         {
           type: "text",
           value: 'OOO "Gavali Sweets"',
           style:
-            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;"
+            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;",
         },
         {
           type: "table",
@@ -1352,16 +1352,16 @@ export default {
               {
                 type: "text",
                 value: address,
-                style: "font-size: 14px; color: 3CAF50;"
-              }
-            ]
+                style: "font-size: 14px; color: 3CAF50;",
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;"
+          tableBodyStyle: "background-color: white; color: black;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1381,13 +1381,13 @@ export default {
               {
                 type: "text",
                 value: "Чек №: " + orderId,
-                style: "font-weight: bold;"
+                style: "font-weight: bold;",
               },
               {
                 type: "text",
-                value: "Кассир:" + managerName + " " + managerLastName
-              }
-            ]
+                value: "Кассир:" + managerName + " " + managerLastName,
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
@@ -1395,7 +1395,7 @@ export default {
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
           tableBodyStyle:
-            "border: none; text-transformation: uppercase; font-size: 10px;"
+            "border: none; text-transformation: uppercase; font-size: 10px;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1414,7 +1414,7 @@ export default {
           // custom style for the table body
           tableBodyStyle: "border: none",
           // custom style for the table footer
-          tableFooterStyle: "background-color: #white; color: black;"
+          tableFooterStyle: "background-color: #white; color: black;",
         },
         {
           type: "table",
@@ -1428,7 +1428,7 @@ export default {
               {
                 type: "text",
                 value: "сумма с ндс, 15%",
-                style: "text-align: left;"
+                style: "text-align: left;",
               },
               {
                 type: "text",
@@ -1436,18 +1436,18 @@ export default {
                   currency(+subTotalPrice, {
                     symbol: "",
                     separator: ".",
-                    decimal: ","
+                    decimal: ",",
                   }).format() + " SO'M",
-                style: "text-align: right"
-              }
-            ]
+                style: "text-align: right",
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;"
+          tableBodyStyle: "background-color: white; color: black;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1467,16 +1467,16 @@ export default {
               {
                 type: "text",
                 value: discountPrintValue,
-                style: "text-align: right;"
-              }
-            ]
+                style: "text-align: right;",
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none"
+          tableBodyStyle: "border: none",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1493,7 +1493,7 @@ export default {
                 type: "text",
                 value: "итог:",
                 style:
-                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;"
+                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;",
               },
               {
                 type: "text",
@@ -1501,18 +1501,18 @@ export default {
                   currency(+totalPrice, {
                     symbol: "",
                     separator: ".",
-                    decimal: ","
+                    decimal: ",",
                   }).format() + " SO'M",
-                style: "text-align: right; font-size: 16px; font-weight: bold;"
-              }
-            ]
+                style: "text-align: right; font-size: 16px; font-weight: bold;",
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none;"
+          tableBodyStyle: "border: none;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1532,7 +1532,7 @@ export default {
           type: "text",
           value: "Спасибо за покупку!",
           style:
-            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;"
+            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;",
         },
         {
           type: "table",
@@ -1543,23 +1543,23 @@ export default {
           // multi dimensional array depicting the rows and columns of the table body
           tableBody: [
             ["+998 97 444 1100", "www.gavali.uz"],
-            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"]
+            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none;  text-align: center;"
+          tableBodyStyle: "border: none;  text-align: center;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black;',
-        }
+        },
       ];
       ipcRenderer.send(
         "print",
         JSON.stringify({
           printerName: this.chosenPrinter,
-          data
+          data,
         })
       );
     },
@@ -1578,10 +1578,10 @@ export default {
         cardPrice: this.cardPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
-        discountType: this.discountToggle
+        discountType: this.discountToggle,
       };
       let {
-        data: { result: order }
+        data: { result: order },
       } = await this.$http.post(
         this.webHook + `mysale.order.create`,
         orderData
@@ -1602,7 +1602,7 @@ export default {
       let chars = [];
       let vm = this;
       window.removeEventListener("keypress", () => {});
-      window.addEventListener("keypress", e => {
+      window.addEventListener("keypress", (e) => {
         if (
           e.which == 71 ||
           e.which == 85 ||
@@ -1612,7 +1612,7 @@ export default {
         }
 
         if (pressed === false) {
-          setTimeout(function() {
+          setTimeout(function () {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
               vm.addByQrCode(barcode);
@@ -1628,8 +1628,8 @@ export default {
     addByQrCode(code) {
       this.cartWeightRequiredSnack = false;
       const items = [...this.items];
-      const foundItem = items.filter(item => item.barcode === code)[0];
-      const foundIndex = this.cartItems.findIndex(prod => {
+      const foundItem = items.filter((item) => item.barcode === code)[0];
+      const foundIndex = this.cartItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
 
@@ -1658,13 +1658,13 @@ export default {
         return;
       }
 
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
         }
 
         if (item.type === "set") {
-          item.childs.map(child => {
+          item.childs.map((child) => {
             if (child.weight === 0) {
               res = false;
             }
@@ -1752,7 +1752,7 @@ export default {
       this.$refs.cartItemSelectedInput.focus();
     },
     firstDataRendered() {
-      this.gridSetApi.forEachLeafNode(node => {
+      this.gridSetApi.forEachLeafNode((node) => {
         node && node.setExpanded(true);
       });
     },
@@ -1774,7 +1774,7 @@ export default {
       }
       this.$refs.cartItemSelectedInput.focus();
     },
-    getHostname: url => {
+    getHostname: (url) => {
       return new URL(url).hostname;
     },
     logout() {
@@ -1846,11 +1846,11 @@ export default {
       this.setWeight({
         id: this.selectedCartItem.id,
         weight: this.currentWeight,
-        parentId: this.selectedCartItem.parentId
+        parentId: this.selectedCartItem.parentId,
       });
       this.currentWeight = "";
       setTimeout(() => {
-        this.gridSetApi.forEachLeafNode(node => {
+        this.gridSetApi.forEachLeafNode((node) => {
           node && node.setExpanded(true);
         });
       });
@@ -1891,9 +1891,9 @@ export default {
           price: 0,
           totalPrice: 0,
           type: "set",
-          id: parentId
+          id: parentId,
         };
-        this.items.map(prod => {
+        this.items.map((prod) => {
           if (prod.selected) {
             if (prod.totalAmountCount > 0) {
               item.childs.push({ ...prod, parentId });
@@ -1905,14 +1905,14 @@ export default {
         });
         this.addProductToCart({ item });
         setTimeout(() => {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         });
       } else {
-        this.items.map(item => {
+        this.items.map((item) => {
           if (item.selected) {
-            const foundIndex = this.cartItems.findIndex(prod => {
+            const foundIndex = this.cartItems.findIndex((prod) => {
               return item.id === prod.id;
             });
 
@@ -1939,16 +1939,16 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
-    }
+    },
   },
   filters: {
-    money: value => {
+    money: (value) => {
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
       );
-    }
-  }
+    },
+  },
 };
 </script>
 
