@@ -956,6 +956,7 @@ import CartItemDelete from "./CartItemDelete";
 import MoneyColumn from "./MoneyColumn";
 const { ipcRenderer } = require("electron");
 const escpos = require("escpos");
+const path = require("path");
 // install escpos-usb adapter module manually
 escpos.USB = require("escpos-usb");
 
@@ -1270,33 +1271,182 @@ export default {
       const options = { encoding: "GB18030" /* default */ };
       // encoding is optional
 
+      const tux = path.join(__dirname, "gavali.jpg");
       const printer = new escpos.Printer(device, options);
+      escpos.Image.load(tux, function (image) {
+        device.open((error) => {
+          // printer
+          //   .font("a")
+          //   .align("ct")
+          //   .style("bu")
+          //   .size(1, 1)
+          //   .text("The quick brown fox jumps over the lazy dog")
+          //   .text("敏捷的棕色狐狸跳过懒狗")
+          //   .barcode("1234567", "EAN8")
+          //   .table(["One", "Two", "Three"])
+          //   .tableCustom(
+          //     [
+          //       { text: "Left", align: "LEFT", width: 0.33, style: "B" },
+          //       { text: "Center", align: "CENTER", width: 0.33 },
+          //       { text: "Right", align: "RIGHT", width: 0.33 },
+          //     ],
+          //     { encoding: "cp857", size: [1, 1] } // Optional
+          //   )
+          //   .qrimage("https://github.com/song940/node-escpos", function (err) {
+          //     this.cut();
+          //     this.close();
+          //   });
+          //LOGO
+          printer
+            .align("ct")
+            .image(image, "d24")
+            .then(() => {
+              printer.close();
+            });
 
-      device.open(function (error) {
-        // printer
-        //   .font("a")
-        //   .align("ct")
-        //   .style("bu")
-        //   .size(1, 1)
-        //   .text("The quick brown fox jumps over the lazy dog")
-        //   .text("敏捷的棕色狐狸跳过懒狗")
-        //   .barcode("1234567", "EAN8")
-        //   .table(["One", "Two", "Three"])
-        //   .tableCustom(
-        //     [
-        //       { text: "Left", align: "LEFT", width: 0.33, style: "B" },
-        //       { text: "Center", align: "CENTER", width: 0.33 },
-        //       { text: "Right", align: "RIGHT", width: 0.33 },
-        //     ],
-        //     { encoding: "cp857", size: [1, 1] } // Optional
-        //   )
-        //   .qrimage("https://github.com/song940/node-escpos", function (err) {
-        //     this.cut();
-        //     this.close();
-        //   });
+          //ADDRESS
+          printer
+            .font("A")
+            .size(0.01)
+            .align("ct")
+            .text("г.Ташкент, ул.Шахрисабская, дом 5-А")
+            .text("Бизнес центр SEOUL PLAZA")
+            .close();
 
-        printer.font("a").align("ct").style("b").text("g").cut().close();
+          //DATE AND
+          printer
+            .font("A")
+            .size(0.01)
+            .table([
+              currentDate + " " + currentTime,
+              "Чек №: " + orderId,
+              "Кассир:" + managerName + " " + managerLastName,
+            ])
+            .close();
+
+          //Table header and body
+          printer
+            .font("a")
+            .size(0.01)
+            .table(["Кол-во", "Наименование товара", "Цена", "Сумма"])
+            .text("------------------------------")
+            .close();
+          console.log(cartItems);
+
+          const cartPrint = [];
+
+          cartItems.map((item) => {
+            cartPrint.push([
+              item.weight,
+              item.name,
+              currency(+item.price, {
+                symbol: "",
+                separator: ".",
+                decimal: ",",
+              }).format(),
+              currency(+item.totalPrice, {
+                symbol: "",
+                separator: ".",
+                decimal: ",",
+              }).format(),
+            ]);
+          });
+
+          printer.font("a").size(0.0001).table(cartPrint).close();
+
+          printer
+            .font("a")
+            .size(0.01)
+            .text("------------------------------")
+            .close();
+
+          printer
+            .font("a")
+            .size(0.01)
+            .tableCustom([
+              {
+                text: "сумма с ндс, 15%",
+                align: "LEFT",
+                width: 0.33,
+                style: "B",
+              },
+              {
+                text:
+                  currency(+subTotalPrice, {
+                    symbol: "",
+                    separator: ".",
+                    decimal: ",",
+                  }).format() + " SO'M",
+                align: "RIGHT",
+                width: 0.33,
+              },
+            ])
+            .close();
+
+          printer
+            .font("a")
+            .size(0.01)
+            .tableCustom([
+              {
+                text: "Итог",
+                align: "LEFT",
+                width: 0.33,
+                style: "B",
+              },
+              {
+                text:
+                  currency(+totalPrice, {
+                    symbol: "",
+                    separator: ".",
+                    decimal: ",",
+                  }).format() + " SO'M",
+                align: "RIGHT",
+                width: 0.33,
+              },
+            ])
+            .close();
+        });
       });
+      printer
+        .font("a")
+        .size(0.01)
+        .tableCustom([
+          {
+            text: "Скидка",
+            align: "LEFT",
+            width: 0.33,
+            style: "B",
+          },
+          {
+            text: discountPrintValue ? discountPrintValue : "",
+            align: "RIGHT",
+            width: 0.33,
+          },
+        ])
+        .close();
+
+      printer
+        .font("a")
+        .size(0.01)
+        .text("------------------------------")
+        .close();
+
+      printer
+        .font("a")
+        .size(0.01)
+        .align("ct")
+        .text("Спасибо за пакупку")
+        .close();
+
+      printer
+        .font("a")
+        .size("0.01")
+        .tableCustom([
+          { text: "+998 97 444 11 00", align: "LEFT", width: 0.33 },
+          { text: "www.gavali.uz", align: "RIGHT", width: 0.33 },
+          { text: "gavali_uzbekistan", align: "LEFT", width: 0.33 },
+          { text: "gavali_uzbekistan", align: "RIGHT", width: 0.33 },
+        ]);
 
       let discountPrintValue = "";
       if (discountValue) {
@@ -1331,23 +1481,6 @@ export default {
       //     sets,
       //   }
       // );
-
-      cartItems.map((item) => {
-        cartItemsTable.push([
-          item.name,
-          currency(+item.price, {
-            symbol: "",
-            separator: ".",
-            decimal: ",",
-          }).format(),
-          item.weight,
-          currency(+item.totalPrice, {
-            symbol: "",
-            separator: ".",
-            decimal: ",",
-          }).format(),
-        ]);
-      });
 
       const data = [
         {
@@ -1593,13 +1726,13 @@ export default {
           //tableFooterStyle: 'background-color: #white; color: black;',
         },
       ];
-      ipcRenderer.send(
-        "print",
-        JSON.stringify({
-          printerName: this.chosenPrinter,
-          data,
-        })
-      );
+      // ipcRenderer.send(
+      //   "print",
+      //   JSON.stringify({
+      //     printerName: this.chosenPrinter,
+      //     data,
+      //   })
+      // );
     },
     async saveOrder() {
       if (this.changePrice < 0) {
@@ -1720,9 +1853,15 @@ export default {
       this.showPayMethodDialog = res;
     },
     setScaleWeight(data) {
-      if (data.detail && !this.showPayMethodDialog) {
-        this.currentScaleWeight = data.detail.weight;
+      this.currentScaleWeight = data.detail.weight;
+      console.log(data.detail.weight);
+      if (data.detail && !this.showPayMethodDialog && data.detail.weight > 0) {
         if (this.selectedCartItem.id) {
+          console.log("weight", this.currentWeight);
+          if (this.currentWeight > 0) {
+            console.log("greater");
+            this.append("+");
+          }
           this.append(data.detail.weight);
           this.equal();
         }
@@ -1888,9 +2027,11 @@ export default {
       });
       this.currentWeight = "";
       setTimeout(() => {
-        this.gridSetApi.forEachLeafNode((node) => {
-          node && node.setExpanded(true);
-        });
+        if (this.gridSetApi) {
+          this.gridSetApi.forEachLeafNode((node) => {
+            node && node.setExpanded(true);
+          });
+        }
       });
     },
     changeItem(key, val) {},
