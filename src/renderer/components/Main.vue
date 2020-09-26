@@ -487,7 +487,7 @@
                             class="green--text"
                             width="60"
                             height="70"
-                            @click="printOrder"
+                            @click="printSets"
                             v-bind="attrs"
                             v-on="on"
                           >
@@ -647,7 +647,7 @@
           </v-card>
         </div>
       </v-dialog>
-      <v-dialog v-model="showPayMethodDialog" style="width: 400px;">
+      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px;">
         <v-card v-if="showPayMethodDialog">
           <v-card-text>
             <v-slide-group show-arrows class="py-6">
@@ -849,27 +849,15 @@
                   <h1 class="font-weight-medium">Оплатить</h1>
                 </v-btn>
               </v-col>
-              <v-col cols="6">
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      color="green accent-3"
-                      width="100%"
-                      height="70"
-                      @click="printOrder"
-                      :disabled="!orderData.orderId"
-                      v-bind="attrs"
-                      v-on="on"
-                    >
-                      <h1 class="font-weight-medium">Распечатать</h1>
-                    </v-btn>
-                  </template>
-                  <span>{{
-                    orderData.orderId
-                      ? "Распечатать чек"
-                      : "Необходимо сначала оплатить заказ"
-                  }}</span>
-                </v-tooltip>
+              <v-col>
+                <v-btn
+                  color="green accent-3"
+                  width="100%"
+                  height="70"
+                  @click="clearCompleteBasket"
+                >
+                  <h1 class="font-weight-medium">Закрыть</h1>
+                </v-btn>
               </v-col>
             </v-row>
           </v-col>
@@ -909,7 +897,7 @@
     <v-dialog v-model="showPrintDialog" max-width="450px">
       <v-card v-if="showPrintDialog">
         <v-card-text>
-          <div id="my-node" style="width: 400px;">
+          <div id="order-print" style="width: 400px;">
             <div class="text-center">
               <img :src="printLogo" alt="" />
             </div>
@@ -918,11 +906,16 @@
             </div>
             <div class="text-center">
               <div>
-                <v-icon>mdi-map-marker</v-icon> г.Ташкент, ул.Шахрисабская, дом
-                5-А
+                <v-icon>mdi-map-marker</v-icon>
+                {{ orderPrintData.address }}
               </div>
             </div>
-            <div class="clear-user-agent-styles">
+            <div class="text-center">
+              <span>{{ orderPrintData.printTime }}</span>
+              <span>Чек №: {{ orderPrintData.orderId }}</span>
+              <span>Кассир: {{ orderPrintData.manager }}</span>
+            </div>
+            <div class="clear-user-agent-styles print-cart-items-table">
               <table>
                 <thead>
                   <tr>
@@ -942,8 +935,50 @@
                 </tbody>
               </table>
             </div>
+            <div class="clear-user-agent-styles">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>Сумма с ндс, 15%:</td>
+                    <td>{{ orderPrintData.subTotalPrice }}</td>
+                  </tr>
+                  <tr>
+                    <td>Скидка:</td>
+                    <td>{{ orderPrintData.discountPrintValue }}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold; font-size: 20px;">Итог:</td>
+                    <td style="font-weight: bold; font-size: 20px;">
+                      {{ orderPrintData.totalPrice }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="text-center">
+              Спасибо за покупку!
+            </div>
+            <v-row>
+              <v-col cols="6">
+                <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
+              </v-col>
+              <v-col cols="6"> <v-icon>mdi-web</v-icon> www.gavali.uz </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="6">
+                <v-icon>mdi-facebook</v-icon> gavali_uzbekistan
+              </v-col>
+              <v-col cols="6">
+                <v-icon>mdi-instagram</v-icon> gavali_uzbekistan
+              </v-col>
+            </v-row>
           </div>
         </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn icon large @click="printNode('order-print')">
+            <v-icon>mdi-cloud-print-outline</v-icon>
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-app>
@@ -1061,6 +1096,7 @@ export default {
     orderData: {},
     currentScaleWeight: 0,
     showPrintDialog: false,
+    orderPrintData: {},
   }),
   components: { AgGridVue, "vue-select": vSelect },
   computed: {
@@ -1245,6 +1281,13 @@ export default {
       "setWeight",
       "clearCart",
     ]),
+    clearCompleteBasket() {
+      if (this.orderData.orderId > 0) {
+        this.clearBasket();
+      }
+
+      this.showPayMethodDialog = false;
+    },
     clearBasket() {
       this.clearCart();
       this.discountValue = "";
@@ -1253,6 +1296,7 @@ export default {
       this.clientName = "";
       this.clientPhone = "";
       this.clientEmail = "";
+      this.orderData = {};
     },
     payTotalSumm() {
       if (this.cashBtn) {
@@ -1262,6 +1306,66 @@ export default {
         this.cashPrice = 0;
         this.cardPrice = this.totalPrice;
       }
+    },
+    async printNode(nodeId) {
+      // Select the adapter based on your printer type
+      const device = new escpos.USB();
+      // const device  = new escpos.Network('localhost');
+      // const device  = new escpos.Serial('/dev/usb/lp0');
+
+      const options = {
+        // encoding: "cp1251"
+        /*encoding: "GB18030"*/
+        /* default */
+      };
+      const printer = new escpos.Printer(device, options);
+
+      var node = document.getElementById(nodeId);
+
+      htmlToImage
+        .toBlob(node)
+        .then(async (blob) => {
+          const buffer = await Buffer.from(await blob.arrayBuffer());
+          const tux = path.join(__dirname, "test.png");
+          fs.writeFile(tux, buffer, (err) => {
+            escpos.Image.load(tux, (img) => {
+              device.open((error) => {
+                printer
+                  .align("ct")
+                  .image(img, "d24")
+                  .then(() => {
+                    printer.close();
+                  });
+              });
+            });
+          });
+        })
+        .catch(function (error) {
+          console.error("oops, something went wrong!", error);
+        });
+    },
+    async printSets() {
+      const sets = [];
+
+      const cartItems = [...this.cartItems];
+      cartItems.map((item) => {
+        if (item.type === "set") {
+          sets.push(item);
+        }
+      });
+
+      if (!sets.length) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = `В корзине нет сетов`;
+        return;
+      }
+
+      let { data: setsData } = await this.$http.post(
+        this.webHook + `mysale.createSets`,
+        {
+          sets,
+        }
+      );
     },
     async printOrder() {
       const sets = [];
@@ -1299,246 +1403,6 @@ export default {
 
       this.showPrintDialog = true;
 
-      setTimeout(() => {
-        // Select the adapter based on your printer type
-        const device = new escpos.USB();
-        // const device  = new escpos.Network('localhost');
-        // const device  = new escpos.Serial('/dev/usb/lp0');
-
-        const options = {
-          // encoding: "cp1251"
-          /*encoding: "GB18030"*/
-          /* default */
-        };
-        // encoding is optional
-
-        // const tux = path.join(__dirname, "gavali.jpg");
-        const printer = new escpos.Printer(device, options);
-
-        var node = document.getElementById("my-node");
-
-        var getPixels = require("get-pixels");
-
-        htmlToImage
-          .toBlob(node)
-          .then(async (blob) => {
-            const buffer = await Buffer.from(await blob.arrayBuffer());
-            const tux = path.join(__dirname, "test.png");
-            fs.writeFile(tux, buffer, (err) => {
-              console.log(err);
-              console.log(tux);
-              escpos.Image.load(tux, (img) => {
-                console.log(img);
-                device.open((error) => {
-                  console.log(img);
-                  printer
-                    .align("ct")
-                    .image(img, "d24")
-                    .then(() => {
-                      printer.close();
-                    });
-                });
-              });
-            });
-            // console.log(image);
-            // getPixels(image, (errr, pixels) => {
-            //   var img = new escpos.Image(pixels);
-            //   console.log(errr);
-            //   console.log(img);
-            //
-            // });
-          })
-          .catch(function (error) {
-            console.error("oops, something went wrong!", error);
-          });
-      }, 300);
-
-      // escpos.Image.load(tux, function (image) {
-      //   device.open((error) => {
-      //     // printer
-      //     //   .font("a")
-      //     //   .align("ct")
-      //     //   .style("bu")
-      //     //   .size(1, 1)
-      //     //   .text("The quick brown fox jumps over the lazy dog")
-      //     //   .text("敏捷的棕色狐狸跳过懒狗")
-      //     //   .barcode("1234567", "EAN8")
-      //     //   .table(["One", "Two", "Three"])
-      //     //   .tableCustom(
-      //     //     [
-      //     //       { text: "Left", align: "LEFT", width: 0.33, style: "B" },
-      //     //       { text: "Center", align: "CENTER", width: 0.33 },
-      //     //       { text: "Right", align: "RIGHT", width: 0.33 },
-      //     //     ],
-      //     //     { encoding: "cp857", size: [1, 1] } // Optional
-      //     //   )
-      //     //   .qrimage("https://github.com/song940/node-escpos", function (err) {
-      //     //     this.cut();
-      //     //     this.close();
-      //     //   });
-      //
-      //     //LOGO
-      //     printer
-      //       .align("ct")
-      //       .image(image, "d24")
-      //       .then(() => {
-      //         printer.close();
-      //       });
-      //
-      //
-      //
-      //     //ADDRESS
-      //     printer
-      //       .font("A")
-      //       .size(0.01)
-      //       .align("ct")
-      //       .text("г.Ташкент, ул.Шахрисабская, дом 5-А")
-      //       .text("Бизнес центр SEOUL PLAZA")
-      //       .close();
-      //
-      //     //DATE AND
-      //     // printer
-      //     //   .font("A")
-      //     //   .size(0.01)
-      //     //   .table([
-      //     //     currentDate + " " + currentTime,
-      //     //     "Чек №: " + orderId,
-      //     //     "Кассир:" + managerName + " " + managerLastName
-      //     //   ])
-      //     //   .close();
-      //     //
-      //     // //Table header and body
-      //     // printer
-      //     //   .font("a")
-      //     //   .size(0.01)
-      //     //   .table(["Кол-во", "Наименование товара", "Цена", "Сумма"])
-      //     //   .text("------------------------------")
-      //     //   .close();
-      //     // console.log(cartItems);
-      //     //
-      //     // const cartPrint = [];
-      //     //
-      //     // cartItems.map(item => {
-      //     //   cartPrint.push([
-      //     //     item.weight,
-      //     //     item.name,
-      //     //     currency(+item.price, {
-      //     //       symbol: "",
-      //     //       separator: ".",
-      //     //       decimal: ","
-      //     //     }).format(),
-      //     //     currency(+item.totalPrice, {
-      //     //       symbol: "",
-      //     //       separator: ".",
-      //     //       decimal: ","
-      //     //     }).format()
-      //     //   ]);
-      //     // });
-      //     //
-      //     // printer
-      //     //   .font("a")
-      //     //   .size(0.0001)
-      //     //   .table(cartPrint)
-      //     //   .close();
-      //     //
-      //     // printer
-      //     //   .font("a")
-      //     //   .size(0.01)
-      //     //   .text("------------------------------")
-      //     //   .close();
-      //     //
-      //     // printer
-      //     //   .font("a")
-      //     //   .size(0.01)
-      //     //   .tableCustom([
-      //     //     {
-      //     //       text: "сумма с ндс, 15%",
-      //     //       align: "LEFT",
-      //     //       width: 0.33,
-      //     //       style: "B"
-      //     //     },
-      //     //     {
-      //     //       text:
-      //     //         currency(+subTotalPrice, {
-      //     //           symbol: "",
-      //     //           separator: ".",
-      //     //           decimal: ","
-      //     //         }).format() + " SO'M",
-      //     //       align: "RIGHT",
-      //     //       width: 0.33
-      //     //     }
-      //     //   ])
-      //     //   .close();
-      //     //
-      //     // printer
-      //     //   .font("a")
-      //     //   .size(0.01)
-      //     //   .tableCustom([
-      //     //     {
-      //     //       text: "Итог",
-      //     //       align: "LEFT",
-      //     //       width: 0.33,
-      //     //       style: "B"
-      //     //     },
-      //     //     {
-      //     //       text:
-      //     //         currency(+totalPrice, {
-      //     //           symbol: "",
-      //     //           separator: ".",
-      //     //           decimal: ","
-      //     //         }).format() + " SO'M",
-      //     //       align: "RIGHT",
-      //     //       width: 0.33
-      //     //     }
-      //     //   ])
-      //     //   .close();
-      //   });
-      // });
-      // printer
-      //   .font("a")
-      //   .size(0.01)
-      //   .tableCustom([
-      //     {
-      //       text: "Скидка",
-      //       align: "LEFT",
-      //       width: 0.33,
-      //       style: "B"
-      //     },
-      //     {
-      //       text: discountPrintValue ? discountPrintValue : "",
-      //       align: "RIGHT",
-      //       width: 0.33
-      //     }
-      //   ])
-      //   .close();
-      //
-      // printer
-      //   .font("a")
-      //   .size(0.01)
-      //   .text("------------------------------")
-      //   .close();
-      //
-      // printer
-      //   .font("a")
-      //   .size(0.01)
-      //   .align("ct")
-      //   .text("Спасибо за пакупку")
-      //   .close();
-      //
-      // printer
-      //   .font("a")
-      //   .size("0.01")
-      //   .tableCustom([
-      //     { text: "+998 97 444 11 00", align: "LEFT", width: 0.33 },
-      //     { text: "www.gavali.uz", align: "RIGHT", width: 0.33 },
-      //     { text: "gavali_uzbekistan", align: "LEFT", width: 0.33 },
-      //     { text: "gavali_uzbekistan", align: "RIGHT", width: 0.33 }
-      //   ])
-      //   .cut()
-      //   .close();
-
-      // printer.cut().close();
-
       let discountPrintValue = "";
       if (discountValue) {
         if (this.discountToggle === "percent") {
@@ -1552,6 +1416,30 @@ export default {
             }).format() + " SO'M";
         }
       }
+
+      this.orderPrintData = {
+        address,
+        discountPrintValue,
+        printTime: currentDate + " " + currentTime,
+        orderId,
+        manager: managerName + " " + managerLastName,
+        subTotalPrice:
+          currency(+subTotalPrice, {
+            symbol: "",
+            separator: ".",
+            decimal: ",",
+          }).format() + " SO'M",
+        totalPrice:
+          currency(+totalPrice, {
+            symbol: "",
+            separator: ".",
+            decimal: ",",
+          }).format() + " SO'M",
+      };
+
+      setTimeout(() => {
+        this.printNode("order-print");
+      }, 300);
 
       const data = [
         {
@@ -1837,7 +1725,6 @@ export default {
       }
       this.savingOrderLoading = false;
       this.printOrder();
-      this.clearBasket();
     },
     listenForBarcode() {
       let pressed = false;
@@ -2272,19 +2159,37 @@ export default {
   vertical-align: top;
 }
 
-.clear-user-agent-styles td:first-child,
-.clear-user-agent-styles th:first-child {
+.clear-user-agent-styles.print-cart-items-table td:first-child,
+.clear-user-agent-styles.print-cart-items-table th:first-child {
   width: 50px;
 }
-.clear-user-agent-styles td:nth-child(2),
-.clear-user-agent-styles th:nth-child(2) {
+.clear-user-agent-styles.print-cart-items-table td:nth-child(2),
+.clear-user-agent-styles.print-cart-items-table th:nth-child(2) {
   width: 160px;
 }
-.clear-user-agent-styles td:nth-child(3),
-.clear-user-agent-styles th:nth-child(3),
-.clear-user-agent-styles td[data-v-b2bae082]:nth-child(4),
-.clear-user-agent-styles th[data-v-b2bae082]:nth-child(4) {
+.clear-user-agent-styles.print-cart-items-table td:nth-child(3),
+.clear-user-agent-styles.print-cart-items-table th:nth-child(3),
+.clear-user-agent-styles.print-cart-items-table td:nth-child(4),
+.clear-user-agent-styles.print-cart-items-table th:nth-child(4) {
   width: 80px;
+}
+
+.clear-user-agent-styles.print-cart-items-table th {
+  border-bottom: 2px dashed;
+}
+
+.clear-user-agent-styles tbody {
+  border-bottom: 2px dashed;
+}
+
+.clear-user-agent-styles td:first-child,
+.clear-user-agent-styles th:first-child {
+  width: 220px;
+}
+.clear-user-agent-styles td:last-child,
+.clear-user-agent-styles th:last-child {
+  width: 160px;
+  text-align: right;
 }
 </style>
 
