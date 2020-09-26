@@ -585,7 +585,7 @@
               </v-row>
               <v-divider></v-divider>
               <div class="d-flex">
-                <v-list dense height="315" style="flex:1; overflow-y: auto">
+                <v-list dense height="315" style="flex: 1; overflow-y: auto;">
                   <v-list-item
                     :class="{ 'v-list-item--active': currentCategoryId === 0 }"
                     :color="currentCategoryId === 0 ? 'green accent-3' : ''"
@@ -600,7 +600,7 @@
                     :key="item.id"
                     @click="categoryToggle(item.id)"
                     :class="{
-                      'v-list-item--active': currentCategoryId === item.id
+                      'v-list-item--active': currentCategoryId === item.id,
                     }"
                     :color="
                       currentCategoryId === item.id ? 'green accent-3' : ''
@@ -612,7 +612,7 @@
                   </v-list-item>
                 </v-list>
                 <v-divider vertical></v-divider>
-                <div class="product-list-block" style="flex: 10">
+                <div class="product-list-block" style="flex: 10;">
                   <v-list dense>
                     <v-virtual-scroll
                       :items="filteredProducts"
@@ -906,11 +906,46 @@
         </v-progress-circular>
       </v-snackbar>
     </v-main>
-    <div ref="printOrder">
-      <div id="my-node">
-        <h2>Привет</h2>
-      </div>
-    </div>
+    <v-dialog v-model="showPrintDialog" max-width="450px">
+      <v-card v-if="showPrintDialog">
+        <v-card-text>
+          <div id="my-node" style="width: 400px;">
+            <div class="text-center">
+              <img :src="printLogo" alt="" />
+            </div>
+            <div class="text-center">
+              OOO "Gavali Sweets"
+            </div>
+            <div class="text-center">
+              <div>
+                <v-icon>mdi-map-marker</v-icon> г.Ташкент, ул.Шахрисабская, дом
+                5-А
+              </div>
+            </div>
+            <div class="clear-user-agent-styles">
+              <table>
+                <thead>
+                  <tr>
+                    <th width="30px">Кол-во</th>
+                    <th width="50px">Наименование товара</th>
+                    <th width="50px">Цена</th>
+                    <th width="50px">Сумма</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in cartItems" :key="item.id">
+                    <td>{{ item.weight }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.price | money }}</td>
+                    <td>{{ item.totalPrice | money }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -940,13 +975,14 @@ ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
 
 export default {
   data: () => ({
+    printLogo: "static/images/gavali.png",
     cartWeightRequiredSnack: false,
     cartError: "",
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [v => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [v => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -982,7 +1018,7 @@ export default {
         cellRenderer: "agGroupCellRenderer",
         suppressSizeToFit: true,
         flex: 3,
-        wrapText: true
+        wrapText: true,
       },
       {
         headerName: "Цена",
@@ -990,7 +1026,7 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       { headerName: "Вес", field: "weight", width: 50 },
       {
@@ -999,14 +1035,14 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       {
         headerName: "Действие",
         field: "id",
         cellRenderer: "CartItemDelete",
-        width: 40
-      }
+        width: 40,
+      },
     ],
     context: null,
     frameworkComponents: null,
@@ -1015,7 +1051,7 @@ export default {
     options: [],
     currentClient: {
       ID: null,
-      NAME: null
+      NAME: null,
     },
     setName: "",
     detailCellRendererParams: null,
@@ -1023,7 +1059,8 @@ export default {
     savingClientLoading: false,
     savingOrderLoading: false,
     orderData: {},
-    currentScaleWeight: 0
+    currentScaleWeight: 0,
+    showPrintDialog: false,
   }),
   components: { AgGridVue, "vue-select": vSelect },
   computed: {
@@ -1031,11 +1068,11 @@ export default {
       webHook: "settings/webHook",
       cartItems: "cartItems",
       managerData: "settings/managerData",
-      chosenPrinter: "settings/chosenPrinter"
+      chosenPrinter: "settings/chosenPrinter",
     }),
     showSetsGrid() {
       let res = false;
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         if (item.type === "set") {
           res = true;
         }
@@ -1043,17 +1080,17 @@ export default {
       return res;
     },
     singleProducts() {
-      return this.cartItems.filter(item => item.type !== "set");
+      return this.cartItems.filter((item) => item.type !== "set");
     },
     setProducts() {
-      return this.cartItems.filter(item => item.type === "set");
+      return this.cartItems.filter((item) => item.type === "set");
     },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       let totalPrice = 0;
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1071,7 +1108,7 @@ export default {
     totalPrice() {
       let totalPrice = 0;
 
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1097,11 +1134,11 @@ export default {
     filteredProducts() {
       if (this.currentCategoryId > 0) {
         return this.items.filter(
-          item => item.categoryId === this.currentCategoryId
+          (item) => item.categoryId === this.currentCategoryId
         );
       }
       if (this.searchText.length > 0) {
-        return this.items.filter(item => {
+        return this.items.filter((item) => {
           return (
             item.name.toLowerCase().includes(this.searchText) ||
             (item.barcode && item.barcode.indexOf(this.searchText) >= 0)
@@ -1112,7 +1149,7 @@ export default {
     },
     changePrice() {
       return +this.cashPrice + +this.cardPrice - +this.totalPrice;
-    }
+    },
   },
   beforeMount() {
     this.gridOptions = {};
@@ -1120,7 +1157,7 @@ export default {
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
-      MoneyColumn
+      MoneyColumn,
     };
 
     this.defaultColDef = { flex: 1, resizable: true };
@@ -1132,7 +1169,7 @@ export default {
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
-            wrapText: true
+            wrapText: true,
           },
           {
             headerName: "Цена",
@@ -1140,36 +1177,36 @@ export default {
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
-            wrapText: true
+            wrapText: true,
           },
           { headerName: "Вес", field: "weight", width: 100 },
           {
             headerName: "Итоговая цена",
             field: "totalPrice",
             width: 150,
-            flex: 2
+            flex: 2,
           },
           {
             headerName: "Действие",
             field: "id",
-            cellRenderer: "CartItemDelete"
-          }
+            cellRenderer: "CartItemDelete",
+          },
         ],
         context: { componentParent: this },
         defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
-          MoneyColumn
+          MoneyColumn,
         },
         rowSelection: "single",
-        onRowSelected: this.cartSetItemSelected
+        onRowSelected: this.cartSetItemSelected,
         // events: {
         //   "selection-changed": this.cartSetItemSelected,
         // },
       },
-      getDetailRowData: params => {
+      getDetailRowData: (params) => {
         params.successCallback(params.data.childs);
-      }
+      },
     };
   },
   mounted() {
@@ -1206,7 +1243,7 @@ export default {
       "removeProductCart",
       "unselectAllItems",
       "setWeight",
-      "clearCart"
+      "clearCart",
     ]),
     clearBasket() {
       this.clearCart();
@@ -1260,64 +1297,40 @@ export default {
       //   }
       // );
 
-      // Select the adapter based on your printer type
-      const device = new escpos.USB();
-      // const device  = new escpos.Network('localhost');
-      // const device  = new escpos.Serial('/dev/usb/lp0');
+      this.showPrintDialog = true;
 
-      const options = {
-        // encoding: "cp1251"
-        /*encoding: "GB18030"*/
-        /* default */
-      };
-      // encoding is optional
+      setTimeout(() => {
+        // Select the adapter based on your printer type
+        const device = new escpos.USB();
+        // const device  = new escpos.Network('localhost');
+        // const device  = new escpos.Serial('/dev/usb/lp0');
 
-      const tux = path.join(__dirname, "gavali.jpg");
-      const printer = new escpos.Printer(device, options);
-      escpos.Image.load(tux, function(image) {
-        device.open(error => {
-          // printer
-          //   .font("a")
-          //   .align("ct")
-          //   .style("bu")
-          //   .size(1, 1)
-          //   .text("The quick brown fox jumps over the lazy dog")
-          //   .text("敏捷的棕色狐狸跳过懒狗")
-          //   .barcode("1234567", "EAN8")
-          //   .table(["One", "Two", "Three"])
-          //   .tableCustom(
-          //     [
-          //       { text: "Left", align: "LEFT", width: 0.33, style: "B" },
-          //       { text: "Center", align: "CENTER", width: 0.33 },
-          //       { text: "Right", align: "RIGHT", width: 0.33 },
-          //     ],
-          //     { encoding: "cp857", size: [1, 1] } // Optional
-          //   )
-          //   .qrimage("https://github.com/song940/node-escpos", function (err) {
-          //     this.cut();
-          //     this.close();
-          //   });
+        const options = {
+          // encoding: "cp1251"
+          /*encoding: "GB18030"*/
+          /* default */
+        };
+        // encoding is optional
 
-          //LOGO
-          printer
-            .align("ct")
-            .image(image, "d24")
-            .then(() => {
-              printer.close();
-            });
+        // const tux = path.join(__dirname, "gavali.jpg");
+        const printer = new escpos.Printer(device, options);
 
-          var node = document.getElementById("my-node");
+        var node = document.getElementById("my-node");
 
-          var getPixels = require("get-pixels");
+        var getPixels = require("get-pixels");
 
-          htmlToImage
-            .toBlob(node)
-            .then(async blob => {
-              const buffer = Buffer.from(await blob.arrayBuffer());
-              const tux = path.join(__dirname, "test.jpg");
-              fs.writeFile(tux, buffer, err => {
-                console.log(err);
-                escpos.Image.load(tux, img => {
+        htmlToImage
+          .toBlob(node)
+          .then(async (blob) => {
+            const buffer = await Buffer.from(await blob.arrayBuffer());
+            const tux = path.join(__dirname, "test.png");
+            fs.writeFile(tux, buffer, (err) => {
+              console.log(err);
+              console.log(tux);
+              escpos.Image.load(tux, (img) => {
+                console.log(img);
+                device.open((error) => {
+                  console.log(img);
                   printer
                     .align("ct")
                     .image(img, "d24")
@@ -1326,125 +1339,161 @@ export default {
                     });
                 });
               });
-              // console.log(image);
-              // getPixels(image, (errr, pixels) => {
-              //   var img = new escpos.Image(pixels);
-              //   console.log(errr);
-              //   console.log(img);
-              //
-              // });
-            })
-            .catch(function(error) {
-              console.error("oops, something went wrong!", error);
             });
+            // console.log(image);
+            // getPixels(image, (errr, pixels) => {
+            //   var img = new escpos.Image(pixels);
+            //   console.log(errr);
+            //   console.log(img);
+            //
+            // });
+          })
+          .catch(function (error) {
+            console.error("oops, something went wrong!", error);
+          });
+      }, 300);
 
-          //ADDRESS
-          printer
-            .font("A")
-            .size(0.01)
-            .align("ct")
-            .text("г.Ташкент, ул.Шахрисабская, дом 5-А")
-            .text("Бизнес центр SEOUL PLAZA")
-            .close();
-
-          //DATE AND
-          // printer
-          //   .font("A")
-          //   .size(0.01)
-          //   .table([
-          //     currentDate + " " + currentTime,
-          //     "Чек №: " + orderId,
-          //     "Кассир:" + managerName + " " + managerLastName
-          //   ])
-          //   .close();
-          //
-          // //Table header and body
-          // printer
-          //   .font("a")
-          //   .size(0.01)
-          //   .table(["Кол-во", "Наименование товара", "Цена", "Сумма"])
-          //   .text("------------------------------")
-          //   .close();
-          // console.log(cartItems);
-          //
-          // const cartPrint = [];
-          //
-          // cartItems.map(item => {
-          //   cartPrint.push([
-          //     item.weight,
-          //     item.name,
-          //     currency(+item.price, {
-          //       symbol: "",
-          //       separator: ".",
-          //       decimal: ","
-          //     }).format(),
-          //     currency(+item.totalPrice, {
-          //       symbol: "",
-          //       separator: ".",
-          //       decimal: ","
-          //     }).format()
-          //   ]);
-          // });
-          //
-          // printer
-          //   .font("a")
-          //   .size(0.0001)
-          //   .table(cartPrint)
-          //   .close();
-          //
-          // printer
-          //   .font("a")
-          //   .size(0.01)
-          //   .text("------------------------------")
-          //   .close();
-          //
-          // printer
-          //   .font("a")
-          //   .size(0.01)
-          //   .tableCustom([
-          //     {
-          //       text: "сумма с ндс, 15%",
-          //       align: "LEFT",
-          //       width: 0.33,
-          //       style: "B"
-          //     },
-          //     {
-          //       text:
-          //         currency(+subTotalPrice, {
-          //           symbol: "",
-          //           separator: ".",
-          //           decimal: ","
-          //         }).format() + " SO'M",
-          //       align: "RIGHT",
-          //       width: 0.33
-          //     }
-          //   ])
-          //   .close();
-          //
-          // printer
-          //   .font("a")
-          //   .size(0.01)
-          //   .tableCustom([
-          //     {
-          //       text: "Итог",
-          //       align: "LEFT",
-          //       width: 0.33,
-          //       style: "B"
-          //     },
-          //     {
-          //       text:
-          //         currency(+totalPrice, {
-          //           symbol: "",
-          //           separator: ".",
-          //           decimal: ","
-          //         }).format() + " SO'M",
-          //       align: "RIGHT",
-          //       width: 0.33
-          //     }
-          //   ])
-          //   .close();
-        });
-      });
+      // escpos.Image.load(tux, function (image) {
+      //   device.open((error) => {
+      //     // printer
+      //     //   .font("a")
+      //     //   .align("ct")
+      //     //   .style("bu")
+      //     //   .size(1, 1)
+      //     //   .text("The quick brown fox jumps over the lazy dog")
+      //     //   .text("敏捷的棕色狐狸跳过懒狗")
+      //     //   .barcode("1234567", "EAN8")
+      //     //   .table(["One", "Two", "Three"])
+      //     //   .tableCustom(
+      //     //     [
+      //     //       { text: "Left", align: "LEFT", width: 0.33, style: "B" },
+      //     //       { text: "Center", align: "CENTER", width: 0.33 },
+      //     //       { text: "Right", align: "RIGHT", width: 0.33 },
+      //     //     ],
+      //     //     { encoding: "cp857", size: [1, 1] } // Optional
+      //     //   )
+      //     //   .qrimage("https://github.com/song940/node-escpos", function (err) {
+      //     //     this.cut();
+      //     //     this.close();
+      //     //   });
+      //
+      //     //LOGO
+      //     printer
+      //       .align("ct")
+      //       .image(image, "d24")
+      //       .then(() => {
+      //         printer.close();
+      //       });
+      //
+      //
+      //
+      //     //ADDRESS
+      //     printer
+      //       .font("A")
+      //       .size(0.01)
+      //       .align("ct")
+      //       .text("г.Ташкент, ул.Шахрисабская, дом 5-А")
+      //       .text("Бизнес центр SEOUL PLAZA")
+      //       .close();
+      //
+      //     //DATE AND
+      //     // printer
+      //     //   .font("A")
+      //     //   .size(0.01)
+      //     //   .table([
+      //     //     currentDate + " " + currentTime,
+      //     //     "Чек №: " + orderId,
+      //     //     "Кассир:" + managerName + " " + managerLastName
+      //     //   ])
+      //     //   .close();
+      //     //
+      //     // //Table header and body
+      //     // printer
+      //     //   .font("a")
+      //     //   .size(0.01)
+      //     //   .table(["Кол-во", "Наименование товара", "Цена", "Сумма"])
+      //     //   .text("------------------------------")
+      //     //   .close();
+      //     // console.log(cartItems);
+      //     //
+      //     // const cartPrint = [];
+      //     //
+      //     // cartItems.map(item => {
+      //     //   cartPrint.push([
+      //     //     item.weight,
+      //     //     item.name,
+      //     //     currency(+item.price, {
+      //     //       symbol: "",
+      //     //       separator: ".",
+      //     //       decimal: ","
+      //     //     }).format(),
+      //     //     currency(+item.totalPrice, {
+      //     //       symbol: "",
+      //     //       separator: ".",
+      //     //       decimal: ","
+      //     //     }).format()
+      //     //   ]);
+      //     // });
+      //     //
+      //     // printer
+      //     //   .font("a")
+      //     //   .size(0.0001)
+      //     //   .table(cartPrint)
+      //     //   .close();
+      //     //
+      //     // printer
+      //     //   .font("a")
+      //     //   .size(0.01)
+      //     //   .text("------------------------------")
+      //     //   .close();
+      //     //
+      //     // printer
+      //     //   .font("a")
+      //     //   .size(0.01)
+      //     //   .tableCustom([
+      //     //     {
+      //     //       text: "сумма с ндс, 15%",
+      //     //       align: "LEFT",
+      //     //       width: 0.33,
+      //     //       style: "B"
+      //     //     },
+      //     //     {
+      //     //       text:
+      //     //         currency(+subTotalPrice, {
+      //     //           symbol: "",
+      //     //           separator: ".",
+      //     //           decimal: ","
+      //     //         }).format() + " SO'M",
+      //     //       align: "RIGHT",
+      //     //       width: 0.33
+      //     //     }
+      //     //   ])
+      //     //   .close();
+      //     //
+      //     // printer
+      //     //   .font("a")
+      //     //   .size(0.01)
+      //     //   .tableCustom([
+      //     //     {
+      //     //       text: "Итог",
+      //     //       align: "LEFT",
+      //     //       width: 0.33,
+      //     //       style: "B"
+      //     //     },
+      //     //     {
+      //     //       text:
+      //     //         currency(+totalPrice, {
+      //     //           symbol: "",
+      //     //           separator: ".",
+      //     //           decimal: ","
+      //     //         }).format() + " SO'M",
+      //     //       align: "RIGHT",
+      //     //       width: 0.33
+      //     //     }
+      //     //   ])
+      //     //   .close();
+      //   });
+      // });
       // printer
       //   .font("a")
       //   .size(0.01)
@@ -1499,7 +1548,7 @@ export default {
             currency(+discountValue, {
               symbol: "",
               separator: ".",
-              decimal: ","
+              decimal: ",",
             }).format() + " SO'M";
         }
       }
@@ -1508,18 +1557,18 @@ export default {
         {
           type: "text",
           value: "g",
-          style: "font-size: 36px; color: 3CAF50; text-align: center; "
+          style: "font-size: 36px; color: 3CAF50; text-align: center; ",
         },
         {
           type: "text",
           value: "gavali",
-          style: "font-size: 26px; color: 3CAF50; text-align: center;"
+          style: "font-size: 26px; color: 3CAF50; text-align: center;",
         },
         {
           type: "text",
           value: 'OOO "Gavali Sweets"',
           style:
-            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;"
+            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;",
         },
         {
           type: "table",
@@ -1545,16 +1594,16 @@ export default {
               {
                 type: "text",
                 value: address,
-                style: "font-size: 14px; color: 3CAF50;"
-              }
-            ]
+                style: "font-size: 14px; color: 3CAF50;",
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;"
+          tableBodyStyle: "background-color: white; color: black;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1574,13 +1623,13 @@ export default {
               {
                 type: "text",
                 value: "Чек №: " + orderId,
-                style: "font-weight: bold;"
+                style: "font-weight: bold;",
               },
               {
                 type: "text",
-                value: "Кассир:" + managerName + " " + managerLastName
-              }
-            ]
+                value: "Кассир:" + managerName + " " + managerLastName,
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
@@ -1588,7 +1637,7 @@ export default {
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
           tableBodyStyle:
-            "border: none; text-transformation: uppercase; font-size: 10px;"
+            "border: none; text-transformation: uppercase; font-size: 10px;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1607,7 +1656,7 @@ export default {
           // custom style for the table body
           tableBodyStyle: "border: none",
           // custom style for the table footer
-          tableFooterStyle: "background-color: #white; color: black;"
+          tableFooterStyle: "background-color: #white; color: black;",
         },
         {
           type: "table",
@@ -1621,7 +1670,7 @@ export default {
               {
                 type: "text",
                 value: "сумма с ндс, 15%",
-                style: "text-align: left;"
+                style: "text-align: left;",
               },
               {
                 type: "text",
@@ -1629,18 +1678,18 @@ export default {
                   currency(+subTotalPrice, {
                     symbol: "",
                     separator: ".",
-                    decimal: ","
+                    decimal: ",",
                   }).format() + " SO'M",
-                style: "text-align: right"
-              }
-            ]
+                style: "text-align: right",
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;"
+          tableBodyStyle: "background-color: white; color: black;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1660,16 +1709,16 @@ export default {
               {
                 type: "text",
                 value: discountPrintValue,
-                style: "text-align: right;"
-              }
-            ]
+                style: "text-align: right;",
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none"
+          tableBodyStyle: "border: none",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1686,7 +1735,7 @@ export default {
                 type: "text",
                 value: "итог:",
                 style:
-                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;"
+                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;",
               },
               {
                 type: "text",
@@ -1694,18 +1743,18 @@ export default {
                   currency(+totalPrice, {
                     symbol: "",
                     separator: ".",
-                    decimal: ","
+                    decimal: ",",
                   }).format() + " SO'M",
-                style: "text-align: right; font-size: 16px; font-weight: bold;"
-              }
-            ]
+                style: "text-align: right; font-size: 16px; font-weight: bold;",
+              },
+            ],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none;"
+          tableBodyStyle: "border: none;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1725,7 +1774,7 @@ export default {
           type: "text",
           value: "Спасибо за покупку!",
           style:
-            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;"
+            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;",
         },
         {
           type: "table",
@@ -1736,17 +1785,17 @@ export default {
           // multi dimensional array depicting the rows and columns of the table body
           tableBody: [
             ["+998 97 444 1100", "www.gavali.uz"],
-            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"]
+            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"],
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none;  text-align: center;"
+          tableBodyStyle: "border: none;  text-align: center;",
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black;',
-        }
+        },
       ];
       // ipcRenderer.send(
       //   "print",
@@ -1771,10 +1820,10 @@ export default {
         cardPrice: this.cardPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
-        discountType: this.discountToggle
+        discountType: this.discountToggle,
       };
       let {
-        data: { result: order }
+        data: { result: order },
       } = await this.$http.post(
         this.webHook + `mysale.order.create`,
         orderData
@@ -1795,7 +1844,7 @@ export default {
       let chars = [];
       let vm = this;
       window.removeEventListener("keypress", () => {});
-      window.addEventListener("keypress", e => {
+      window.addEventListener("keypress", (e) => {
         if (
           e.which == 71 ||
           e.which == 85 ||
@@ -1805,7 +1854,7 @@ export default {
         }
 
         if (pressed === false) {
-          setTimeout(function() {
+          setTimeout(function () {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
               vm.addByQrCode(barcode);
@@ -1821,8 +1870,8 @@ export default {
     addByQrCode(code) {
       this.cartWeightRequiredSnack = false;
       const items = [...this.items];
-      const foundItem = items.filter(item => item.barcode === code)[0];
-      const foundIndex = this.cartItems.findIndex(prod => {
+      const foundItem = items.filter((item) => item.barcode === code)[0];
+      const foundIndex = this.cartItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
 
@@ -1851,13 +1900,13 @@ export default {
         return;
       }
 
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
         }
 
         if (item.type === "set") {
-          item.childs.map(child => {
+          item.childs.map((child) => {
             if (child.weight === 0) {
               res = false;
             }
@@ -1951,7 +2000,7 @@ export default {
       this.$refs.cartItemSelectedInput.focus();
     },
     firstDataRendered() {
-      this.gridSetApi.forEachLeafNode(node => {
+      this.gridSetApi.forEachLeafNode((node) => {
         node && node.setExpanded(true);
       });
     },
@@ -1973,7 +2022,7 @@ export default {
       }
       this.$refs.cartItemSelectedInput.focus();
     },
-    getHostname: url => {
+    getHostname: (url) => {
       return new URL(url).hostname;
     },
     logout() {
@@ -2045,12 +2094,12 @@ export default {
       this.setWeight({
         id: this.selectedCartItem.id,
         weight: this.currentWeight,
-        parentId: this.selectedCartItem.parentId
+        parentId: this.selectedCartItem.parentId,
       });
       this.currentWeight = "";
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }
@@ -2092,9 +2141,9 @@ export default {
           price: 0,
           totalPrice: 0,
           type: "set",
-          id: parentId
+          id: parentId,
         };
-        this.items.map(prod => {
+        this.items.map((prod) => {
           if (prod.selected) {
             if (prod.totalAmountCount > 0) {
               item.childs.push({ ...prod, parentId });
@@ -2106,14 +2155,14 @@ export default {
         });
         this.addProductToCart({ item });
         setTimeout(() => {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         });
       } else {
-        this.items.map(item => {
+        this.items.map((item) => {
           if (item.selected) {
-            const foundIndex = this.cartItems.findIndex(prod => {
+            const foundIndex = this.cartItems.findIndex((prod) => {
               return item.id === prod.id;
             });
 
@@ -2140,16 +2189,16 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
-    }
+    },
   },
   filters: {
-    money: value => {
+    money: (value) => {
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
       );
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -2194,6 +2243,48 @@ export default {
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active до версии 2.1.8 */ {
   opacity: 0;
+}
+.clear-user-agent-styles table,
+.clear-user-agent-styles thead,
+.clear-user-agent-styles tbody,
+.clear-user-agent-styles tfoot,
+.clear-user-agent-styles tr,
+.clear-user-agent-styles th,
+.clear-user-agent-styles td {
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-collapse: inherit;
+  border-spacing: 0;
+  border-color: inherit;
+  vertical-align: inherit;
+  text-align: left;
+  font-weight: inherit;
+  -webkit-border-horizontal-spacing: 0;
+  -webkit-border-vertical-spacing: 0;
+}
+.clear-user-agent-styles th,
+.clear-user-agent-styles td {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.clear-user-agent-styles td:first-child,
+.clear-user-agent-styles th:first-child {
+  width: 50px;
+}
+.clear-user-agent-styles td:nth-child(2),
+.clear-user-agent-styles th:nth-child(2) {
+  width: 160px;
+}
+.clear-user-agent-styles td:nth-child(3),
+.clear-user-agent-styles th:nth-child(3),
+.clear-user-agent-styles td[data-v-b2bae082]:nth-child(4),
+.clear-user-agent-styles th[data-v-b2bae082]:nth-child(4) {
+  width: 80px;
 }
 </style>
 
