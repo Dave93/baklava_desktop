@@ -585,7 +585,7 @@
               </v-row>
               <v-divider></v-divider>
               <div class="d-flex">
-                <v-list dense height="315" style="flex: 1; overflow-y: auto;">
+                <v-list dense height="315" style="flex: 2; overflow-y: auto;">
                   <v-list-item
                     :class="{ 'v-list-item--active': currentCategoryId === 0 }"
                     :color="currentCategoryId === 0 ? 'green accent-3' : ''"
@@ -630,6 +630,7 @@
                             <v-list-item-title
                               v-text="item.name"
                             ></v-list-item-title>
+                            <div>{{ item.price | money }}</div>
                           </v-list-item-content>
                         </v-list-item>
                       </template>
