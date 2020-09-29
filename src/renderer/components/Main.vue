@@ -487,6 +487,7 @@
                             class="green--text"
                             width="60"
                             height="70"
+                            :loading="isSetSaving"
                             @click="printSets"
                             v-bind="attrs"
                             v-on="on"
@@ -585,7 +586,7 @@
               </v-row>
               <v-divider></v-divider>
               <div class="d-flex">
-                <v-list dense height="315" style="flex: 2; overflow-y: auto;">
+                <v-list dense height="315" style="flex: 3; overflow-y: auto;">
                   <v-list-item
                     :class="{ 'v-list-item--active': currentCategoryId === 0 }"
                     :color="currentCategoryId === 0 ? 'green accent-3' : ''"
@@ -630,8 +631,10 @@
                             <v-list-item-title
                               v-text="item.name"
                             ></v-list-item-title>
-                            <div>{{ item.price | money }}</div>
                           </v-list-item-content>
+                          <v-list-item-action>{{
+                            item.price | money
+                          }}</v-list-item-action>
                         </v-list-item>
                       </template>
                     </v-virtual-scroll>
@@ -982,6 +985,80 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="showSetPrintDialog" max-width="450px">
+      <v-card v-if="showSetPrintDialog">
+        <v-card-text>
+          <div id="sets-print" style="width: 400px;">
+            <div class="text-center">
+              <img :src="printLogo" alt="" />
+            </div>
+            <div class="text-center">
+              OOO "Gavali Sweets"
+            </div>
+            <div v-for="set in setPrintData" :key="set.res_id">
+              <h2>Сет: {{ set.name }}</h2>
+              <div class="clear-user-agent-styles print-cart-items-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th width="30px">Кол-во</th>
+                      <th width="50px">Наименование товара</th>
+                      <th width="50px">Цена</th>
+                      <th width="50px">Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in set.childs" :key="item.id">
+                      <td>{{ item.weight }}</td>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.price | money }}</td>
+                      <td>{{ item.totalPrice | money }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="clear-user-agent-styles">
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>Сумма:</td>
+                      <td>{{ set.totalPrice }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <barcode
+                format="CODE128"
+                :value="set.barcode"
+                :displayValue="false"
+              />
+            </div>
+            <div class="text-center">
+              Спасибо за покупку!
+            </div>
+            <v-row>
+              <v-col cols="6">
+                <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
+              </v-col>
+              <v-col cols="6"> <v-icon>mdi-web</v-icon> www.gavali.uz </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="6">
+                <v-icon>mdi-facebook</v-icon> gavali_uzbekistan
+              </v-col>
+              <v-col cols="6">
+                <v-icon>mdi-instagram</v-icon> gavali_uzbekistan
+              </v-col>
+            </v-row>
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn icon large @click="printNode('sets-print')">
+            <v-icon>mdi-cloud-print-outline</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -1000,6 +1077,7 @@ import vSelect from "vue-select";
 import CartItemDelete from "./CartItemDelete";
 import MoneyColumn from "./MoneyColumn";
 import htmlToImage from "html-to-image";
+import VueBarcode from "vue-barcode";
 const { ipcRenderer } = require("electron");
 const escpos = require("escpos");
 const path = require("path");
@@ -1098,8 +1176,11 @@ export default {
     currentScaleWeight: 0,
     showPrintDialog: false,
     orderPrintData: {},
+    isSetSaving: false,
+    setPrintData: null,
+    showSetPrintDialog: false,
   }),
-  components: { AgGridVue, "vue-select": vSelect },
+  components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
@@ -1178,7 +1259,8 @@ export default {
         return this.items.filter((item) => {
           return (
             item.name.toLowerCase().includes(this.searchText) ||
-            (item.barcode && item.barcode.indexOf(this.searchText) >= 0)
+            (item.barcode && item.barcode.indexOf(this.searchText) >= 0) ||
+            (item.customCode && item.customCode.indexOf(this.searchText) >= 0)
           );
         });
       }
@@ -1361,12 +1443,23 @@ export default {
         return;
       }
 
+      this.isSetSaving = true;
+
       let { data: setsData } = await this.$http.post(
         this.webHook + `mysale.createSets`,
         {
           sets,
         }
       );
+
+      this.setPrintData = setsData.result.sets;
+
+      this.isSetSaving = false;
+
+      this.showSetPrintDialog = true;
+      setTimeout(() => {
+        this.printNode("sets-print");
+      }, 300);
     },
     async printOrder() {
       const sets = [];
