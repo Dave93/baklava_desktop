@@ -5,7 +5,7 @@
         <v-row>
           <v-col cols="9" class="d-flex flex-row">
             <v-card width="100%">
-              <v-card-text style="height: 100%;" class="pb-0">
+              <v-card-text style="height: 100%" class="pb-0">
                 <v-row>
                   <v-col cols="12" class="mt-n3">
                     <v-btn
@@ -151,9 +151,7 @@
                     :clearable="false"
                     @search="onSearch"
                   >
-                    <template slot="no-options">
-                      Введите имя клиента
-                    </template>
+                    <template slot="no-options"> Введите имя клиента </template>
                   </vue-select>
                   <div v-if="currentClient.ID">
                     <div class="mb-4">
@@ -391,7 +389,7 @@
             <v-col cols="5">
               <div
                 class="align-center d-flex justify-center"
-                style="height: 100%; width: 100%;"
+                style="height: 100%; width: 100%"
               >
                 <div>
                   <div class="font-weight-black">Показатель весов:</div>
@@ -494,9 +492,7 @@
                           color="black"
                           class="justify-start"
                           @click="append('0')"
-                          ><h1 class="font-weight-bold green--text pl-1">
-                            0
-                          </h1>
+                          ><h1 class="font-weight-bold green--text pl-1">0</h1>
                           <v-spacer></v-spacer
                         ></v-btn>
                       </v-col>
@@ -585,7 +581,7 @@
               </v-row>
               <v-divider></v-divider>
               <div class="d-flex">
-                <v-list dense height="315" style="flex: 3; overflow-y: auto;">
+                <v-list dense height="315" style="flex: 3; overflow-y: auto">
                   <v-list-item
                     :class="{ 'v-list-item--active': currentCategoryId === 0 }"
                     :color="currentCategoryId === 0 ? 'green accent-3' : ''"
@@ -600,7 +596,7 @@
                     :key="item.id"
                     @click="categoryToggle(item.id)"
                     :class="{
-                      'v-list-item--active': currentCategoryId === item.id,
+                      'v-list-item--active': currentCategoryId === item.id
                     }"
                     :color="
                       currentCategoryId === item.id ? 'green accent-3' : ''
@@ -612,7 +608,7 @@
                   </v-list-item>
                 </v-list>
                 <v-divider vertical></v-divider>
-                <div class="product-list-block" style="flex: 10;">
+                <div class="product-list-block" style="flex: 10">
                   <v-list dense>
                     <v-virtual-scroll
                       :items="filteredProducts"
@@ -650,7 +646,7 @@
           </v-card>
         </div>
       </v-dialog>
-      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px;">
+      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px">
         <v-card v-if="showPayMethodDialog">
           <v-card-text>
             <v-slide-group show-arrows class="py-6">
@@ -681,7 +677,7 @@
             </v-slide-group>
           </v-card-text>
         </v-card>
-        <v-row style="background-color: #ffffff;" class="mx-md-auto">
+        <v-row style="background-color: #ffffff" class="mx-md-auto">
           <v-col cols="4" class="">
             <v-card flat class="keyboard-background px-10 weight-keyboard">
               <v-row>
@@ -897,28 +893,26 @@
         </v-progress-circular>
       </v-snackbar>
     </v-main>
-    <v-dialog v-model="showPrintDialog" max-width="450px">
+    <v-dialog v-model="showPrintDialog" max-width="590px">
       <v-card v-if="showPrintDialog">
         <v-card-text>
-          <div id="order-print" style="width: 400px;">
-            <div class="text-center">
+          <div id="order-print" style="width: 540px">
+            <div class="text-center py-3">
               <img :src="printLogo" alt="" />
             </div>
-            <div class="text-center">
-              OOO "Gavali Sweets"
-            </div>
-            <div class="text-center">
+            <div class="text-center py-3">OOO "Gavali Sweets"</div>
+            <div class="text-center py-3">
               <div>
                 <v-icon>mdi-map-marker</v-icon>
                 {{ orderPrintData.address }}
               </div>
             </div>
-            <div class="text-center">
+            <div class="text-center py-3">
               <span>{{ orderPrintData.printTime }}</span>
               <span>Чек №: {{ orderPrintData.orderId }}</span>
               <span>Кассир: {{ orderPrintData.manager }}</span>
             </div>
-            <div class="clear-user-agent-styles print-cart-items-table">
+            <div class="clear-user-agent-styles print-cart-items-table py-3">
               <table>
                 <thead>
                   <tr>
@@ -938,7 +932,7 @@
                 </tbody>
               </table>
             </div>
-            <div class="clear-user-agent-styles">
+            <div class="clear-user-agent-styles py-3">
               <table>
                 <tbody>
                   <tr>
@@ -950,17 +944,15 @@
                     <td>{{ orderPrintData.discountPrintValue }}</td>
                   </tr>
                   <tr>
-                    <td style="font-weight: bold; font-size: 20px;">Итог:</td>
-                    <td style="font-weight: bold; font-size: 20px;">
+                    <td style="font-weight: bold; font-size: 30px">Итог:</td>
+                    <td style="font-weight: bold; font-size: 30px">
                       {{ orderPrintData.totalPrice }}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div class="text-center">
-              Спасибо за покупку!
-            </div>
+            <div class="text-center py-6">Спасибо за покупку!</div>
             <v-row>
               <v-col cols="6">
                 <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
@@ -987,13 +979,11 @@
     <v-dialog v-model="showSetPrintDialog" max-width="450px">
       <v-card v-if="showSetPrintDialog">
         <v-card-text>
-          <div id="sets-print" style="width: 400px;">
+          <div id="sets-print" style="width: 400px">
             <div class="text-center">
               <img :src="printLogo" alt="" />
             </div>
-            <div class="text-center">
-              OOO "Gavali Sweets"
-            </div>
+            <div class="text-center">OOO "Gavali Sweets"</div>
             <div v-for="set in setPrintData" :key="set.res_id">
               <h2>Сет: {{ set.name }}</h2>
               <div class="clear-user-agent-styles print-cart-items-table">
@@ -1032,9 +1022,7 @@
                 :displayValue="false"
               />
             </div>
-            <div class="text-center">
-              Спасибо за покупку!
-            </div>
+            <div class="text-center">Спасибо за покупку!</div>
             <v-row>
               <v-col cols="6">
                 <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
@@ -1081,6 +1069,7 @@ const { ipcRenderer } = require("electron");
 const escpos = require("escpos");
 const path = require("path");
 const fs = require("fs");
+const electron = require("electron");
 // install escpos-usb adapter module manually
 escpos.USB = require("escpos-usb");
 
@@ -1094,8 +1083,8 @@ export default {
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [v => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [v => !!v || "Имя обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -1131,7 +1120,7 @@ export default {
         cellRenderer: "agGroupCellRenderer",
         suppressSizeToFit: true,
         flex: 3,
-        wrapText: true,
+        wrapText: true
       },
       {
         headerName: "Цена",
@@ -1139,7 +1128,7 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2,
+        flex: 2
       },
       { headerName: "Вес", field: "weight", width: 50, flex: 2 },
       {
@@ -1148,15 +1137,15 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2,
+        flex: 2
       },
       {
         headerName: "",
         field: "id",
         cellRenderer: "CartItemDelete",
         width: 40,
-        flex: 1,
-      },
+        flex: 1
+      }
     ],
     context: null,
     frameworkComponents: null,
@@ -1165,7 +1154,7 @@ export default {
     options: [],
     currentClient: {
       ID: null,
-      NAME: null,
+      NAME: null
     },
     setName: "",
     detailCellRendererParams: null,
@@ -1181,7 +1170,7 @@ export default {
     showSetPrintDialog: false,
     showScaleDialog: false,
     isPlusScale: false,
-    isMinusScale: false,
+    isMinusScale: false
   }),
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
   computed: {
@@ -1189,11 +1178,11 @@ export default {
       webHook: "settings/webHook",
       cartItems: "cartItems",
       managerData: "settings/managerData",
-      chosenPrinter: "settings/chosenPrinter",
+      chosenPrinter: "settings/chosenPrinter"
     }),
     showSetsGrid() {
       let res = false;
-      this.cartItems.map((item) => {
+      this.cartItems.map(item => {
         if (item.type === "set") {
           res = true;
         }
@@ -1201,17 +1190,17 @@ export default {
       return res;
     },
     singleProducts() {
-      return this.cartItems.filter((item) => item.type !== "set");
+      return this.cartItems.filter(item => item.type !== "set");
     },
     setProducts() {
-      return this.cartItems.filter((item) => item.type === "set");
+      return this.cartItems.filter(item => item.type === "set");
     },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       let totalPrice = 0;
-      this.cartItems.map((item) => {
+      this.cartItems.map(item => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1221,7 +1210,7 @@ export default {
     totalPrice() {
       let totalPrice = 0;
 
-      this.cartItems.map((item) => {
+      this.cartItems.map(item => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1247,11 +1236,11 @@ export default {
     filteredProducts() {
       if (this.currentCategoryId > 0) {
         return this.items.filter(
-          (item) => item.categoryId === this.currentCategoryId
+          item => item.categoryId === this.currentCategoryId
         );
       }
       if (this.searchText.length > 0) {
-        return this.items.filter((item) => {
+        return this.items.filter(item => {
           return (
             item.name.toLowerCase().includes(this.searchText) ||
             (item.barcode && item.barcode.indexOf(this.searchText) >= 0) ||
@@ -1263,7 +1252,7 @@ export default {
     },
     changePrice() {
       return +this.cashPrice + +this.cardPrice - +this.totalPrice;
-    },
+    }
   },
   beforeMount() {
     this.gridOptions = {};
@@ -1271,7 +1260,7 @@ export default {
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
-      MoneyColumn,
+      MoneyColumn
     };
 
     this.defaultColDef = { flex: 1, resizable: true };
@@ -1283,7 +1272,7 @@ export default {
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
-            wrapText: true,
+            wrapText: true
           },
           {
             headerName: "Цена",
@@ -1291,37 +1280,37 @@ export default {
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
-            wrapText: true,
+            wrapText: true
           },
           { headerName: "Вес", field: "weight", width: 100, flex: 2 },
           {
             headerName: "Итоговая цена",
             field: "totalPrice",
             width: 150,
-            flex: 2,
+            flex: 2
           },
           {
             headerName: "",
             field: "id",
             cellRenderer: "CartItemDelete",
-            flex: 1,
-          },
+            flex: 1
+          }
         ],
         context: { componentParent: this },
         defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
-          MoneyColumn,
+          MoneyColumn
         },
         rowSelection: "single",
-        onRowSelected: this.cartSetItemSelected,
+        onRowSelected: this.cartSetItemSelected
         // events: {
         //   "selection-changed": this.cartSetItemSelected,
         // },
       },
-      getDetailRowData: (params) => {
+      getDetailRowData: params => {
         params.successCallback(params.data.childs);
-      },
+      }
     };
   },
   mounted() {
@@ -1358,7 +1347,7 @@ export default {
       "removeProductCart",
       "unselectAllItems",
       "setWeight",
-      "clearCart",
+      "clearCart"
     ]),
     showPlusScale() {
       if (!this.selectedCartItem.id) {
@@ -1427,23 +1416,26 @@ export default {
 
       htmlToImage
         .toBlob(node)
-        .then(async (blob) => {
+        .then(async blob => {
           const buffer = await Buffer.from(await blob.arrayBuffer());
-          const tux = path.join(__dirname, "test.png");
-          fs.writeFile(tux, buffer, (err) => {
-            escpos.Image.load(tux, (img) => {
-              device.open((error) => {
+          const userDataPath = (electron.app || electron.remote.app).getPath(
+            "userData"
+          );
+          const tux = path.join(userDataPath, "test.png");
+          fs.writeFile(tux, buffer, err => {
+            escpos.Image.load(tux, img => {
+              device.open(error => {
                 printer
                   .align("ct")
                   .image(img, "d24")
                   .then(() => {
-                    printer.close();
+                    printer.cut().close();
                   });
               });
             });
           });
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.error("oops, something went wrong!", error);
         });
     },
@@ -1451,7 +1443,7 @@ export default {
       const sets = [];
 
       const cartItems = [...this.cartItems];
-      cartItems.map((item) => {
+      cartItems.map(item => {
         if (item.type === "set") {
           sets.push(item);
         }
@@ -1468,7 +1460,7 @@ export default {
       let { data: setsData } = await this.$http.post(
         this.webHook + `mysale.createSets`,
         {
-          sets,
+          sets
         }
       );
 
@@ -1526,7 +1518,7 @@ export default {
             currency(+discountValue, {
               symbol: "",
               separator: ".",
-              decimal: ",",
+              decimal: ","
             }).format() + " SO'M";
         }
       }
@@ -1541,14 +1533,14 @@ export default {
           currency(+subTotalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ",",
+            decimal: ","
           }).format() + " SO'M",
         totalPrice:
           currency(+totalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ",",
-          }).format() + " SO'M",
+            decimal: ","
+          }).format() + " SO'M"
       };
 
       setTimeout(() => {
@@ -1560,18 +1552,18 @@ export default {
         {
           type: "text",
           value: "g",
-          style: "font-size: 36px; color: 3CAF50; text-align: center; ",
+          style: "font-size: 36px; color: 3CAF50; text-align: center; "
         },
         {
           type: "text",
           value: "gavali",
-          style: "font-size: 26px; color: 3CAF50; text-align: center;",
+          style: "font-size: 26px; color: 3CAF50; text-align: center;"
         },
         {
           type: "text",
           value: 'OOO "Gavali Sweets"',
           style:
-            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;",
+            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;"
         },
         {
           type: "table",
@@ -1597,16 +1589,16 @@ export default {
               {
                 type: "text",
                 value: address,
-                style: "font-size: 14px; color: 3CAF50;",
-              },
-            ],
+                style: "font-size: 14px; color: 3CAF50;"
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;",
+          tableBodyStyle: "background-color: white; color: black;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1626,13 +1618,13 @@ export default {
               {
                 type: "text",
                 value: "Чек №: " + orderId,
-                style: "font-weight: bold;",
+                style: "font-weight: bold;"
               },
               {
                 type: "text",
-                value: "Кассир:" + managerName + " " + managerLastName,
-              },
-            ],
+                value: "Кассир:" + managerName + " " + managerLastName
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
@@ -1640,7 +1632,7 @@ export default {
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
           tableBodyStyle:
-            "border: none; text-transformation: uppercase; font-size: 10px;",
+            "border: none; text-transformation: uppercase; font-size: 10px;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1659,7 +1651,7 @@ export default {
           // custom style for the table body
           tableBodyStyle: "border: none",
           // custom style for the table footer
-          tableFooterStyle: "background-color: #white; color: black;",
+          tableFooterStyle: "background-color: #white; color: black;"
         },
         {
           type: "table",
@@ -1673,7 +1665,7 @@ export default {
               {
                 type: "text",
                 value: "сумма с ндс, 15%",
-                style: "text-align: left;",
+                style: "text-align: left;"
               },
               {
                 type: "text",
@@ -1681,18 +1673,18 @@ export default {
                   currency(+subTotalPrice, {
                     symbol: "",
                     separator: ".",
-                    decimal: ",",
+                    decimal: ","
                   }).format() + " SO'M",
-                style: "text-align: right",
-              },
-            ],
+                style: "text-align: right"
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;",
+          tableBodyStyle: "background-color: white; color: black;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1712,16 +1704,16 @@ export default {
               {
                 type: "text",
                 value: discountPrintValue,
-                style: "text-align: right;",
-              },
-            ],
+                style: "text-align: right;"
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none",
+          tableBodyStyle: "border: none"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1738,7 +1730,7 @@ export default {
                 type: "text",
                 value: "итог:",
                 style:
-                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;",
+                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;"
               },
               {
                 type: "text",
@@ -1746,18 +1738,18 @@ export default {
                   currency(+totalPrice, {
                     symbol: "",
                     separator: ".",
-                    decimal: ",",
+                    decimal: ","
                   }).format() + " SO'M",
-                style: "text-align: right; font-size: 16px; font-weight: bold;",
-              },
-            ],
+                style: "text-align: right; font-size: 16px; font-weight: bold;"
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none;",
+          tableBodyStyle: "border: none;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1777,7 +1769,7 @@ export default {
           type: "text",
           value: "Спасибо за покупку!",
           style:
-            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;",
+            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;"
         },
         {
           type: "table",
@@ -1788,14 +1780,14 @@ export default {
           // multi dimensional array depicting the rows and columns of the table body
           tableBody: [
             ["+998 97 444 1100", "www.gavali.uz"],
-            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"],
+            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none;  text-align: center;",
+          tableBodyStyle: "border: none;  text-align: center;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black;',
         },
@@ -1823,10 +1815,10 @@ export default {
         cardPrice: this.cardPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
-        discountType: this.discountToggle,
+        discountType: this.discountToggle
       };
       let {
-        data: { result: order },
+        data: { result: order }
       } = await this.$http.post(
         this.webHook + `mysale.order.create`,
         orderData
@@ -1846,7 +1838,7 @@ export default {
       let chars = [];
       let vm = this;
       window.removeEventListener("keypress", () => {});
-      window.addEventListener("keypress", (e) => {
+      window.addEventListener("keypress", e => {
         if (
           e.which == 71 ||
           e.which == 85 ||
@@ -1856,7 +1848,7 @@ export default {
         }
 
         if (pressed === false) {
-          setTimeout(function () {
+          setTimeout(function() {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
               vm.addByQrCode(barcode);
@@ -1872,8 +1864,8 @@ export default {
     addByQrCode(code) {
       this.cartWeightRequiredSnack = false;
       const items = [...this.items];
-      const foundItem = items.filter((item) => item.barcode === code)[0];
-      const foundIndex = this.cartItems.findIndex((prod) => {
+      const foundItem = items.filter(item => item.barcode === code)[0];
+      const foundIndex = this.cartItems.findIndex(prod => {
         return foundItem.id === prod.id;
       });
 
@@ -1902,13 +1894,13 @@ export default {
         return;
       }
 
-      this.cartItems.map((item) => {
+      this.cartItems.map(item => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
         }
 
         if (item.type === "set") {
-          item.childs.map((child) => {
+          item.childs.map(child => {
             if (child.weight === 0) {
               res = false;
             }
@@ -1999,7 +1991,7 @@ export default {
       });
     },
     firstDataRendered() {
-      this.gridSetApi.forEachLeafNode((node) => {
+      this.gridSetApi.forEachLeafNode(node => {
         node && node.setExpanded(true);
       });
     },
@@ -2021,7 +2013,7 @@ export default {
       }
       // this.$refs.cartItemSelectedInput.focus();
     },
-    getHostname: (url) => {
+    getHostname: url => {
       return new URL(url).hostname;
     },
     logout() {
@@ -2111,7 +2103,7 @@ export default {
       this.setWeight({
         id: this.selectedCartItem.id,
         weight: +parseFloat(itemWeight).toFixed(3),
-        parentId: this.selectedCartItem.parentId,
+        parentId: this.selectedCartItem.parentId
       });
       this.currentWeight = "";
       this.isPlusScale = false;
@@ -2119,7 +2111,7 @@ export default {
       this.showScaleDialog = false;
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode((node) => {
+          this.gridSetApi.forEachLeafNode(node => {
             node && node.setExpanded(true);
           });
         }
@@ -2161,9 +2153,9 @@ export default {
           price: 0,
           totalPrice: 0,
           type: "set",
-          id: parentId,
+          id: parentId
         };
-        this.items.map((prod) => {
+        this.items.map(prod => {
           if (prod.selected) {
             if (prod.totalAmountCount > 0) {
               item.childs.push({ ...prod, parentId });
@@ -2175,14 +2167,14 @@ export default {
         });
         this.addProductToCart({ item });
         setTimeout(() => {
-          this.gridSetApi.forEachLeafNode((node) => {
+          this.gridSetApi.forEachLeafNode(node => {
             node && node.setExpanded(true);
           });
         });
       } else {
-        this.items.map((item) => {
+        this.items.map(item => {
           if (item.selected) {
-            const foundIndex = this.cartItems.findIndex((prod) => {
+            const foundIndex = this.cartItems.findIndex(prod => {
               return item.id === prod.id;
             });
 
@@ -2209,16 +2201,16 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
-    },
+    }
   },
   filters: {
-    money: (value) => {
+    money: value => {
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
       );
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -2294,17 +2286,17 @@ export default {
 
 .clear-user-agent-styles.print-cart-items-table td:first-child,
 .clear-user-agent-styles.print-cart-items-table th:first-child {
-  width: 50px;
+  width: 12%;
 }
 .clear-user-agent-styles.print-cart-items-table td:nth-child(2),
 .clear-user-agent-styles.print-cart-items-table th:nth-child(2) {
-  width: 160px;
+  width: 40%;
 }
 .clear-user-agent-styles.print-cart-items-table td:nth-child(3),
 .clear-user-agent-styles.print-cart-items-table th:nth-child(3),
 .clear-user-agent-styles.print-cart-items-table td:nth-child(4),
 .clear-user-agent-styles.print-cart-items-table th:nth-child(4) {
-  width: 80px;
+  width: 19%;
 }
 
 .clear-user-agent-styles.print-cart-items-table th {
@@ -2317,12 +2309,15 @@ export default {
 
 .clear-user-agent-styles td:first-child,
 .clear-user-agent-styles th:first-child {
-  width: 220px;
+  width: 40%;
 }
 .clear-user-agent-styles td:last-child,
 .clear-user-agent-styles th:last-child {
-  width: 160px;
+  width: 52%;
   text-align: right;
+}
+#order-print {
+  font-size: 20px;
 }
 </style>
 
