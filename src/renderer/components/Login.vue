@@ -4,7 +4,12 @@
       <v-container class="fill-height" fluid>
         <v-row align="stretch" justify="start">
           <v-col cols="6">
-            <div class="auth-back"></div>
+            <div
+              class="auth-back"
+              :style="{
+                backgroundImage: printLogo,
+              }"
+            ></div>
           </v-col>
           <v-col cols="6" class="mt-n6">
             <div>
@@ -134,6 +139,7 @@ export default {
   name: "Login",
   layout: "auth",
   data: () => ({
+    printLogo: "static/images/auth.png",
     dialog: false,
     managers: [],
     isSavingSettings: false,
@@ -238,6 +244,7 @@ export default {
               id: item.ID,
               name: item.ELEMENT_NAME,
               barcode: item.BARCODE_BARCODE,
+              customCode: item.CUSTOM_CODE,
               selected: false,
               categoryId: item.ELEMENT_IBLOCK_SECTION_ID,
               image: item.PREVIEW_PICTURE,

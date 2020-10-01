@@ -3,9 +3,9 @@
     <v-main>
       <v-container fluid class="grey lighten-3 px-6 py-0">
         <v-row>
-          <v-col cols="7" class="d-flex flex-row">
+          <v-col cols="9" class="d-flex flex-row">
             <v-card width="100%">
-              <v-card-text style="height: 100%;" class="pb-0">
+              <v-card-text style="height: 100%" class="pb-0">
                 <v-row>
                   <v-col cols="12" class="mt-n3">
                     <v-btn
@@ -98,136 +98,276 @@
               </v-card-text>
             </v-card>
           </v-col>
-          <v-col cols="5" class="mt-n3">
-            <v-row>
-              <v-col cols="5">
-                <v-card
-                  class="mx-auto selected-product-info"
-                  elevation="5"
-                  min-height="150px"
-                >
-                  <div v-if="selectedCartItem.id">
-                    <v-card-title class="text-break subtitle-2">{{
-                      selectedCartItem.name
-                    }}</v-card-title>
-                    <v-card-subtitle v-show="selectedCartItem.barcode"
-                      >Штрих-код:
-                      {{ selectedCartItem.barcode }}</v-card-subtitle
+          <v-col cols="3">
+            <div class="d-flex flex-column justify-space-between">
+              <v-card rounded elevation="5" min-height="300px">
+                <v-card-text v-if="showClientEditor || showAddEditor">
+                  <div class="title">
+                    {{
+                      showClientEditor && currentClient.ID
+                        ? "Редактирование"
+                        : "Добавление"
+                    }}
+                  </div>
+                  <v-form ref="form" v-model="valid">
+                    <v-text-field
+                      v-model="clientFirstName"
+                      :rules="firstNameRules"
+                      label="Фамилия"
+                      required
+                    ></v-text-field>
+                    <v-text-field
+                      v-model="clientName"
+                      :rules="nameRules"
+                      label="Имя"
+                      required
+                    ></v-text-field>
+                    <v-text-field
+                      v-model="clientPhone"
+                      label="Телефон"
+                    ></v-text-field>
+                    <v-text-field
+                      v-model="clientEmail"
+                      label="Email"
+                    ></v-text-field>
+                    <v-btn
+                      :disabled="!valid"
+                      :loading="savingClientLoading"
+                      color="green"
+                      class="mr-4 accent-3"
+                      @click="saveClient"
                     >
-                    <v-card-text>
-                      <div class="subtitle-1" v-show="selectedCartItem.price">
-                        {{ selectedCartItem.price | money }} сум
+                      Сохранить
+                    </v-btn>
+                  </v-form>
+                </v-card-text>
+                <v-card-text v-else>
+                  <vue-select
+                    label="NAME"
+                    placeholder="Поиск клиента"
+                    class="mb-4"
+                    v-model="currentClient"
+                    :options="options"
+                    :clearable="false"
+                    @search="onSearch"
+                  >
+                    <template slot="no-options"> Введите имя клиента </template>
+                  </vue-select>
+                  <div v-if="currentClient.ID">
+                    <div class="mb-4">
+                      <div>Client # {{ currentClient.ID }}</div>
+                      <h2 class="font-weight-medium text--primary">
+                        {{ currentClient.NAME + " " + currentClient.LAST_NAME }}
+                      </h2>
+                    </div>
+                    <div class="mb-4" v-if="currentClient.PERSONAL_PHONE">
+                      <div>Phone</div>
+                      <div class="font-weight-bold">
+                        {{ currentClient.PERSONAL_PHONE }}
                       </div>
-                    </v-card-text>
+                    </div>
+                    <div class="mb-4" v-if="currentClient.EMAIL">
+                      <div>Email</div>
+                      <div class="font-weight-bold">
+                        {{ currentClient.EMAIL }}
+                      </div>
+                    </div>
                   </div>
                   <div v-else>
-                    <div class="title text-center pt-16">Продукт не выбран</div>
+                    <div class="title text-center">Клиент не выбран</div>
                   </div>
-                </v-card>
-                <div class="mt-6">
-                  <v-card rounded elevation="5" min-height="300px">
-                    <v-card-text v-if="showClientEditor || showAddEditor">
-                      <div class="title">
-                        {{
-                          showClientEditor && currentClient.ID
-                            ? "Редактирование"
-                            : "Добавление"
-                        }}
-                      </div>
-                      <v-form ref="form" v-model="valid">
+                </v-card-text>
+                <v-card-actions class="justify-lg-space-around">
+                  <v-btn
+                    :icon="!showClientEditor"
+                    :x-large="!showClientEditor"
+                    :fab="showClientEditor"
+                    color="success"
+                    :disabled="!currentClient.ID"
+                    @click="onEditClient"
+                  >
+                    <v-icon>mdi-pencil-outline</v-icon>
+                  </v-btn>
+                  <v-btn
+                    :icon="!showAddEditor"
+                    :x-large="!showAddEditor"
+                    :fab="showAddEditor"
+                    color="success"
+                    @click="onAddClient"
+                  >
+                    <v-icon>mdi-account-plus-outline</v-icon>
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+              <div>
+                <v-row class="d-flex flex-column mx-auto pt-3">
+                  <v-card class="elevation-5">
+                    <v-row>
+                      <v-col class="mx-auto py-0">
+                        <v-card-actions>
+                          <v-btn-toggle
+                            v-model="discountToggle"
+                            @change="focusDiscountInput"
+                          >
+                            <v-btn
+                              width="100%"
+                              class="elevation-5"
+                              value="percent"
+                            >
+                              <v-icon>mdi-percent-outline</v-icon>
+                            </v-btn>
+
+                            <v-btn
+                              width="100%"
+                              class="elevation-5"
+                              value="cash"
+                            >
+                              <v-icon>mdi-cash-multiple</v-icon>
+                            </v-btn>
+                          </v-btn-toggle>
+                        </v-card-actions>
+                      </v-col>
+                    </v-row>
+                    <v-row class="mx-auto d-flex flex-row">
+                      <v-col cols="9">
                         <v-text-field
-                          v-model="clientFirstName"
-                          :rules="firstNameRules"
-                          label="Фамилия"
-                          required
+                          label="Введите скидку"
+                          hide-details
+                          ref="discountInput"
+                          outlined
+                          rows="1"
+                          row-height="10"
+                          v-model="discountValue"
                         ></v-text-field>
-                        <v-text-field
-                          v-model="clientName"
-                          :rules="nameRules"
-                          label="Имя"
-                          required
-                        ></v-text-field>
-                        <v-text-field
-                          v-model="clientPhone"
-                          label="Телефон"
-                        ></v-text-field>
-                        <v-text-field
-                          v-model="clientEmail"
-                          label="Email"
-                        ></v-text-field>
-                        <v-btn
-                          :disabled="!valid"
-                          :loading="savingClientLoading"
-                          color="green"
-                          class="mr-4 accent-3"
-                          @click="saveClient"
+                      </v-col>
+                      <v-col cols="2" class="d-flex pt-0">
+                        <template v-if="discountToggle === 'percent'"
+                          ><v-icon>mdi-percent-outline</v-icon></template
                         >
-                          Сохранить
-                        </v-btn>
-                      </v-form>
-                    </v-card-text>
-                    <v-card-text v-else>
-                      <vue-select
-                        label="NAME"
-                        placeholder="Поиск клиента"
-                        class="mb-4"
-                        v-model="currentClient"
-                        :options="options"
-                        :clearable="false"
-                        @search="onSearch"
-                      >
-                        <template slot="no-options">
-                          Введите имя клиента
-                        </template>
-                      </vue-select>
-                      <div v-if="currentClient.ID">
-                        <div class="mb-4">
-                          <div>Client # {{ currentClient.ID }}</div>
-                          <h2 class="font-weight-medium text--primary">
-                            {{
-                              currentClient.NAME + " " + currentClient.LAST_NAME
-                            }}
-                          </h2>
-                        </div>
-                        <div class="mb-4">
-                          <div>Phone</div>
-                          <div class="font-weight-bold">
-                            {{ currentClient.PERSONAL_PHONE }}
-                          </div>
-                        </div>
-                        <div class="mb-4">
-                          <div>Email</div>
-                          <div class="font-weight-bold">
-                            {{ currentClient.EMAIL }}
-                          </div>
-                        </div>
-                      </div>
-                      <div v-else>
-                        <div class="title text-center">Клиент не выбран</div>
-                      </div>
-                    </v-card-text>
-                    <v-card-actions class="justify-lg-space-around">
-                      <v-btn
-                        :icon="!showClientEditor"
-                        :x-large="!showClientEditor"
-                        :fab="showClientEditor"
-                        color="success"
-                        :disabled="!currentClient.ID"
-                        @click="onEditClient"
-                      >
-                        <v-icon>mdi-pencil-outline</v-icon>
-                      </v-btn>
-                      <v-btn
-                        :icon="!showAddEditor"
-                        :x-large="!showAddEditor"
-                        :fab="showAddEditor"
-                        color="success"
-                        @click="onAddClient"
-                      >
-                        <v-icon>mdi-account-plus-outline</v-icon>
-                      </v-btn>
-                    </v-card-actions>
+                        <template v-else
+                          ><v-icon>mdi-cash-multiple</v-icon></template
+                        >
+                      </v-col>
+                    </v-row>
                   </v-card>
+                </v-row>
+              </div>
+              <div>
+                <v-row>
+                  <v-col cols="4" class="pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          @click="showPlusScale"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon large>mdi-scale</v-icon
+                          ><span class="headline">+</span>
+                        </v-btn>
+                      </template>
+                      <span>Увеличить вес</span>
+                    </v-tooltip>
+                  </v-col>
+                  <v-col cols="4" class="pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          @click="showMinusScale"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon large>mdi-scale</v-icon
+                          ><span class="headline">-</span>
+                        </v-btn>
+                      </template>
+                      <span>Уменьшить вес</span>
+                    </v-tooltip>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="4" class="pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          :loading="isSetSaving"
+                          @click="printSets"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon large>mdi-printer</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Сохранить сеты и распечатать</span>
+                    </v-tooltip>
+                  </v-col>
+                  <v-col cols="4" class="pr-0 pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="red--text"
+                          width="60"
+                          height="70"
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="clearBasket"
+                        >
+                          <v-icon large>mdi-close</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Очистить корзину</span>
+                    </v-tooltip>
+                  </v-col>
+                  <v-col cols="3" class="pr-0 pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="logout"
+                        >
+                          <v-icon large>mdi-lock-open-variant-outline</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Выход</span>
+                    </v-tooltip>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" class="pr-0">
+                    <v-btn
+                      color="green accent-3"
+                      width="100%"
+                      height="70"
+                      @click="showPayDialog"
+                    >
+                      <v-icon large>mdi-cart-outline</v-icon>
+                      <h1 class="font-weight-medium">Оплата</h1>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </div>
+            </div>
+            <v-row v-if="false">
+              <v-col cols="5" v-if="false">
+                <div class="mt-6">
                   <v-card
                     class="keyboard-background px-3 py-3 mt-5 weight-keyboard"
                     elevation="5"
@@ -239,320 +379,176 @@
                   </v-card>
                 </div>
               </v-col>
-              <v-col cols="7" class="d-flex flex-column justify-space-between">
-                <div>
-                  <v-form @submit.prevent="equal">
-                    <v-text-field
-                      ref="cartItemSelectedInput"
-                      v-model="currentWeight"
-                      outlined
-                      hide-details
-                      dense
-                      class="keyboard-background selected-product-weight mb-2 text-h5"
-                      elevation
-                    ></v-text-field>
-                  </v-form>
-                  <v-card
-                    class="keyboard-background px-10 weight-keyboard"
-                    elevation="5"
-                  >
-                    <v-row class="mb-n4">
-                      <v-col cols="12">
-                        <v-row>
-                          <v-col cols="6">
-                            <v-btn
-                              @click="append('-')"
-                              color="black"
-                              rounded
-                              height="40"
-                              width="100%"
-                              class="justify-center"
-                              ><h1 class="font-weight-bold green--text">
-                                -
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="6">
-                            <v-btn
-                              @click="append('+')"
-                              color="black"
-                              rounded
-                              height="40"
-                              width="100%"
-                              class="justify-center"
-                              ><h1 class="font-weight-bold green--text">
-                                +
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col cols="9" class="pl-0">
-                        <v-row class="mb-n4">
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('7')"
-                              ><h1 class="font-weight-bold green--text">
-                                7
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('8')"
-                              ><h1 class="font-weight-bold green--text">
-                                8
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('9')"
-                              ><h1 class="font-weight-bold green--text">
-                                9
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('4')"
-                              ><h1 class="font-weight-bold green--text">
-                                4
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('5')"
-                              ><h1 class="font-weight-bold green--text">
-                                5
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('6')"
-                              ><h1 class="font-weight-bold green--text">
-                                6
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('1')"
-                              ><h1 class="font-weight-bold green--text">
-                                1
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('2')"
-                              ><h1 class="font-weight-bold green--text">
-                                2
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('3')"
-                              ><h1 class="font-weight-bold green--text">
-                                3
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="8" class="pr-0">
-                            <v-btn
-                              rounded
-                              height="40"
-                              width="100%"
-                              color="black"
-                              class="justify-start"
-                              @click="append('0')"
-                              ><h1 class="font-weight-bold green--text pl-1">
-                                0
-                              </h1>
-                              <v-spacer></v-spacer
-                            ></v-btn>
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="dot(',')"
-                              ><h1 class="font-weight-bold green--text">
-                                ,
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                      </v-col>
-                      <v-col cols="3">
-                        <v-row class="mb-n4">
-                          <v-col cols="12">
-                            <v-btn fab small color="black"
-                              ><h1
-                                class="font-weight-bold green--text"
-                                @click="substr('currentWeight')"
-                              >
-                                &larr;
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="12">
-                            <v-btn @click="clear" fab small color="black"
-                              ><h1 class="font-weight-bold green--text">
-                                C
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="12">
-                            <v-btn
-                              @click="equal"
-                              rounded
-                              color="black"
-                              height="88px"
-                              width="40"
-                              x-small
-                              ><h1 class="font-weight-bold green--text">
-                                &crarr;
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                      </v-col>
-                    </v-row>
-                  </v-card>
-                </div>
-                <div>
-                  <v-row class="d-flex flex-column mx-auto pt-3">
-                    <v-card class="elevation-5">
-                      <v-row>
-                        <v-col class="mx-auto py-0">
-                          <v-card-actions>
-                            <v-btn-toggle
-                              v-model="discountToggle"
-                              @change="focusDiscountInput"
-                            >
-                              <v-btn
-                                width="100%"
-                                class="elevation-5"
-                                value="percent"
-                              >
-                                <v-icon>mdi-percent-outline</v-icon>
-                              </v-btn>
-
-                              <v-btn
-                                width="100%"
-                                class="elevation-5"
-                                value="cash"
-                              >
-                                <v-icon>mdi-cash-multiple</v-icon>
-                              </v-btn>
-                            </v-btn-toggle>
-                          </v-card-actions>
-                        </v-col>
-                      </v-row>
-                      <v-row class="mx-auto d-flex flex-row">
-                        <v-col cols="9">
-                          <v-text-field
-                            label="Введите скидку"
-                            hide-details
-                            ref="discountInput"
-                            outlined
-                            rows="1"
-                            row-height="10"
-                            v-model="discountValue"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="2" class="d-flex pt-0">
-                          <template v-if="discountToggle === 'percent'"
-                            ><v-icon>mdi-percent-outline</v-icon></template
-                          >
-                          <template v-else
-                            ><v-icon>mdi-cash-multiple</v-icon></template
-                          >
-                        </v-col>
-                      </v-row>
-                    </v-card>
-                  </v-row>
-                </div>
-                <div>
-                  <v-row>
-                    <v-col cols="4">
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                            color="grey darken-3"
-                            class="green--text"
-                            width="60"
-                            height="70"
-                            @click="printSets"
-                            v-bind="attrs"
-                            v-on="on"
-                          >
-                            <v-icon large>mdi-printer</v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Сохранить сеты и распечатать</span>
-                      </v-tooltip>
-                    </v-col>
-                    <v-col cols="4" class="pr-0">
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                            color="grey darken-3"
-                            class="red--text"
-                            width="60"
-                            height="70"
-                            v-bind="attrs"
-                            v-on="on"
-                            @click="clearBasket"
-                          >
-                            <v-icon large>mdi-close</v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Очистить корзину</span>
-                      </v-tooltip>
-                    </v-col>
-                    <v-col cols="3" class="pr-0">
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                            color="grey darken-3"
-                            class="green--text"
-                            width="60"
-                            height="70"
-                            v-bind="attrs"
-                            v-on="on"
-                            @click="logout"
-                          >
-                            <v-icon large>mdi-lock-open-variant-outline</v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Выход</span>
-                      </v-tooltip>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="12" class="pr-0">
-                      <v-btn
-                        color="green accent-3"
-                        width="100%"
-                        height="70"
-                        @click="showPayDialog"
-                      >
-                        <v-icon large>mdi-cart-outline</v-icon>
-                        <h1 class="font-weight-medium">Оплата</h1>
-                      </v-btn>
-                    </v-col>
-                  </v-row>
-                </div>
-              </v-col>
             </v-row>
           </v-col>
         </v-row>
       </v-container>
+      <v-dialog v-model="showScaleDialog" max-width="450px">
+        <v-card v-if="showScaleDialog" class="keyboard-background">
+          <v-row>
+            <v-col cols="5">
+              <div
+                class="align-center d-flex justify-center"
+                style="height: 100%; width: 100%"
+              >
+                <div>
+                  <div class="font-weight-black">Показатель весов:</div>
+                  <div class="headline font-weight-medium">
+                    {{ currentScaleWeight }}
+                  </div>
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="7" class="px-6">
+              <div>
+                <v-form @submit.prevent="equal">
+                  <v-text-field
+                    ref="cartItemSelectedInput"
+                    v-model="currentWeight"
+                    outlined
+                    hide-details
+                    dense
+                    class="keyboard-background selected-product-weight mb-2 text-h5"
+                    elevation
+                  ></v-text-field>
+                </v-form>
+                <v-row class="px-3">
+                  <v-col cols="9" class="pl-0">
+                    <v-row class="mb-n4">
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('7')"
+                          ><h1 class="font-weight-bold green--text">
+                            7
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('8')"
+                          ><h1 class="font-weight-bold green--text">
+                            8
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('9')"
+                          ><h1 class="font-weight-bold green--text">
+                            9
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('4')"
+                          ><h1 class="font-weight-bold green--text">
+                            4
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('5')"
+                          ><h1 class="font-weight-bold green--text">
+                            5
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('6')"
+                          ><h1 class="font-weight-bold green--text">
+                            6
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('1')"
+                          ><h1 class="font-weight-bold green--text">
+                            1
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('2')"
+                          ><h1 class="font-weight-bold green--text">
+                            2
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('3')"
+                          ><h1 class="font-weight-bold green--text">
+                            3
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="8" class="pr-0">
+                        <v-btn
+                          rounded
+                          height="40"
+                          width="100%"
+                          color="black"
+                          class="justify-start"
+                          @click="append('0')"
+                          ><h1 class="font-weight-bold green--text pl-1">0</h1>
+                          <v-spacer></v-spacer
+                        ></v-btn>
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="dot(',')"
+                          ><h1 class="font-weight-bold green--text">
+                            ,
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                  <v-col cols="3">
+                    <v-row class="mb-n4">
+                      <v-col cols="12">
+                        <v-btn fab small color="black"
+                          ><h1
+                            class="font-weight-bold green--text"
+                            @click="substr('currentWeight')"
+                          >
+                            &larr;
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="12">
+                        <v-btn @click="clear" fab small color="black"
+                          ><h1 class="font-weight-bold green--text">
+                            C
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="12">
+                        <v-btn
+                          @click="equal"
+                          rounded
+                          color="black"
+                          height="88px"
+                          width="40"
+                          x-small
+                          ><h1 class="font-weight-bold green--text">
+                            &crarr;
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-dialog>
       <v-dialog v-model="showSearchDialog">
         <div v-if="showSearchDialog">
           <v-card>
@@ -585,7 +581,7 @@
               </v-row>
               <v-divider></v-divider>
               <div class="d-flex">
-                <v-list dense height="315" style="flex: 1; overflow-y: auto;">
+                <v-list dense height="315" style="flex: 3; overflow-y: auto">
                   <v-list-item
                     :class="{ 'v-list-item--active': currentCategoryId === 0 }"
                     :color="currentCategoryId === 0 ? 'green accent-3' : ''"
@@ -600,7 +596,7 @@
                     :key="item.id"
                     @click="categoryToggle(item.id)"
                     :class="{
-                      'v-list-item--active': currentCategoryId === item.id
+                      'v-list-item--active': currentCategoryId === item.id,
                     }"
                     :color="
                       currentCategoryId === item.id ? 'green accent-3' : ''
@@ -612,7 +608,7 @@
                   </v-list-item>
                 </v-list>
                 <v-divider vertical></v-divider>
-                <div class="product-list-block" style="flex: 10;">
+                <div class="product-list-block" style="flex: 10">
                   <v-list dense>
                     <v-virtual-scroll
                       :items="filteredProducts"
@@ -631,6 +627,9 @@
                               v-text="item.name"
                             ></v-list-item-title>
                           </v-list-item-content>
+                          <v-list-item-action>{{
+                            item.price | money
+                          }}</v-list-item-action>
                         </v-list-item>
                       </template>
                     </v-virtual-scroll>
@@ -647,7 +646,7 @@
           </v-card>
         </div>
       </v-dialog>
-      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px;">
+      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px">
         <v-card v-if="showPayMethodDialog">
           <v-card-text>
             <v-slide-group show-arrows class="py-6">
@@ -678,7 +677,7 @@
             </v-slide-group>
           </v-card-text>
         </v-card>
-        <v-row style="background-color: #ffffff;" class="mx-md-auto">
+        <v-row style="background-color: #ffffff" class="mx-md-auto">
           <v-col cols="4" class="">
             <v-card flat class="keyboard-background px-10 weight-keyboard">
               <v-row>
@@ -897,13 +896,11 @@
     <v-dialog v-model="showPrintDialog" max-width="590px">
       <v-card v-if="showPrintDialog">
         <v-card-text>
-          <div id="order-print" style="width: 540px;">
+          <div id="order-print" style="width: 540px">
             <div class="text-center py-3">
               <img :src="printLogo" alt="" />
             </div>
-            <div class="text-center py-3">
-              OOO "Gavali Sweets"
-            </div>
+            <div class="text-center py-3">OOO "Gavali Sweets"</div>
             <div class="text-center py-3">
               <div>
                 <v-icon>mdi-map-marker</v-icon>
@@ -947,17 +944,15 @@
                     <td>{{ orderPrintData.discountPrintValue }}</td>
                   </tr>
                   <tr>
-                    <td style="font-weight: bold; font-size: 30px;">Итог:</td>
-                    <td style="font-weight: bold; font-size: 30px;">
+                    <td style="font-weight: bold; font-size: 30px">Итог:</td>
+                    <td style="font-weight: bold; font-size: 30px">
                       {{ orderPrintData.totalPrice }}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div class="text-center py-6">
-              Спасибо за покупку!
-            </div>
+            <div class="text-center py-6">Спасибо за покупку!</div>
             <v-row>
               <v-col cols="6">
                 <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
@@ -981,6 +976,76 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="showSetPrintDialog" max-width="450px">
+      <v-card v-if="showSetPrintDialog">
+        <v-card-text>
+          <div id="sets-print" style="width: 400px">
+            <div class="text-center">
+              <img :src="printLogo" alt="" />
+            </div>
+            <div class="text-center">OOO "Gavali Sweets"</div>
+            <div v-for="set in setPrintData" :key="set.res_id">
+              <h2>Сет: {{ set.name }}</h2>
+              <div class="clear-user-agent-styles print-cart-items-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th width="30px">Кол-во</th>
+                      <th width="50px">Наименование товара</th>
+                      <th width="50px">Цена</th>
+                      <th width="50px">Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in set.childs" :key="item.id">
+                      <td>{{ item.weight }}</td>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.price | money }}</td>
+                      <td>{{ item.totalPrice | money }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="clear-user-agent-styles">
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>Сумма:</td>
+                      <td>{{ set.totalPrice }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <barcode
+                format="CODE128"
+                :value="set.barcode"
+                :displayValue="false"
+              />
+            </div>
+            <div class="text-center">Спасибо за покупку!</div>
+            <v-row>
+              <v-col cols="6">
+                <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
+              </v-col>
+              <v-col cols="6"> <v-icon>mdi-web</v-icon> www.gavali.uz </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="6">
+                <v-icon>mdi-facebook</v-icon> gavali_uzbekistan
+              </v-col>
+              <v-col cols="6">
+                <v-icon>mdi-instagram</v-icon> gavali_uzbekistan
+              </v-col>
+            </v-row>
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn icon large @click="printNode('sets-print')">
+            <v-icon>mdi-cloud-print-outline</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -999,6 +1064,7 @@ import vSelect from "vue-select";
 import CartItemDelete from "./CartItemDelete";
 import MoneyColumn from "./MoneyColumn";
 import htmlToImage from "html-to-image";
+import VueBarcode from "vue-barcode";
 const { ipcRenderer } = require("electron");
 const escpos = require("escpos");
 const path = require("path");
@@ -1017,8 +1083,8 @@ export default {
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [v => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [v => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -1054,7 +1120,7 @@ export default {
         cellRenderer: "agGroupCellRenderer",
         suppressSizeToFit: true,
         flex: 3,
-        wrapText: true
+        wrapText: true,
       },
       {
         headerName: "Цена",
@@ -1062,23 +1128,24 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
-      { headerName: "Вес", field: "weight", width: 50 },
+      { headerName: "Вес", field: "weight", width: 50, flex: 2 },
       {
         headerName: "Итоговая цена",
         field: "totalPrice",
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       {
-        headerName: "Действие",
+        headerName: "",
         field: "id",
         cellRenderer: "CartItemDelete",
-        width: 40
-      }
+        width: 40,
+        flex: 1,
+      },
     ],
     context: null,
     frameworkComponents: null,
@@ -1087,7 +1154,7 @@ export default {
     options: [],
     currentClient: {
       ID: null,
-      NAME: null
+      NAME: null,
     },
     setName: "",
     detailCellRendererParams: null,
@@ -1097,19 +1164,25 @@ export default {
     orderData: {},
     currentScaleWeight: 0,
     showPrintDialog: false,
-    orderPrintData: {}
+    orderPrintData: {},
+    isSetSaving: false,
+    setPrintData: null,
+    showSetPrintDialog: false,
+    showScaleDialog: false,
+    isPlusScale: false,
+    isMinusScale: false,
   }),
-  components: { AgGridVue, "vue-select": vSelect },
+  components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
   computed: {
     ...mapGetters({
       webHook: "settings/webHook",
       cartItems: "cartItems",
       managerData: "settings/managerData",
-      chosenPrinter: "settings/chosenPrinter"
+      chosenPrinter: "settings/chosenPrinter",
     }),
     showSetsGrid() {
       let res = false;
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         if (item.type === "set") {
           res = true;
         }
@@ -1117,35 +1190,27 @@ export default {
       return res;
     },
     singleProducts() {
-      return this.cartItems.filter(item => item.type !== "set");
+      return this.cartItems.filter((item) => item.type !== "set");
     },
     setProducts() {
-      return this.cartItems.filter(item => item.type === "set");
+      return this.cartItems.filter((item) => item.type === "set");
     },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       let totalPrice = 0;
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
       });
       return totalPrice;
     },
-    // cardPrice() {
-    //   let cardPrice = 0;
-    //   if(this.togglePaymentType === "cash"){
-    //     return this.totalPrice - this.cashPrice
-    //   }else{
-    //     return this.totalPrice - this.cardPrice
-    //   }
-    // },
     totalPrice() {
       let totalPrice = 0;
 
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1171,14 +1236,15 @@ export default {
     filteredProducts() {
       if (this.currentCategoryId > 0) {
         return this.items.filter(
-          item => item.categoryId === this.currentCategoryId
+          (item) => item.categoryId === this.currentCategoryId
         );
       }
       if (this.searchText.length > 0) {
-        return this.items.filter(item => {
+        return this.items.filter((item) => {
           return (
             item.name.toLowerCase().includes(this.searchText) ||
-            (item.barcode && item.barcode.indexOf(this.searchText) >= 0)
+            (item.barcode && item.barcode.indexOf(this.searchText) >= 0) ||
+            (item.customCode && item.customCode.indexOf(this.searchText) >= 0)
           );
         });
       }
@@ -1186,7 +1252,7 @@ export default {
     },
     changePrice() {
       return +this.cashPrice + +this.cardPrice - +this.totalPrice;
-    }
+    },
   },
   beforeMount() {
     this.gridOptions = {};
@@ -1194,7 +1260,7 @@ export default {
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
-      MoneyColumn
+      MoneyColumn,
     };
 
     this.defaultColDef = { flex: 1, resizable: true };
@@ -1206,7 +1272,7 @@ export default {
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
-            wrapText: true
+            wrapText: true,
           },
           {
             headerName: "Цена",
@@ -1214,36 +1280,37 @@ export default {
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
-            wrapText: true
+            wrapText: true,
           },
-          { headerName: "Вес", field: "weight", width: 100 },
+          { headerName: "Вес", field: "weight", width: 100, flex: 2 },
           {
             headerName: "Итоговая цена",
             field: "totalPrice",
             width: 150,
-            flex: 2
+            flex: 2,
           },
           {
-            headerName: "Действие",
+            headerName: "",
             field: "id",
-            cellRenderer: "CartItemDelete"
-          }
+            cellRenderer: "CartItemDelete",
+            flex: 1,
+          },
         ],
         context: { componentParent: this },
         defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
-          MoneyColumn
+          MoneyColumn,
         },
         rowSelection: "single",
-        onRowSelected: this.cartSetItemSelected
+        onRowSelected: this.cartSetItemSelected,
         // events: {
         //   "selection-changed": this.cartSetItemSelected,
         // },
       },
-      getDetailRowData: params => {
+      getDetailRowData: (params) => {
         params.successCallback(params.data.childs);
-      }
+      },
     };
   },
   mounted() {
@@ -1280,8 +1347,32 @@ export default {
       "removeProductCart",
       "unselectAllItems",
       "setWeight",
-      "clearCart"
+      "clearCart",
     ]),
+    showPlusScale() {
+      if (!this.selectedCartItem.id) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = "Не выбран товар";
+        return;
+      }
+      this.isPlusScale = true;
+      this.showScaleDialog = true;
+      setTimeout(() => {
+        this.$refs.cartItemSelectedInput.focus();
+      });
+    },
+    showMinusScale() {
+      if (!this.selectedCartItem.id) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = "Не выбран товар";
+        return;
+      }
+      this.isMinusScale = true;
+      this.showScaleDialog = true;
+      setTimeout(() => {
+        this.$refs.cartItemSelectedInput.focus();
+      });
+    },
     clearCompleteBasket() {
       if (this.orderData.orderId > 0) {
         this.clearBasket();
@@ -1325,15 +1416,15 @@ export default {
 
       htmlToImage
         .toBlob(node)
-        .then(async blob => {
+        .then(async (blob) => {
           const buffer = await Buffer.from(await blob.arrayBuffer());
           const userDataPath = (electron.app || electron.remote.app).getPath(
             "userData"
           );
           const tux = path.join(userDataPath, "test.png");
-          fs.writeFile(tux, buffer, err => {
-            escpos.Image.load(tux, img => {
-              device.open(error => {
+          fs.writeFile(tux, buffer, (err) => {
+            escpos.Image.load(tux, (img) => {
+              device.open((error) => {
                 printer
                   .align("ct")
                   .image(img, "d24")
@@ -1344,7 +1435,7 @@ export default {
             });
           });
         })
-        .catch(function(error) {
+        .catch(function (error) {
           console.error("oops, something went wrong!", error);
         });
     },
@@ -1352,7 +1443,7 @@ export default {
       const sets = [];
 
       const cartItems = [...this.cartItems];
-      cartItems.map(item => {
+      cartItems.map((item) => {
         if (item.type === "set") {
           sets.push(item);
         }
@@ -1364,12 +1455,23 @@ export default {
         return;
       }
 
+      this.isSetSaving = true;
+
       let { data: setsData } = await this.$http.post(
         this.webHook + `mysale.createSets`,
         {
-          sets
+          sets,
         }
       );
+
+      this.setPrintData = setsData.result.sets;
+
+      this.isSetSaving = false;
+
+      this.showSetPrintDialog = true;
+      setTimeout(() => {
+        this.printNode("sets-print");
+      }, 300);
     },
     async printOrder() {
       const sets = [];
@@ -1416,7 +1518,7 @@ export default {
             currency(+discountValue, {
               symbol: "",
               separator: ".",
-              decimal: ","
+              decimal: ",",
             }).format() + " SO'M";
         }
       }
@@ -1431,20 +1533,21 @@ export default {
           currency(+subTotalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ","
+            decimal: ",",
           }).format() + " SO'M",
         totalPrice:
           currency(+totalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ","
-          }).format() + " SO'M"
+            decimal: ",",
+          }).format() + " SO'M",
       };
 
       setTimeout(() => {
         this.printNode("order-print");
       }, 300);
 
+      /*
       const data = [
         {
           type: "text",
@@ -1687,8 +1790,8 @@ export default {
           tableBodyStyle: "border: none;  text-align: center;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black;',
-        }
-      ];
+        },
+      ];*/
       // ipcRenderer.send(
       //   "print",
       //   JSON.stringify({
@@ -1712,10 +1815,10 @@ export default {
         cardPrice: this.cardPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
-        discountType: this.discountToggle
+        discountType: this.discountToggle,
       };
       let {
-        data: { result: order }
+        data: { result: order },
       } = await this.$http.post(
         this.webHook + `mysale.order.create`,
         orderData
@@ -1735,7 +1838,7 @@ export default {
       let chars = [];
       let vm = this;
       window.removeEventListener("keypress", () => {});
-      window.addEventListener("keypress", e => {
+      window.addEventListener("keypress", (e) => {
         if (
           e.which == 71 ||
           e.which == 85 ||
@@ -1745,7 +1848,7 @@ export default {
         }
 
         if (pressed === false) {
-          setTimeout(function() {
+          setTimeout(function () {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
               vm.addByQrCode(barcode);
@@ -1761,8 +1864,8 @@ export default {
     addByQrCode(code) {
       this.cartWeightRequiredSnack = false;
       const items = [...this.items];
-      const foundItem = items.filter(item => item.barcode === code)[0];
-      const foundIndex = this.cartItems.findIndex(prod => {
+      const foundItem = items.filter((item) => item.barcode === code)[0];
+      const foundIndex = this.cartItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
 
@@ -1791,13 +1894,13 @@ export default {
         return;
       }
 
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
         }
 
         if (item.type === "set") {
-          item.childs.map(child => {
+          item.childs.map((child) => {
             if (child.weight === 0) {
               res = false;
             }
@@ -1816,18 +1919,16 @@ export default {
     },
     setScaleWeight(data) {
       this.currentScaleWeight = data.detail.weight;
-      console.log(data.detail.weight);
-      if (data.detail && !this.showPayMethodDialog && data.detail.weight > 0) {
-        if (this.selectedCartItem.id) {
-          console.log("weight", this.currentWeight);
-          if (this.currentWeight > 0) {
-            console.log("greater");
-            this.append("+");
-          }
-          this.append(data.detail.weight);
-          this.equal();
-        }
-      }
+      // console.log(data.detail.weight);
+      // if (data.detail && !this.showPayMethodDialog && data.detail.weight > 0) {
+      //   if (this.selectedCartItem.id) {
+      //     if (this.currentWeight > 0) {
+      //       this.append("+");
+      //     }
+      //     this.append(data.detail.weight);
+      //     this.equal();
+      //   }
+      // }
     },
     async saveClient() {
       this.savingClientLoading = true;
@@ -1877,21 +1978,20 @@ export default {
         const selectedRows = this.gridApi.getSelectedRows();
         if (selectedRows.length) {
           this.selectedCartItem = selectedRows[0];
-          if (this.selectedCartItem.weight) {
-            if (this.currentScaleWeight > 0) {
-              this.currentWeight = this.currentScaleWeight;
-            } else {
-              this.currentWeight = this.selectedCartItem.weight;
-            }
-          }
+          // if (this.selectedCartItem.weight) {
+          //   if (this.currentScaleWeight > 0) {
+          //     this.currentWeight = this.currentScaleWeight;
+          //   } else {
+          //     this.currentWeight = this.selectedCartItem.weight;
+          //   }
+          // }
         } else {
           this.selectedCartItem = {};
         }
       });
-      this.$refs.cartItemSelectedInput.focus();
     },
     firstDataRendered() {
-      this.gridSetApi.forEachLeafNode(node => {
+      this.gridSetApi.forEachLeafNode((node) => {
         node && node.setExpanded(true);
       });
     },
@@ -1902,18 +2002,18 @@ export default {
         const selectedSetRows = this.gridSetApi.getSelectedRows();
         if (selectedSetRows.length) {
           this.selectedCartItem = selectedSetRows[0];
-          if (this.currentScaleWeight > 0) {
-            this.currentWeight = this.currentScaleWeight;
-          } else {
-            this.currentWeight = this.selectedCartItem.weight;
-          }
+          // if (this.currentScaleWeight > 0) {
+          //   this.currentWeight = this.currentScaleWeight;
+          // } else {
+          //   this.currentWeight = this.selectedCartItem.weight;
+          // }
         } else {
           this.selectedCartItem = {};
         }
       }
-      this.$refs.cartItemSelectedInput.focus();
+      // this.$refs.cartItemSelectedInput.focus();
     },
-    getHostname: url => {
+    getHostname: (url) => {
       return new URL(url).hostname;
     },
     logout() {
@@ -1981,16 +2081,37 @@ export default {
       }
     },
     equal() {
-      this.currentWeight = eval(this.currentWeight);
+      // console.log(this.currentWeight);
+      this.currentWeight = this.currentWeight.replace(",", ".");
+      console.log(+this.currentWeight);
+      let weight = this.currentWeight
+        ? this.currentWeight
+        : this.currentScaleWeight;
+
+      let { weight: itemWeight } = this.selectedCartItem;
+      console.log(this.selectedCartItem);
+      console.log(itemWeight);
+      itemWeight = +itemWeight;
+      if (this.isPlusScale) {
+        itemWeight += +weight;
+      }
+
+      if (this.isMinusScale) {
+        itemWeight -= +weight;
+      }
+
       this.setWeight({
         id: this.selectedCartItem.id,
-        weight: this.currentWeight,
-        parentId: this.selectedCartItem.parentId
+        weight: +parseFloat(itemWeight).toFixed(3),
+        parentId: this.selectedCartItem.parentId,
       });
       this.currentWeight = "";
+      this.isPlusScale = false;
+      this.isMinusScale = false;
+      this.showScaleDialog = false;
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }
@@ -2032,9 +2153,9 @@ export default {
           price: 0,
           totalPrice: 0,
           type: "set",
-          id: parentId
+          id: parentId,
         };
-        this.items.map(prod => {
+        this.items.map((prod) => {
           if (prod.selected) {
             if (prod.totalAmountCount > 0) {
               item.childs.push({ ...prod, parentId });
@@ -2046,14 +2167,14 @@ export default {
         });
         this.addProductToCart({ item });
         setTimeout(() => {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         });
       } else {
-        this.items.map(item => {
+        this.items.map((item) => {
           if (item.selected) {
-            const foundIndex = this.cartItems.findIndex(prod => {
+            const foundIndex = this.cartItems.findIndex((prod) => {
               return item.id === prod.id;
             });
 
@@ -2080,16 +2201,16 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
-    }
+    },
   },
   filters: {
-    money: value => {
+    money: (value) => {
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
       );
-    }
-  }
+    },
+  },
 };
 </script>
 
