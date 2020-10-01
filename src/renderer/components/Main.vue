@@ -2092,14 +2092,14 @@ export default {
     equal() {
       // console.log(this.currentWeight);
       this.currentWeight = this.currentWeight.replace(",", ".");
-      console.log(+this.currentWeight);
       let weight = this.currentWeight
         ? this.currentWeight
         : this.currentScaleWeight;
 
       let { weight: itemWeight } = this.selectedCartItem;
-      console.log(this.selectedCartItem);
-      console.log(itemWeight);
+      if (!itemWeight) {
+        itemWeight = 0;
+      }
       itemWeight = +itemWeight;
       if (this.isPlusScale) {
         itemWeight += +weight;
