@@ -36,6 +36,8 @@ function createWindow () {
   })
 
   mainWindow.maximize();
+
+  mainWindow.webContents.openDevTools();
 }
 
 app.on('ready', createWindow)
@@ -106,9 +108,9 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') {
     autoUpdater.checkForUpdates()
   }
-  if (process.env.NODE_ENV !== 'production') {
+  // if (process.env.NODE_ENV !== 'production') {
     require('vue-devtools').install()
-  }
+  // }
 })
 ipcMain.on('print', (event, arg) => {
   const args = JSON.parse(arg);

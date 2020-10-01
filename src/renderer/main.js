@@ -38,7 +38,9 @@ const listenForScale = async () => {
     localPort.pipe(parser);
     const setWeights = {};
     parser.on('data', (data) => {
+      console.log(data);
       const content = data.toString('utf8');
+      console.log(content);
       const re = new RegExp('U.*([0-9]+\\.[0-9]+)');
       if (re.test(content)) {
         const match = re.exec(content);
