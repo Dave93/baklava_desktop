@@ -1479,6 +1479,7 @@ export default {
       this.showSetPrintDialog = true;
       setTimeout(() => {
         this.printNode("sets-print");
+        this.clearBasket();
       }, 300);
     },
     async printOrder() {
