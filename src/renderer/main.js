@@ -36,25 +36,25 @@ const listenForScale = async () => {
     const { Readline } = Serialport.parsers;
     const parser = new Readline();
     localPort.pipe(parser);
-    const setWeights = {};
+    // const setWeights = {};
     parser.on('data', (data) => {
       const content = data.toString('utf8');
       const re = new RegExp('U.*([0-9]+\\.[0-9]+)');
       if (re.test(content)) {
         const match = re.exec(content);
-        if (!setWeights[match[1].toString()]) {
-          setWeights[match[1].toString()] = 0;
-        }
-        setWeights[match[1].toString()]++;
-        if (setWeights[match[1].toString()] === 2) {
+        // if (!setWeights[match[1].toString()]) {
+        //   setWeights[match[1].toString()] = 0;
+        // }
+        // setWeights[match[1].toString()]++;
+        // if (setWeights[match[1].toString()] === 2) {
           const event = new CustomEvent('setWeight', {
             detail: {
               weight: +match[1],
             },
           });
           document.dispatchEvent(event);
-          setWeights[match[1].toString()] = 0;
-        }
+          // setWeights[match[1].toString()] = 0;
+        // }
       }
     });
     return 0;
