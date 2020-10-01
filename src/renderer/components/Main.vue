@@ -3,7 +3,7 @@
     <v-main>
       <v-container fluid class="grey lighten-3 px-6 py-0">
         <v-row>
-          <v-col cols="7" class="d-flex flex-row">
+          <v-col cols="9" class="d-flex flex-row">
             <v-card width="100%">
               <v-card-text style="height: 100%;" class="pb-0">
                 <v-row>
@@ -98,136 +98,278 @@
               </v-card-text>
             </v-card>
           </v-col>
-          <v-col cols="5" class="mt-n3">
-            <v-row>
-              <v-col cols="5">
-                <v-card
-                  class="mx-auto selected-product-info"
-                  elevation="5"
-                  min-height="150px"
-                >
-                  <div v-if="selectedCartItem.id">
-                    <v-card-title class="text-break subtitle-2">{{
-                      selectedCartItem.name
-                    }}</v-card-title>
-                    <v-card-subtitle v-show="selectedCartItem.barcode"
-                      >Штрих-код:
-                      {{ selectedCartItem.barcode }}</v-card-subtitle
+          <v-col cols="3">
+            <div class="d-flex flex-column justify-space-between">
+              <v-card rounded elevation="5" min-height="300px">
+                <v-card-text v-if="showClientEditor || showAddEditor">
+                  <div class="title">
+                    {{
+                      showClientEditor && currentClient.ID
+                        ? "Редактирование"
+                        : "Добавление"
+                    }}
+                  </div>
+                  <v-form ref="form" v-model="valid">
+                    <v-text-field
+                      v-model="clientFirstName"
+                      :rules="firstNameRules"
+                      label="Фамилия"
+                      required
+                    ></v-text-field>
+                    <v-text-field
+                      v-model="clientName"
+                      :rules="nameRules"
+                      label="Имя"
+                      required
+                    ></v-text-field>
+                    <v-text-field
+                      v-model="clientPhone"
+                      label="Телефон"
+                    ></v-text-field>
+                    <v-text-field
+                      v-model="clientEmail"
+                      label="Email"
+                    ></v-text-field>
+                    <v-btn
+                      :disabled="!valid"
+                      :loading="savingClientLoading"
+                      color="green"
+                      class="mr-4 accent-3"
+                      @click="saveClient"
                     >
-                    <v-card-text>
-                      <div class="subtitle-1" v-show="selectedCartItem.price">
-                        {{ selectedCartItem.price | money }} сум
+                      Сохранить
+                    </v-btn>
+                  </v-form>
+                </v-card-text>
+                <v-card-text v-else>
+                  <vue-select
+                    label="NAME"
+                    placeholder="Поиск клиента"
+                    class="mb-4"
+                    v-model="currentClient"
+                    :options="options"
+                    :clearable="false"
+                    @search="onSearch"
+                  >
+                    <template slot="no-options">
+                      Введите имя клиента
+                    </template>
+                  </vue-select>
+                  <div v-if="currentClient.ID">
+                    <div class="mb-4">
+                      <div>Client # {{ currentClient.ID }}</div>
+                      <h2 class="font-weight-medium text--primary">
+                        {{ currentClient.NAME + " " + currentClient.LAST_NAME }}
+                      </h2>
+                    </div>
+                    <div class="mb-4" v-if="currentClient.PERSONAL_PHONE">
+                      <div>Phone</div>
+                      <div class="font-weight-bold">
+                        {{ currentClient.PERSONAL_PHONE }}
                       </div>
-                    </v-card-text>
+                    </div>
+                    <div class="mb-4" v-if="currentClient.EMAIL">
+                      <div>Email</div>
+                      <div class="font-weight-bold">
+                        {{ currentClient.EMAIL }}
+                      </div>
+                    </div>
                   </div>
                   <div v-else>
-                    <div class="title text-center pt-16">Продукт не выбран</div>
+                    <div class="title text-center">Клиент не выбран</div>
                   </div>
-                </v-card>
-                <div class="mt-6">
-                  <v-card rounded elevation="5" min-height="300px">
-                    <v-card-text v-if="showClientEditor || showAddEditor">
-                      <div class="title">
-                        {{
-                          showClientEditor && currentClient.ID
-                            ? "Редактирование"
-                            : "Добавление"
-                        }}
-                      </div>
-                      <v-form ref="form" v-model="valid">
+                </v-card-text>
+                <v-card-actions class="justify-lg-space-around">
+                  <v-btn
+                    :icon="!showClientEditor"
+                    :x-large="!showClientEditor"
+                    :fab="showClientEditor"
+                    color="success"
+                    :disabled="!currentClient.ID"
+                    @click="onEditClient"
+                  >
+                    <v-icon>mdi-pencil-outline</v-icon>
+                  </v-btn>
+                  <v-btn
+                    :icon="!showAddEditor"
+                    :x-large="!showAddEditor"
+                    :fab="showAddEditor"
+                    color="success"
+                    @click="onAddClient"
+                  >
+                    <v-icon>mdi-account-plus-outline</v-icon>
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+              <div>
+                <v-row class="d-flex flex-column mx-auto pt-3">
+                  <v-card class="elevation-5">
+                    <v-row>
+                      <v-col class="mx-auto py-0">
+                        <v-card-actions>
+                          <v-btn-toggle
+                            v-model="discountToggle"
+                            @change="focusDiscountInput"
+                          >
+                            <v-btn
+                              width="100%"
+                              class="elevation-5"
+                              value="percent"
+                            >
+                              <v-icon>mdi-percent-outline</v-icon>
+                            </v-btn>
+
+                            <v-btn
+                              width="100%"
+                              class="elevation-5"
+                              value="cash"
+                            >
+                              <v-icon>mdi-cash-multiple</v-icon>
+                            </v-btn>
+                          </v-btn-toggle>
+                        </v-card-actions>
+                      </v-col>
+                    </v-row>
+                    <v-row class="mx-auto d-flex flex-row">
+                      <v-col cols="9">
                         <v-text-field
-                          v-model="clientFirstName"
-                          :rules="firstNameRules"
-                          label="Фамилия"
-                          required
+                          label="Введите скидку"
+                          hide-details
+                          ref="discountInput"
+                          outlined
+                          rows="1"
+                          row-height="10"
+                          v-model="discountValue"
                         ></v-text-field>
-                        <v-text-field
-                          v-model="clientName"
-                          :rules="nameRules"
-                          label="Имя"
-                          required
-                        ></v-text-field>
-                        <v-text-field
-                          v-model="clientPhone"
-                          label="Телефон"
-                        ></v-text-field>
-                        <v-text-field
-                          v-model="clientEmail"
-                          label="Email"
-                        ></v-text-field>
-                        <v-btn
-                          :disabled="!valid"
-                          :loading="savingClientLoading"
-                          color="green"
-                          class="mr-4 accent-3"
-                          @click="saveClient"
+                      </v-col>
+                      <v-col cols="2" class="d-flex pt-0">
+                        <template v-if="discountToggle === 'percent'"
+                          ><v-icon>mdi-percent-outline</v-icon></template
                         >
-                          Сохранить
-                        </v-btn>
-                      </v-form>
-                    </v-card-text>
-                    <v-card-text v-else>
-                      <vue-select
-                        label="NAME"
-                        placeholder="Поиск клиента"
-                        class="mb-4"
-                        v-model="currentClient"
-                        :options="options"
-                        :clearable="false"
-                        @search="onSearch"
-                      >
-                        <template slot="no-options">
-                          Введите имя клиента
-                        </template>
-                      </vue-select>
-                      <div v-if="currentClient.ID">
-                        <div class="mb-4">
-                          <div>Client # {{ currentClient.ID }}</div>
-                          <h2 class="font-weight-medium text--primary">
-                            {{
-                              currentClient.NAME + " " + currentClient.LAST_NAME
-                            }}
-                          </h2>
-                        </div>
-                        <div class="mb-4">
-                          <div>Phone</div>
-                          <div class="font-weight-bold">
-                            {{ currentClient.PERSONAL_PHONE }}
-                          </div>
-                        </div>
-                        <div class="mb-4">
-                          <div>Email</div>
-                          <div class="font-weight-bold">
-                            {{ currentClient.EMAIL }}
-                          </div>
-                        </div>
-                      </div>
-                      <div v-else>
-                        <div class="title text-center">Клиент не выбран</div>
-                      </div>
-                    </v-card-text>
-                    <v-card-actions class="justify-lg-space-around">
-                      <v-btn
-                        :icon="!showClientEditor"
-                        :x-large="!showClientEditor"
-                        :fab="showClientEditor"
-                        color="success"
-                        :disabled="!currentClient.ID"
-                        @click="onEditClient"
-                      >
-                        <v-icon>mdi-pencil-outline</v-icon>
-                      </v-btn>
-                      <v-btn
-                        :icon="!showAddEditor"
-                        :x-large="!showAddEditor"
-                        :fab="showAddEditor"
-                        color="success"
-                        @click="onAddClient"
-                      >
-                        <v-icon>mdi-account-plus-outline</v-icon>
-                      </v-btn>
-                    </v-card-actions>
+                        <template v-else
+                          ><v-icon>mdi-cash-multiple</v-icon></template
+                        >
+                      </v-col>
+                    </v-row>
                   </v-card>
+                </v-row>
+              </div>
+              <div>
+                <v-row>
+                  <v-col cols="4" class="pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          @click="showPlusScale"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon large>mdi-scale</v-icon
+                          ><span class="headline">+</span>
+                        </v-btn>
+                      </template>
+                      <span>Увеличить вес</span>
+                    </v-tooltip>
+                  </v-col>
+                  <v-col cols="4" class="pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          @click="showMinusScale"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon large>mdi-scale</v-icon
+                          ><span class="headline">-</span>
+                        </v-btn>
+                      </template>
+                      <span>Уменьшить вес</span>
+                    </v-tooltip>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="4" class="pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          :loading="isSetSaving"
+                          @click="printSets"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon large>mdi-printer</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Сохранить сеты и распечатать</span>
+                    </v-tooltip>
+                  </v-col>
+                  <v-col cols="4" class="pr-0 pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="red--text"
+                          width="60"
+                          height="70"
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="clearBasket"
+                        >
+                          <v-icon large>mdi-close</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Очистить корзину</span>
+                    </v-tooltip>
+                  </v-col>
+                  <v-col cols="3" class="pr-0 pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="logout"
+                        >
+                          <v-icon large>mdi-lock-open-variant-outline</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Выход</span>
+                    </v-tooltip>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" class="pr-0">
+                    <v-btn
+                      color="green accent-3"
+                      width="100%"
+                      height="70"
+                      @click="showPayDialog"
+                    >
+                      <v-icon large>mdi-cart-outline</v-icon>
+                      <h1 class="font-weight-medium">Оплата</h1>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </div>
+            </div>
+            <v-row v-if="false">
+              <v-col cols="5" v-if="false">
+                <div class="mt-6">
                   <v-card
                     class="keyboard-background px-3 py-3 mt-5 weight-keyboard"
                     elevation="5"
@@ -239,321 +381,178 @@
                   </v-card>
                 </div>
               </v-col>
-              <v-col cols="7" class="d-flex flex-column justify-space-between">
-                <div>
-                  <v-form @submit.prevent="equal">
-                    <v-text-field
-                      ref="cartItemSelectedInput"
-                      v-model="currentWeight"
-                      outlined
-                      hide-details
-                      dense
-                      class="keyboard-background selected-product-weight mb-2 text-h5"
-                      elevation
-                    ></v-text-field>
-                  </v-form>
-                  <v-card
-                    class="keyboard-background px-10 weight-keyboard"
-                    elevation="5"
-                  >
-                    <v-row class="mb-n4">
-                      <v-col cols="12">
-                        <v-row>
-                          <v-col cols="6">
-                            <v-btn
-                              @click="append('-')"
-                              color="black"
-                              rounded
-                              height="40"
-                              width="100%"
-                              class="justify-center"
-                              ><h1 class="font-weight-bold green--text">
-                                -
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="6">
-                            <v-btn
-                              @click="append('+')"
-                              color="black"
-                              rounded
-                              height="40"
-                              width="100%"
-                              class="justify-center"
-                              ><h1 class="font-weight-bold green--text">
-                                +
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col cols="9" class="pl-0">
-                        <v-row class="mb-n4">
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('7')"
-                              ><h1 class="font-weight-bold green--text">
-                                7
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('8')"
-                              ><h1 class="font-weight-bold green--text">
-                                8
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('9')"
-                              ><h1 class="font-weight-bold green--text">
-                                9
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('4')"
-                              ><h1 class="font-weight-bold green--text">
-                                4
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('5')"
-                              ><h1 class="font-weight-bold green--text">
-                                5
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('6')"
-                              ><h1 class="font-weight-bold green--text">
-                                6
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('1')"
-                              ><h1 class="font-weight-bold green--text">
-                                1
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('2')"
-                              ><h1 class="font-weight-bold green--text">
-                                2
-                              </h1></v-btn
-                            >
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="append('3')"
-                              ><h1 class="font-weight-bold green--text">
-                                3
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="8" class="pr-0">
-                            <v-btn
-                              rounded
-                              height="40"
-                              width="100%"
-                              color="black"
-                              class="justify-start"
-                              @click="append('0')"
-                              ><h1 class="font-weight-bold green--text pl-1">
-                                0
-                              </h1>
-                              <v-spacer></v-spacer
-                            ></v-btn>
-                          </v-col>
-                          <v-col cols="4">
-                            <v-btn fab small color="black" @click="dot(',')"
-                              ><h1 class="font-weight-bold green--text">
-                                ,
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                      </v-col>
-                      <v-col cols="3">
-                        <v-row class="mb-n4">
-                          <v-col cols="12">
-                            <v-btn fab small color="black"
-                              ><h1
-                                class="font-weight-bold green--text"
-                                @click="substr('currentWeight')"
-                              >
-                                &larr;
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="12">
-                            <v-btn @click="clear" fab small color="black"
-                              ><h1 class="font-weight-bold green--text">
-                                C
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                        <v-row class="mb-n4">
-                          <v-col cols="12">
-                            <v-btn
-                              @click="equal"
-                              rounded
-                              color="black"
-                              height="88px"
-                              width="40"
-                              x-small
-                              ><h1 class="font-weight-bold green--text">
-                                &crarr;
-                              </h1></v-btn
-                            >
-                          </v-col>
-                        </v-row>
-                      </v-col>
-                    </v-row>
-                  </v-card>
-                </div>
-                <div>
-                  <v-row class="d-flex flex-column mx-auto pt-3">
-                    <v-card class="elevation-5">
-                      <v-row>
-                        <v-col class="mx-auto py-0">
-                          <v-card-actions>
-                            <v-btn-toggle
-                              v-model="discountToggle"
-                              @change="focusDiscountInput"
-                            >
-                              <v-btn
-                                width="100%"
-                                class="elevation-5"
-                                value="percent"
-                              >
-                                <v-icon>mdi-percent-outline</v-icon>
-                              </v-btn>
-
-                              <v-btn
-                                width="100%"
-                                class="elevation-5"
-                                value="cash"
-                              >
-                                <v-icon>mdi-cash-multiple</v-icon>
-                              </v-btn>
-                            </v-btn-toggle>
-                          </v-card-actions>
-                        </v-col>
-                      </v-row>
-                      <v-row class="mx-auto d-flex flex-row">
-                        <v-col cols="9">
-                          <v-text-field
-                            label="Введите скидку"
-                            hide-details
-                            ref="discountInput"
-                            outlined
-                            rows="1"
-                            row-height="10"
-                            v-model="discountValue"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="2" class="d-flex pt-0">
-                          <template v-if="discountToggle === 'percent'"
-                            ><v-icon>mdi-percent-outline</v-icon></template
-                          >
-                          <template v-else
-                            ><v-icon>mdi-cash-multiple</v-icon></template
-                          >
-                        </v-col>
-                      </v-row>
-                    </v-card>
-                  </v-row>
-                </div>
-                <div>
-                  <v-row>
-                    <v-col cols="4">
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                            color="grey darken-3"
-                            class="green--text"
-                            width="60"
-                            height="70"
-                            :loading="isSetSaving"
-                            @click="printSets"
-                            v-bind="attrs"
-                            v-on="on"
-                          >
-                            <v-icon large>mdi-printer</v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Сохранить сеты и распечатать</span>
-                      </v-tooltip>
-                    </v-col>
-                    <v-col cols="4" class="pr-0">
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                            color="grey darken-3"
-                            class="red--text"
-                            width="60"
-                            height="70"
-                            v-bind="attrs"
-                            v-on="on"
-                            @click="clearBasket"
-                          >
-                            <v-icon large>mdi-close</v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Очистить корзину</span>
-                      </v-tooltip>
-                    </v-col>
-                    <v-col cols="3" class="pr-0">
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                            color="grey darken-3"
-                            class="green--text"
-                            width="60"
-                            height="70"
-                            v-bind="attrs"
-                            v-on="on"
-                            @click="logout"
-                          >
-                            <v-icon large>mdi-lock-open-variant-outline</v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Выход</span>
-                      </v-tooltip>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="12" class="pr-0">
-                      <v-btn
-                        color="green accent-3"
-                        width="100%"
-                        height="70"
-                        @click="showPayDialog"
-                      >
-                        <v-icon large>mdi-cart-outline</v-icon>
-                        <h1 class="font-weight-medium">Оплата</h1>
-                      </v-btn>
-                    </v-col>
-                  </v-row>
-                </div>
-              </v-col>
             </v-row>
           </v-col>
         </v-row>
       </v-container>
+      <v-dialog v-model="showScaleDialog" max-width="450px">
+        <v-card v-if="showScaleDialog" class="keyboard-background">
+          <v-row>
+            <v-col cols="5">
+              <div
+                class="align-center d-flex justify-center"
+                style="height: 100%; width: 100%;"
+              >
+                <div>
+                  <div class="font-weight-black">Показатель весов:</div>
+                  <div class="headline font-weight-medium">
+                    {{ currentScaleWeight }}
+                  </div>
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="7" class="px-6">
+              <div>
+                <v-form @submit.prevent="equal">
+                  <v-text-field
+                    ref="cartItemSelectedInput"
+                    v-model="currentWeight"
+                    outlined
+                    hide-details
+                    dense
+                    class="keyboard-background selected-product-weight mb-2 text-h5"
+                    elevation
+                  ></v-text-field>
+                </v-form>
+                <v-row class="px-3">
+                  <v-col cols="9" class="pl-0">
+                    <v-row class="mb-n4">
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('7')"
+                          ><h1 class="font-weight-bold green--text">
+                            7
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('8')"
+                          ><h1 class="font-weight-bold green--text">
+                            8
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('9')"
+                          ><h1 class="font-weight-bold green--text">
+                            9
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('4')"
+                          ><h1 class="font-weight-bold green--text">
+                            4
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('5')"
+                          ><h1 class="font-weight-bold green--text">
+                            5
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('6')"
+                          ><h1 class="font-weight-bold green--text">
+                            6
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('1')"
+                          ><h1 class="font-weight-bold green--text">
+                            1
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('2')"
+                          ><h1 class="font-weight-bold green--text">
+                            2
+                          </h1></v-btn
+                        >
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="append('3')"
+                          ><h1 class="font-weight-bold green--text">
+                            3
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="8" class="pr-0">
+                        <v-btn
+                          rounded
+                          height="40"
+                          width="100%"
+                          color="black"
+                          class="justify-start"
+                          @click="append('0')"
+                          ><h1 class="font-weight-bold green--text pl-1">
+                            0
+                          </h1>
+                          <v-spacer></v-spacer
+                        ></v-btn>
+                      </v-col>
+                      <v-col cols="4">
+                        <v-btn fab small color="black" @click="dot(',')"
+                          ><h1 class="font-weight-bold green--text">
+                            ,
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                  <v-col cols="3">
+                    <v-row class="mb-n4">
+                      <v-col cols="12">
+                        <v-btn fab small color="black"
+                          ><h1
+                            class="font-weight-bold green--text"
+                            @click="substr('currentWeight')"
+                          >
+                            &larr;
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="12">
+                        <v-btn @click="clear" fab small color="black"
+                          ><h1 class="font-weight-bold green--text">
+                            C
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                    <v-row class="mb-n4">
+                      <v-col cols="12">
+                        <v-btn
+                          @click="equal"
+                          rounded
+                          color="black"
+                          height="88px"
+                          width="40"
+                          x-small
+                          ><h1 class="font-weight-bold green--text">
+                            &crarr;
+                          </h1></v-btn
+                        >
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-dialog>
       <v-dialog v-model="showSearchDialog">
         <div v-if="showSearchDialog">
           <v-card>
@@ -1142,7 +1141,7 @@ export default {
         cellRenderer: "MoneyColumn",
         flex: 2,
       },
-      { headerName: "Вес", field: "weight", width: 50 },
+      { headerName: "Вес", field: "weight", width: 50, flex: 2 },
       {
         headerName: "Итоговая цена",
         field: "totalPrice",
@@ -1152,10 +1151,11 @@ export default {
         flex: 2,
       },
       {
-        headerName: "Действие",
+        headerName: "",
         field: "id",
         cellRenderer: "CartItemDelete",
         width: 40,
+        flex: 1,
       },
     ],
     context: null,
@@ -1179,6 +1179,9 @@ export default {
     isSetSaving: false,
     setPrintData: null,
     showSetPrintDialog: false,
+    showScaleDialog: false,
+    isPlusScale: false,
+    isMinusScale: false,
   }),
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
   computed: {
@@ -1215,14 +1218,6 @@ export default {
       });
       return totalPrice;
     },
-    // cardPrice() {
-    //   let cardPrice = 0;
-    //   if(this.togglePaymentType === "cash"){
-    //     return this.totalPrice - this.cashPrice
-    //   }else{
-    //     return this.totalPrice - this.cardPrice
-    //   }
-    // },
     totalPrice() {
       let totalPrice = 0;
 
@@ -1298,7 +1293,7 @@ export default {
             flex: 2,
             wrapText: true,
           },
-          { headerName: "Вес", field: "weight", width: 100 },
+          { headerName: "Вес", field: "weight", width: 100, flex: 2 },
           {
             headerName: "Итоговая цена",
             field: "totalPrice",
@@ -1306,9 +1301,10 @@ export default {
             flex: 2,
           },
           {
-            headerName: "Действие",
+            headerName: "",
             field: "id",
             cellRenderer: "CartItemDelete",
+            flex: 1,
           },
         ],
         context: { componentParent: this },
@@ -1364,6 +1360,30 @@ export default {
       "setWeight",
       "clearCart",
     ]),
+    showPlusScale() {
+      if (!this.selectedCartItem.id) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = "Не выбран товар";
+        return;
+      }
+      this.isPlusScale = true;
+      this.showScaleDialog = true;
+      setTimeout(() => {
+        this.$refs.cartItemSelectedInput.focus();
+      });
+    },
+    showMinusScale() {
+      if (!this.selectedCartItem.id) {
+        this.cartWeightRequiredSnack = true;
+        this.cartError = "Не выбран товар";
+        return;
+      }
+      this.isMinusScale = true;
+      this.showScaleDialog = true;
+      setTimeout(() => {
+        this.$refs.cartItemSelectedInput.focus();
+      });
+    },
     clearCompleteBasket() {
       if (this.orderData.orderId > 0) {
         this.clearBasket();
@@ -1535,6 +1555,7 @@ export default {
         this.printNode("order-print");
       }, 300);
 
+      /*
       const data = [
         {
           type: "text",
@@ -1778,7 +1799,7 @@ export default {
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black;',
         },
-      ];
+      ];*/
       // ipcRenderer.send(
       //   "print",
       //   JSON.stringify({
@@ -1906,18 +1927,16 @@ export default {
     },
     setScaleWeight(data) {
       this.currentScaleWeight = data.detail.weight;
-      console.log(data.detail.weight);
-      if (data.detail && !this.showPayMethodDialog && data.detail.weight > 0) {
-        if (this.selectedCartItem.id) {
-          console.log("weight", this.currentWeight);
-          if (this.currentWeight > 0) {
-            console.log("greater");
-            this.append("+");
-          }
-          this.append(data.detail.weight);
-          this.equal();
-        }
-      }
+      // console.log(data.detail.weight);
+      // if (data.detail && !this.showPayMethodDialog && data.detail.weight > 0) {
+      //   if (this.selectedCartItem.id) {
+      //     if (this.currentWeight > 0) {
+      //       this.append("+");
+      //     }
+      //     this.append(data.detail.weight);
+      //     this.equal();
+      //   }
+      // }
     },
     async saveClient() {
       this.savingClientLoading = true;
@@ -1967,18 +1986,17 @@ export default {
         const selectedRows = this.gridApi.getSelectedRows();
         if (selectedRows.length) {
           this.selectedCartItem = selectedRows[0];
-          if (this.selectedCartItem.weight) {
-            if (this.currentScaleWeight > 0) {
-              this.currentWeight = this.currentScaleWeight;
-            } else {
-              this.currentWeight = this.selectedCartItem.weight;
-            }
-          }
+          // if (this.selectedCartItem.weight) {
+          //   if (this.currentScaleWeight > 0) {
+          //     this.currentWeight = this.currentScaleWeight;
+          //   } else {
+          //     this.currentWeight = this.selectedCartItem.weight;
+          //   }
+          // }
         } else {
           this.selectedCartItem = {};
         }
       });
-      this.$refs.cartItemSelectedInput.focus();
     },
     firstDataRendered() {
       this.gridSetApi.forEachLeafNode((node) => {
@@ -1992,16 +2010,16 @@ export default {
         const selectedSetRows = this.gridSetApi.getSelectedRows();
         if (selectedSetRows.length) {
           this.selectedCartItem = selectedSetRows[0];
-          if (this.currentScaleWeight > 0) {
-            this.currentWeight = this.currentScaleWeight;
-          } else {
-            this.currentWeight = this.selectedCartItem.weight;
-          }
+          // if (this.currentScaleWeight > 0) {
+          //   this.currentWeight = this.currentScaleWeight;
+          // } else {
+          //   this.currentWeight = this.selectedCartItem.weight;
+          // }
         } else {
           this.selectedCartItem = {};
         }
       }
-      this.$refs.cartItemSelectedInput.focus();
+      // this.$refs.cartItemSelectedInput.focus();
     },
     getHostname: (url) => {
       return new URL(url).hostname;
@@ -2071,13 +2089,34 @@ export default {
       }
     },
     equal() {
-      this.currentWeight = eval(this.currentWeight);
+      // console.log(this.currentWeight);
+      this.currentWeight = this.currentWeight.replace(",", ".");
+      console.log(+this.currentWeight);
+      let weight = this.currentWeight
+        ? this.currentWeight
+        : this.currentScaleWeight;
+
+      let { weight: itemWeight } = this.selectedCartItem;
+      console.log(this.selectedCartItem);
+      console.log(itemWeight);
+      itemWeight = +itemWeight;
+      if (this.isPlusScale) {
+        itemWeight += +weight;
+      }
+
+      if (this.isMinusScale) {
+        itemWeight -= +weight;
+      }
+
       this.setWeight({
         id: this.selectedCartItem.id,
-        weight: this.currentWeight,
+        weight: +parseFloat(itemWeight).toFixed(3),
         parentId: this.selectedCartItem.parentId,
       });
       this.currentWeight = "";
+      this.isPlusScale = false;
+      this.isMinusScale = false;
+      this.showScaleDialog = false;
       setTimeout(() => {
         if (this.gridSetApi) {
           this.gridSetApi.forEachLeafNode((node) => {
