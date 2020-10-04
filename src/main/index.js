@@ -36,6 +36,8 @@ function createWindow () {
   })
 
   mainWindow.maximize();
+
+  // mainWindow.webContents.openDevTools();
 }
 
 app.on('ready', createWindow)

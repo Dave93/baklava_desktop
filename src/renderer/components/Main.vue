@@ -151,9 +151,7 @@
                     :clearable="false"
                     @search="onSearch"
                   >
-                    <template slot="no-options">
-                      Введите имя клиента
-                    </template>
+                    <template slot="no-options"> Введите имя клиента </template>
                   </vue-select>
                   <div v-if="currentClient.ID">
                     <div class="mb-4">
@@ -494,9 +492,7 @@
                           color="black"
                           class="justify-start"
                           @click="append('0')"
-                          ><h1 class="font-weight-bold green--text pl-1">
-                            0
-                          </h1>
+                          ><h1 class="font-weight-bold green--text pl-1">0</h1>
                           <v-spacer></v-spacer
                         ></v-btn>
                       </v-col>
@@ -897,28 +893,26 @@
         </v-progress-circular>
       </v-snackbar>
     </v-main>
-    <v-dialog v-model="showPrintDialog" max-width="450px">
+    <v-dialog v-model="showPrintDialog" max-width="590px">
       <v-card v-if="showPrintDialog">
         <v-card-text>
-          <div id="order-print" style="width: 400px;">
-            <div class="text-center">
+          <div id="order-print" style="width: 540px;">
+            <div class="text-center py-3">
               <img :src="printLogo" alt="" />
             </div>
-            <div class="text-center">
-              OOO "Gavali Sweets"
-            </div>
-            <div class="text-center">
+            <div class="text-center py-3">OOO "Gavali Sweets"</div>
+            <div class="text-center py-3">
               <div>
                 <v-icon>mdi-map-marker</v-icon>
                 {{ orderPrintData.address }}
               </div>
             </div>
-            <div class="text-center">
+            <div class="text-center py-3">
               <span>{{ orderPrintData.printTime }}</span>
               <span>Чек №: {{ orderPrintData.orderId }}</span>
               <span>Кассир: {{ orderPrintData.manager }}</span>
             </div>
-            <div class="clear-user-agent-styles print-cart-items-table">
+            <div class="clear-user-agent-styles print-cart-items-table py-3">
               <table>
                 <thead>
                   <tr>
@@ -938,7 +932,7 @@
                 </tbody>
               </table>
             </div>
-            <div class="clear-user-agent-styles">
+            <div class="clear-user-agent-styles py-3">
               <table>
                 <tbody>
                   <tr>
@@ -950,17 +944,15 @@
                     <td>{{ orderPrintData.discountPrintValue }}</td>
                   </tr>
                   <tr>
-                    <td style="font-weight: bold; font-size: 20px;">Итог:</td>
-                    <td style="font-weight: bold; font-size: 20px;">
+                    <td style="font-weight: bold; font-size: 30px;">Итог:</td>
+                    <td style="font-weight: bold; font-size: 30px;">
                       {{ orderPrintData.totalPrice }}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div class="text-center">
-              Спасибо за покупку!
-            </div>
+            <div class="text-center py-6">Спасибо за покупку!</div>
             <v-row>
               <v-col cols="6">
                 <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
@@ -991,9 +983,7 @@
             <div class="text-center">
               <img :src="printLogo" alt="" />
             </div>
-            <div class="text-center">
-              OOO "Gavali Sweets"
-            </div>
+            <div class="text-center">OOO "Gavali Sweets"</div>
             <div v-for="set in setPrintData" :key="set.res_id">
               <h2>Сет: {{ set.name }}</h2>
               <div class="clear-user-agent-styles print-cart-items-table">
@@ -1032,9 +1022,7 @@
                 :displayValue="false"
               />
             </div>
-            <div class="text-center">
-              Спасибо за покупку!
-            </div>
+            <div class="text-center">Спасибо за покупку!</div>
             <v-row>
               <v-col cols="6">
                 <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
@@ -1081,6 +1069,7 @@ const { ipcRenderer } = require("electron");
 const escpos = require("escpos");
 const path = require("path");
 const fs = require("fs");
+const electron = require("electron");
 // install escpos-usb adapter module manually
 escpos.USB = require("escpos-usb");
 
@@ -1429,7 +1418,10 @@ export default {
         .toBlob(node)
         .then(async (blob) => {
           const buffer = await Buffer.from(await blob.arrayBuffer());
-          const tux = path.join(__dirname, "test.png");
+          const userDataPath = (electron.app || electron.remote.app).getPath(
+            "userData"
+          );
+          const tux = path.join(userDataPath, "test.png");
           fs.writeFile(tux, buffer, (err) => {
             escpos.Image.load(tux, (img) => {
               device.open((error) => {
@@ -1437,7 +1429,7 @@ export default {
                   .align("ct")
                   .image(img, "d24")
                   .then(() => {
-                    printer.close();
+                    printer.cut().close();
                   });
               });
             });
@@ -1561,18 +1553,18 @@ export default {
         {
           type: "text",
           value: "g",
-          style: "font-size: 36px; color: 3CAF50; text-align: center; ",
+          style: "font-size: 36px; color: 3CAF50; text-align: center; "
         },
         {
           type: "text",
           value: "gavali",
-          style: "font-size: 26px; color: 3CAF50; text-align: center;",
+          style: "font-size: 26px; color: 3CAF50; text-align: center;"
         },
         {
           type: "text",
           value: 'OOO "Gavali Sweets"',
           style:
-            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;",
+            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;"
         },
         {
           type: "table",
@@ -1598,16 +1590,16 @@ export default {
               {
                 type: "text",
                 value: address,
-                style: "font-size: 14px; color: 3CAF50;",
-              },
-            ],
+                style: "font-size: 14px; color: 3CAF50;"
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;",
+          tableBodyStyle: "background-color: white; color: black;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1627,13 +1619,13 @@ export default {
               {
                 type: "text",
                 value: "Чек №: " + orderId,
-                style: "font-weight: bold;",
+                style: "font-weight: bold;"
               },
               {
                 type: "text",
-                value: "Кассир:" + managerName + " " + managerLastName,
-              },
-            ],
+                value: "Кассир:" + managerName + " " + managerLastName
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
@@ -1641,7 +1633,7 @@ export default {
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
           tableBodyStyle:
-            "border: none; text-transformation: uppercase; font-size: 10px;",
+            "border: none; text-transformation: uppercase; font-size: 10px;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1660,7 +1652,7 @@ export default {
           // custom style for the table body
           tableBodyStyle: "border: none",
           // custom style for the table footer
-          tableFooterStyle: "background-color: #white; color: black;",
+          tableFooterStyle: "background-color: #white; color: black;"
         },
         {
           type: "table",
@@ -1674,7 +1666,7 @@ export default {
               {
                 type: "text",
                 value: "сумма с ндс, 15%",
-                style: "text-align: left;",
+                style: "text-align: left;"
               },
               {
                 type: "text",
@@ -1682,18 +1674,18 @@ export default {
                   currency(+subTotalPrice, {
                     symbol: "",
                     separator: ".",
-                    decimal: ",",
+                    decimal: ","
                   }).format() + " SO'M",
-                style: "text-align: right",
-              },
-            ],
+                style: "text-align: right"
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;",
+          tableBodyStyle: "background-color: white; color: black;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1713,16 +1705,16 @@ export default {
               {
                 type: "text",
                 value: discountPrintValue,
-                style: "text-align: right;",
-              },
-            ],
+                style: "text-align: right;"
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none",
+          tableBodyStyle: "border: none"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1739,7 +1731,7 @@ export default {
                 type: "text",
                 value: "итог:",
                 style:
-                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;",
+                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;"
               },
               {
                 type: "text",
@@ -1747,18 +1739,18 @@ export default {
                   currency(+totalPrice, {
                     symbol: "",
                     separator: ".",
-                    decimal: ",",
+                    decimal: ","
                   }).format() + " SO'M",
-                style: "text-align: right; font-size: 16px; font-weight: bold;",
-              },
-            ],
+                style: "text-align: right; font-size: 16px; font-weight: bold;"
+              }
+            ]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none;",
+          tableBodyStyle: "border: none;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
         },
@@ -1778,7 +1770,7 @@ export default {
           type: "text",
           value: "Спасибо за покупку!",
           style:
-            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;",
+            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;"
         },
         {
           type: "table",
@@ -1789,14 +1781,14 @@ export default {
           // multi dimensional array depicting the rows and columns of the table body
           tableBody: [
             ["+998 97 444 1100", "www.gavali.uz"],
-            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"],
+            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"]
           ],
           // list of columns to be rendered in the table footer
           //tableFooter: [],
           // custom style for the table header
           //tableHeaderStyle: 'background-color: white; color: black;',
           // custom style for the table body
-          tableBodyStyle: "border: none;  text-align: center;",
+          tableBodyStyle: "border: none;  text-align: center;"
           // custom style for the table footer
           //tableFooterStyle: 'background-color: #white; color: black;',
         },
@@ -2124,7 +2116,7 @@ export default {
             node && node.setExpanded(true);
           });
         }
-      });
+      }, 200);
     },
     changeItem(key, val) {},
     categoryToggle(id) {
@@ -2295,17 +2287,17 @@ export default {
 
 .clear-user-agent-styles.print-cart-items-table td:first-child,
 .clear-user-agent-styles.print-cart-items-table th:first-child {
-  width: 50px;
+  width: 12%;
 }
 .clear-user-agent-styles.print-cart-items-table td:nth-child(2),
 .clear-user-agent-styles.print-cart-items-table th:nth-child(2) {
-  width: 160px;
+  width: 40%;
 }
 .clear-user-agent-styles.print-cart-items-table td:nth-child(3),
 .clear-user-agent-styles.print-cart-items-table th:nth-child(3),
 .clear-user-agent-styles.print-cart-items-table td:nth-child(4),
 .clear-user-agent-styles.print-cart-items-table th:nth-child(4) {
-  width: 80px;
+  width: 19%;
 }
 
 .clear-user-agent-styles.print-cart-items-table th {
@@ -2318,12 +2310,15 @@ export default {
 
 .clear-user-agent-styles td:first-child,
 .clear-user-agent-styles th:first-child {
-  width: 220px;
+  width: 40%;
 }
 .clear-user-agent-styles td:last-child,
 .clear-user-agent-styles th:last-child {
-  width: 160px;
+  width: 52%;
   text-align: right;
+}
+#order-print {
+  font-size: 20px;
 }
 </style>
 
