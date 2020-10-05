@@ -2116,7 +2116,7 @@ export default {
             node && node.setExpanded(true);
           });
         }
-      }, 200);
+      }, 300);
     },
     changeItem(key, val) {},
     categoryToggle(id) {
@@ -2171,7 +2171,7 @@ export default {
           this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
-        });
+        }, 300);
       } else {
         this.items.map((item) => {
           if (item.selected) {
