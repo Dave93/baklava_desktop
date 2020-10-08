@@ -630,6 +630,9 @@
                           <v-list-item-action>{{
                             item.price | money
                           }}</v-list-item-action>
+                          <v-btn icon @click="printBarcodeLabel(item)">
+                            <v-icon>mdi-printer</v-icon>
+                          </v-btn>
                         </v-list-item>
                       </template>
                     </v-virtual-scroll>
@@ -1074,6 +1077,8 @@ const electron = require("electron");
 escpos.USB = require("escpos-usb");
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
+JSPM.JSPrintManager.auto_reconnect = true;
+JSPM.JSPrintManager.start();
 
 export default {
   data: () => ({
@@ -1349,6 +1354,69 @@ export default {
       "setWeight",
       "clearCart",
     ]),
+    printBarcodeLabel(item) {
+      console.log(item);
+      if (this.jspmWSStatus()) {
+        //Create a ClientPrintJob
+        var cpj = new JSPM.ClientPrintJob();
+        cpj.clientPrinter = new JSPM.InstalledPrinter(this.chosenPrinter);
+        //Set content to print...
+        //Create Godex EZPL commands for sample label
+
+        var CR = "\x0D";
+
+        var cmds = "^Q40,3" + CR;
+        cmds += "^W54" + CR;
+        cmds += "^H7" + CR;
+        cmds += "^P1" + CR;
+        cmds += "^S3" + CR;
+        cmds += "^AD" + CR;
+        cmds += "^C1" + CR;
+        cmds += "^R0" + CR;
+        cmds += "~Q+0" + CR;
+        cmds += "^O0" + CR;
+        cmds += "^D0" + CR;
+        cmds += "^E14" + CR;
+        cmds += "~R255" + CR;
+        cmds += "^L" + CR;
+        cmds += "Dy4-me-dd" + CR;
+        cmds += "Th:m:s" + CR;
+        cmds += "BU,43,127,3,7,45,0,3," + item.barcode + CR;
+        cmds += "AA,7,10,1,1,0,0E," + item.name + CR;
+        cmds += "AA,7,64,1,1,0,0E,Цена:" + CR;
+        cmds +=
+          "AA,328,64,1,1,0,0E," +
+          currency(+item.price, {
+            symbol: "",
+            separator: " ",
+            decimal: ",",
+          }).format() +
+          CR;
+        cmds +=
+          "AD,7,63,1,1,0,0E,............................................\n" +
+          "E" +
+          CR;
+
+        cpj.printerCommands = cmds;
+        //Send print job to printer!
+        cpj.sendToClient();
+      }
+    },
+    jspmWSStatus() {
+      if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Open)
+        return true;
+      else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Closed) {
+        alert(
+          "JSPrintManager (JSPM) is not installed or not running! Download JSPM Client App from https://neodynamic.com/downloads/jspm"
+        );
+        return false;
+      } else if (
+        JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Blocked
+      ) {
+        alert("JSPM has blocked this website!");
+        return false;
+      }
+    },
     showPlusScale() {
       if (!this.selectedCartItem.id) {
         this.cartWeightRequiredSnack = true;
