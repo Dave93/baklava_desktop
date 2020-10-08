@@ -40,7 +40,7 @@
                     :defaultColDef="defaultColDef"
                   >
                   </ag-grid-vue>
-                  <div v-if="showSetsGrid">
+                  <div v-show="showSetsGrid">
                     <h2>Сеты</h2>
                     <ag-grid-vue
                       :style="showSetsGrid ? 'width: 100%; height: 400px;' : ''"
@@ -384,7 +384,10 @@
         </v-row>
       </v-container>
       <v-dialog v-model="showScaleDialog" max-width="450px">
-        <v-card v-if="showScaleDialog" class="keyboard-background">
+        <v-card
+          v-if="showScaleDialog"
+          class="keyboard-background overflow-hidden"
+        >
           <v-row>
             <v-col cols="5">
               <div

@@ -41,7 +41,7 @@ const listenForScale = async () => {
       console.log(data);
       const content = data.toString('utf8');
       console.log(content);
-      const re = new RegExp('U.*([0-9]+\\.[0-9]+)');
+      const re = new RegExp('S.*([0-9]+\\.[0-9]+)');
       if (re.test(content)) {
         const match = re.exec(content);
         // if (!setWeights[match[1].toString()]) {
