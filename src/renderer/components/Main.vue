@@ -1137,6 +1137,7 @@ JSPM.JSPrintManager.start();
 
 export default {
   data: () => ({
+    editingSetId: 0,
     showPaymentReportDialog: false,
     isPaymentReportLoading: false,
     paymentReportData: {},
@@ -1297,11 +1298,6 @@ export default {
       return product.getters.categories;
     },
     filteredProducts() {
-      if (this.currentCategoryId > 0) {
-        return this.items.filter(
-          (item) => item.categoryId === this.currentCategoryId
-        );
-      }
       if (this.searchText.length > 0) {
         return this.items.filter((item) => {
           return (
@@ -1310,6 +1306,11 @@ export default {
             (item.customCode && item.customCode.indexOf(this.searchText) >= 0)
           );
         });
+      }
+      if (this.currentCategoryId > 0) {
+        return this.items.filter(
+          (item) => item.categoryId === this.currentCategoryId
+        );
       }
       return this.items;
     },
@@ -1411,7 +1412,12 @@ export default {
       "unselectAllItems",
       "setWeight",
       "clearCart",
+      "appendSetWithItems",
     ]),
+    plusSetCartItem(node) {
+      this.editingSetId = node.data.id;
+      this.showSearchDialog = true;
+    },
     async showPaymentReport() {
       this.isPaymentReportLoading = true;
       let { data } = await this.$http.post(this.webHook + `mysale.getReport`, {
@@ -1626,25 +1632,6 @@ export default {
       const { orderId, storeData } = this.orderData;
       const address = storeData ? storeData.ADDRESS : "";
 
-      // cartItems.map(item => {
-      //   if (item.type === "set") {
-      //     sets.push(item);
-      //   }
-      // });
-      //
-      // if (!sets.length) {
-      //   this.cartWeightRequiredSnack = true;
-      //   this.cartError = `В корзине нет сетов`;
-      //   return;
-      // }
-      //
-      // let { data: setsData } = await this.$http.post(
-      //   this.webHook + `mysale.createSets`,
-      //   {
-      //     sets
-      //   }
-      // );
-
       this.showPrintDialog = true;
 
       let discountPrintValue = "";
@@ -1684,259 +1671,6 @@ export default {
       setTimeout(() => {
         this.printNode("order-print");
       }, 300);
-
-      /*
-      const data = [
-        {
-          type: "text",
-          value: "g",
-          style: "font-size: 36px; color: 3CAF50; text-align: center; "
-        },
-        {
-          type: "text",
-          value: "gavali",
-          style: "font-size: 26px; color: 3CAF50; text-align: center;"
-        },
-        {
-          type: "text",
-          value: 'OOO "Gavali Sweets"',
-          style:
-            "font-size: 18px; font-weight: bold; color: 3CAF50; text-align: center;"
-        },
-        {
-          type: "table",
-          // style the table
-          style: "border: 0; margin-bottom: -50px;",
-          // list of the columns to be rendered in the table header
-          // tableHeader: ["", ""],
-          // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [
-            [
-              // {
-              //   type: "text",
-              //   value: "<img :src='~static/images/icons8-location-100.png' />",
-              //   style: "font-size: 14px; color: 3CAF50; text-align: left",
-              // },
-              // {
-              //   type: "image",
-              //   path: "src/images/icons8-location-100.png",
-              //   position: "center",
-              //   height: "40px",
-              //   weight: "40px",
-              // },
-              {
-                type: "text",
-                value: address,
-                style: "font-size: 14px; color: 3CAF50;"
-              }
-            ]
-          ],
-          // list of columns to be rendered in the table footer
-          //tableFooter: [],
-          // custom style for the table header
-          //tableHeaderStyle: 'background-color: white; color: black;',
-          // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;"
-          // custom style for the table footer
-          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
-        },
-        // {
-        //   type: 'text', value: 'г.Ташкент, ул.Шахрисабзкая, дом 5-А Бизнес центр SEOUL PLAZA', style: "font-size: 14px; color: 3CAF50; text-align: left"
-        // },
-        {
-          type: "table",
-          // style the table
-          style: "border: none; margin-top: -50px;",
-          // list of the columns to be rendered in the table header
-          //tableHeader: ['', ''],
-          // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [
-            [
-              { type: "text", value: currentDate + " " + currentTime },
-              {
-                type: "text",
-                value: "Чек №: " + orderId,
-                style: "font-weight: bold;"
-              },
-              {
-                type: "text",
-                value: "Кассир:" + managerName + " " + managerLastName
-              }
-            ]
-          ],
-          // list of columns to be rendered in the table footer
-          //tableFooter: [],
-          // custom style for the table header
-          //tableHeaderStyle: 'background-color: white; color: black;',
-          // custom style for the table body
-          tableBodyStyle:
-            "border: none; text-transformation: uppercase; font-size: 10px;"
-          // custom style for the table footer
-          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
-        },
-        {
-          type: "table",
-          // style the table
-          style: "border: none;margin-top: -50px;",
-          // list of the columns to be rendered in the table header
-          tableHeader: ["Название", "Цена", "Вес", "Сумма"],
-          // multi dimensional array depicting the rows and columns of the table body
-          tableBody: cartItemsTable,
-          // list of columns to be rendered in the table footer
-          tableFooter: [],
-          // custom style for the table header
-          tableHeaderStyle: "background-color: white; color: black;",
-          // custom style for the table body
-          tableBodyStyle: "border: none",
-          // custom style for the table footer
-          tableFooterStyle: "background-color: #white; color: black;"
-        },
-        {
-          type: "table",
-          // style the table
-          style: "border: none; margin-top: -15px;",
-          // list of the columns to be rendered in the table header
-          //tableHeader: ['', '', '', ''],
-          // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [
-            [
-              {
-                type: "text",
-                value: "сумма с ндс, 15%",
-                style: "text-align: left;"
-              },
-              {
-                type: "text",
-                value:
-                  currency(+subTotalPrice, {
-                    symbol: "",
-                    separator: ".",
-                    decimal: ","
-                  }).format() + " SO'M",
-                style: "text-align: right"
-              }
-            ]
-          ],
-          // list of columns to be rendered in the table footer
-          //tableFooter: [],
-          // custom style for the table header
-          //tableHeaderStyle: 'background-color: white; color: black;',
-          // custom style for the table body
-          tableBodyStyle: "background-color: white; color: black;"
-          // custom style for the table footer
-          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
-        },
-        // {
-        //   type: 'text', value: subTotalPrice, style: "font-size: 14px; color: 3CAF50; text-align: right;"
-        // },
-        {
-          type: "table",
-          // style the table
-          style: "border: none; margin-top: -70px;",
-          // list of the columns to be rendered in the table header
-          //tableHeader: ['', '', '', ''],
-          // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [
-            [
-              { type: "text", value: "Скидка:", style: "text-align: left" },
-              {
-                type: "text",
-                value: discountPrintValue,
-                style: "text-align: right;"
-              }
-            ]
-          ],
-          // list of columns to be rendered in the table footer
-          //tableFooter: [],
-          // custom style for the table header
-          //tableHeaderStyle: 'background-color: white; color: black;',
-          // custom style for the table body
-          tableBodyStyle: "border: none"
-          // custom style for the table footer
-          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
-        },
-        {
-          type: "table",
-          // style the table
-          style: "border: none; margin-top: -70px;",
-          // list of the columns to be rendered in the table header
-          //tableHeader: ['', ''],
-          // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [
-            [
-              {
-                type: "text",
-                value: "итог:",
-                style:
-                  "text-align: left; text-transformation: uppercase; font-size: 18px; font-weight: bold;"
-              },
-              {
-                type: "text",
-                value:
-                  currency(+totalPrice, {
-                    symbol: "",
-                    separator: ".",
-                    decimal: ","
-                  }).format() + " SO'M",
-                style: "text-align: right; font-size: 16px; font-weight: bold;"
-              }
-            ]
-          ],
-          // list of columns to be rendered in the table footer
-          //tableFooter: [],
-          // custom style for the table header
-          //tableHeaderStyle: 'background-color: white; color: black;',
-          // custom style for the table body
-          tableBodyStyle: "border: none;"
-          // custom style for the table footer
-          //tableFooterStyle: 'background-color: #white; color: black; text-transformation: uppercase; font-size: 14px',
-        },
-        // {
-        //   type: 'text', value: 'Скидка', style: "font-size: 12px; color: 3CAF50; text-align: left;"
-        // },
-        // {
-        //   type: 'text', value: discountValue, style: "font-size: 14px; color: 3CAF50; text-align: left;"
-        // },
-        // {
-        //   type: 'text', value: 'итог', style: "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase"
-        // },
-        // {
-        //   type: 'text', value: totalPrice, style: "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase"
-        // },
-        {
-          type: "text",
-          value: "Спасибо за покупку!",
-          style:
-            "font-size: 16px; color: 3CAF50; text-align: right; text-transform: uppercase; text-align: center;"
-        },
-        {
-          type: "table",
-          // style the table
-          style: "border: none;",
-          // list of the columns to be rendered in the table header
-          //tableHeader: [],
-          // multi dimensional array depicting the rows and columns of the table body
-          tableBody: [
-            ["+998 97 444 1100", "www.gavali.uz"],
-            ["FB: gavali_uzbekistan", "INST: gavali_uzbekistan"]
-          ],
-          // list of columns to be rendered in the table footer
-          //tableFooter: [],
-          // custom style for the table header
-          //tableHeaderStyle: 'background-color: white; color: black;',
-          // custom style for the table body
-          tableBodyStyle: "border: none;  text-align: center;"
-          // custom style for the table footer
-          //tableFooterStyle: 'background-color: #white; color: black;',
-        },
-      ];*/
-      // ipcRenderer.send(
-      //   "print",
-      //   JSON.stringify({
-      //     printerName: this.chosenPrinter,
-      //     data,
-      //   })
-      // );
     },
     async saveOrder() {
       if (this.changePrice < 0) {
@@ -2057,16 +1791,6 @@ export default {
     },
     setScaleWeight(data) {
       this.currentScaleWeight = data.detail.weight;
-      // console.log(data.detail.weight);
-      // if (data.detail && !this.showPayMethodDialog && data.detail.weight > 0) {
-      //   if (this.selectedCartItem.id) {
-      //     if (this.currentWeight > 0) {
-      //       this.append("+");
-      //     }
-      //     this.append(data.detail.weight);
-      //     this.equal();
-      //   }
-      // }
     },
     async saveClient() {
       this.savingClientLoading = true;
@@ -2110,19 +1834,19 @@ export default {
     },
     removeCartItem(node) {
       this.removeProductCart({ item: node.data });
+      setTimeout(() => {
+        if (this.gridSetApi) {
+          this.gridSetApi.forEachLeafNode((node) => {
+            node && node.setExpanded(true);
+          });
+        }
+      }, 300);
     },
     cartItemSelected() {
       setTimeout(() => {
         const selectedRows = this.gridApi.getSelectedRows();
         if (selectedRows.length) {
           this.selectedCartItem = selectedRows[0];
-          // if (this.selectedCartItem.weight) {
-          //   if (this.currentScaleWeight > 0) {
-          //     this.currentWeight = this.currentScaleWeight;
-          //   } else {
-          //     this.currentWeight = this.selectedCartItem.weight;
-          //   }
-          // }
         } else {
           this.selectedCartItem = {};
         }
@@ -2140,11 +1864,6 @@ export default {
         const selectedSetRows = this.gridSetApi.getSelectedRows();
         if (selectedSetRows.length) {
           this.selectedCartItem = selectedSetRows[0];
-          // if (this.currentScaleWeight > 0) {
-          //   this.currentWeight = this.currentScaleWeight;
-          // } else {
-          //   this.currentWeight = this.selectedCartItem.weight;
-          // }
         } else {
           this.selectedCartItem = {};
         }
@@ -2282,60 +2001,75 @@ export default {
       }
     },
     addChosenProducts() {
-      if (this.set) {
-        const parentId = Math.floor(Math.random() * Math.floor(99999));
-        const item = {
-          name: this.setName,
-          weight: 1,
-          childs: [],
-          price: 0,
-          totalPrice: 0,
-          type: "set",
-          id: parentId,
-        };
-        this.items.map((prod) => {
-          if (prod.selected) {
-            if (prod.totalAmountCount > 0) {
-              item.childs.push({ ...prod, parentId });
-            } else {
-              this.cartWeightRequiredSnack = true;
-              this.cartError = `Товар "#${prod.barcode}: ${prod.name}" отсутствует в складах`;
-            }
+      if (this.editingSetId > 0) {
+        const selectedForSetItems = [];
+        this.items.map((item) => {
+          if (item.selected) {
+            selectedForSetItems.push(item);
           }
         });
-        this.addProductToCart({ item });
+
+        this.appendSetWithItems({
+          setId: this.editingSetId,
+          items: selectedForSetItems,
+        });
+        this.editingSetId = 0;
         setTimeout(() => {
           this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }, 300);
       } else {
-        this.items.map((item) => {
-          if (item.selected) {
-            const foundIndex = this.cartItems.findIndex((prod) => {
-              return item.id === prod.id;
-            });
-
-            if (item.totalAmountCount > 0) {
-              if (foundIndex < 0) {
-                this.addProductToCart({ item: { ...item, type: "product" } });
+        if (this.set) {
+          const parentId = Math.floor(Math.random() * Math.floor(99999));
+          const item = {
+            name: this.setName,
+            weight: 1,
+            childs: [],
+            price: 0,
+            totalPrice: 0,
+            type: "set",
+            id: parentId,
+          };
+          this.items.map((prod) => {
+            if (prod.selected) {
+              if (prod.totalAmountCount > 0) {
+                item.childs.push({ ...prod, parentId });
+              } else {
+                this.cartWeightRequiredSnack = true;
+                this.cartError = `Товар "#${prod.barcode}: ${prod.name}" отсутствует в складах`;
               }
-            } else {
-              this.cartWeightRequiredSnack = true;
-              this.cartError = `Товар "#${item.barcode}: ${item.name}" отсутствует в складах`;
             }
-          }
-        });
+          });
+          this.addProductToCart({ item });
+          setTimeout(() => {
+            this.gridSetApi.forEachLeafNode((node) => {
+              node && node.setExpanded(true);
+            });
+          }, 300);
+        } else {
+          this.items.map((item) => {
+            if (item.selected) {
+              const foundIndex = this.cartItems.findIndex((prod) => {
+                return item.id === prod.id;
+              });
+
+              if (item.totalAmountCount > 0) {
+                if (foundIndex < 0) {
+                  this.addProductToCart({ item: { ...item, type: "product" } });
+                }
+              } else {
+                this.cartWeightRequiredSnack = true;
+                this.cartError = `Товар "#${item.barcode}: ${item.name}" отсутствует в складах`;
+              }
+            }
+          });
+        }
       }
       this.set = false;
       this.setName = "";
       this.unselectAllItems();
       this.showSearchDialog = false;
-      // setTimeout(() => {
-      //   window.davr = this.gridApi;
-      //   console.log("size");
-      //   this.gridApi.sizeColumnsToFit();
-      // });
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
