@@ -122,6 +122,26 @@ const mutations = {
         return item;
       });
     }
+  },
+  APPEND_SET_WITH_ITEMS(state, {setId, items}) {
+    state.cartItems = state.cartItems.map(item => {
+
+      if (item.type === 'set' && item.id === setId) {
+        items.map(child => {
+
+          const foundIndex = item.childs.findIndex((prod) => {
+            return child.id === prod.id;
+          });
+          if (child.totalAmountCount > 0) {
+            if (foundIndex < 0) {
+              item.childs.push({...child, parentId: setId})
+            }
+          }
+        })
+      }
+
+      return item;
+    })
   }
 }
 
@@ -155,6 +175,9 @@ const actions = {
   },
   clearCart({commit}) {
     commit('CLEAR_CART')
+  },
+  appendSetWithItems({commit}, {setId, items}) {
+    commit('APPEND_SET_WITH_ITEMS', {setId, items})
   }
 }
 
