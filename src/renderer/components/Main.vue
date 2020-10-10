@@ -292,6 +292,25 @@
                       <span>Уменьшить вес</span>
                     </v-tooltip>
                   </v-col>
+                  <v-col cols="4" class="pb-0">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="grey darken-3"
+                          class="green--text"
+                          width="60"
+                          height="70"
+                          :loading="isPaymentReportLoading"
+                          @click="showPaymentReport"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon large>mdi-file-chart</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Показать отчёт о суммах</span>
+                    </v-tooltip>
+                  </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="4" class="pb-0">
@@ -1052,6 +1071,39 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="showPaymentReportDialog" max-width="450px">
+      <v-card v-if="showPaymentReportDialog" class="py-8">
+        <v-card-text>
+          <div class="subtitle-2 font-weight-bold">
+            Период: {{ paymentReportData.DATES }}
+          </div>
+          <div class="py-3">
+            <v-row v-for="price in paymentReportData.PRICES" :key="price.LABEL">
+              <v-col cols="6" class="py-0">
+                <div class="title font-weight-bold">{{ price.LABEL }}:</div>
+              </v-col>
+              <v-col cols="6" class="py-0">
+                <div class="title font-weight-bold">
+                  {{ price.PRICE | money }}
+                </div>
+              </v-col>
+            </v-row>
+          </div>
+          <v-row>
+            <v-col cols="6">
+              <div class="title font-weight-bold">
+                Общая сумма:
+              </div>
+            </v-col>
+            <v-col cols="6">
+              <div class="title font-weight-bold">
+                {{ paymentReportData.TOTAL_PRICE | money }}
+              </div>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -1085,6 +1137,9 @@ JSPM.JSPrintManager.start();
 
 export default {
   data: () => ({
+    showPaymentReportDialog: false,
+    isPaymentReportLoading: false,
+    paymentReportData: {},
     printLogo: "static/images/gavali.png",
     cartWeightRequiredSnack: false,
     cartError: "",
@@ -1357,8 +1412,19 @@ export default {
       "setWeight",
       "clearCart",
     ]),
+    async showPaymentReport() {
+      this.isPaymentReportLoading = true;
+      let { data } = await this.$http.post(this.webHook + `mysale.getReport`, {
+        managerId: this.managerData.ID,
+      });
+
+      this.isPaymentReportLoading = false;
+
+      this.paymentReportData = data.result;
+
+      this.showPaymentReportDialog = true;
+    },
     printBarcodeLabel(item) {
-      console.log(item);
       if (this.jspmWSStatus()) {
         //Create a ClientPrintJob
         var cpj = new JSPM.ClientPrintJob();
