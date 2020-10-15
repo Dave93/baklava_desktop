@@ -1301,7 +1301,7 @@ export default {
       if (this.searchText.length > 0) {
         return this.items.filter((item) => {
           return (
-            item.name.toLowerCase().includes(this.searchText) ||
+            item.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
             (item.barcode && item.barcode.indexOf(this.searchText) >= 0) ||
             (item.customCode && item.customCode.indexOf(this.searchText) >= 0)
           );
@@ -1858,6 +1858,9 @@ export default {
       });
     },
     cartSetItemSelected(event) {
+      if (!event.node.selected) {
+        return;
+      }
       if (event.node) {
         this.selectedCartItem = event.node.data;
       } else {
@@ -1938,7 +1941,6 @@ export default {
       }
     },
     equal() {
-      // console.log(this.currentWeight);
       this.currentWeight = this.currentWeight.replace(",", ".");
       let weight = this.currentWeight
         ? this.currentWeight
