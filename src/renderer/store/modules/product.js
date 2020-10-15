@@ -89,6 +89,7 @@ const mutations = {
     state.cartItems = []
   },
   SET_WEIGHT(state, {id, weight, parentId}) {
+    console.log('weight params', {id, weight, parentId});
     if (parentId) {
       state.cartItems = state.cartItems.map(parent => {
         parent.totalPrice = 0

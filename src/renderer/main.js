@@ -34,7 +34,7 @@ const listenForScale = async () => {
       flowControl: false,
     });
     const { Readline } = Serialport.parsers;
-    const parser = new Readline();
+    const parser = new Readline('W\n');
     localPort.pipe(parser);
     // const setWeights = {};
     parser.on('data', (data) => {
