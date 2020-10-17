@@ -3,6 +3,10 @@ import axios from 'axios'
 import Serialport from 'serialport';
 // import { AgGridVue } from "ag-grid-vue";
 
+const Store = require('electron-store');
+
+const eStore = new Store();
+
 import App from './App'
 import router from './router'
 import store from './store'
@@ -21,6 +25,11 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
+let storeData = eStore.get('isOldScale');
+if (storeData) {
+  storeData = JSON.parse(storeData);
+}
+const isOldScale = (storeData || false)
 
 const listenForScale = async () => {
   const ports = await Serialport.list();
@@ -63,8 +72,9 @@ const listenForScale = async () => {
   });
 };
 
-
-listenForScale();
+if (!isOldScale) {
+  listenForScale();
+}
 
 /* eslint-disable no-new */
 new Vue({

@@ -6,14 +6,18 @@ const state = {
     webHook: '',
     authUserId: '',
     managerData: {},
-    chosenPrinter: ''
+    chosenPrinter: '',
+    isOldScale: false,
+    comPortName: 'COM1'
 }
 
 const getters = {
     webHook: (state) => state.webHook,
     authUserId: (state) => state.authUserId,
     managerData: (state) => state.managerData,
-    chosenPrinter: (state) => state.chosenPrinter
+    chosenPrinter: (state) => state.chosenPrinter,
+    isOldScale: (state) => state.isOldScale,
+    comPortName: (state) => state.comPortName
 }
 
 const mutations = {
@@ -32,6 +36,14 @@ const mutations = {
     SET_PRINTER(state, { val }) {
         state.chosenPrinter = val
         eStore.set('chosenPrinter', JSON.stringify(val))
+    },
+    SET_OLD_SCALE_CHECKBOX(state, { val }) {
+        state.isOldScale = val
+        eStore.set('isOldScale', JSON.stringify(val))
+    },
+    SET_COM_PORT_NAME(state, { val }) {
+        state.comPortName = val
+        eStore.set('comPortName', JSON.stringify(val))
     }
 }
 
@@ -50,6 +62,12 @@ const actions = {
     },
     setPrinter({ commit }, { val }) {
         commit('SET_PRINTER', { val })
+    },
+    setOldScaleCheckbox({ commit }, { val }) {
+        commit('SET_OLD_SCALE_CHECKBOX', { val })
+    },
+    setComPortName({ commit }, { val }) {
+        commit('SET_COM_PORT_NAME', { val })
     }
 }
 

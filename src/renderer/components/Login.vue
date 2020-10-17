@@ -99,6 +99,19 @@
                 @change="savePrinter"
               >
               </v-select>
+              <v-checkbox
+                :value="isOldScale"
+                label="Старые весы"
+                @change="saveOldScale"
+              ></v-checkbox>
+              <v-text-field
+                :value="comPortName"
+                label="Название порта"
+                v-if="isOldScale"
+                outlined
+                rounded
+                @change="savePortName"
+              />
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -172,6 +185,8 @@ export default {
     ...mapGetters({
       webHook: "settings/webHook",
       chosenPrinter: "settings/chosenPrinter",
+      isOldScale: "settings/isOldScale",
+      comPortName: "settings/comPortName",
     }),
   },
   methods: {
@@ -180,6 +195,8 @@ export default {
       setUserId: "settings/setUserId",
       setManagerData: "settings/setManagerData",
       setPrinter: "settings/setPrinter",
+      setOldScaleCheckbox: "settings/setOldScaleCheckbox",
+      setComPortName: "settings/setComPortName",
       setCategories: "setCategories",
       setProducts: "setProducts",
     }),
@@ -188,6 +205,12 @@ export default {
     },
     savePrinter(val) {
       this.setPrinter({ val });
+    },
+    saveOldScale(val) {
+      this.setOldScaleCheckbox({ val });
+    },
+    savePortName(val) {
+      this.setComPortName({ val });
     },
     async closeDialog() {
       this.isSavingSettings = true;
