@@ -402,7 +402,11 @@
           </v-col>
         </v-row>
       </v-container>
-      <v-dialog v-model="showScaleDialog" max-width="450px">
+      <v-dialog
+        v-model="showScaleDialog"
+        @click:outside="clearScaleDialog"
+        max-width="450px"
+      >
         <v-card
           v-if="showScaleDialog"
           class="keyboard-background overflow-hidden"
@@ -1243,6 +1247,8 @@ export default {
       cartItems: "cartItems",
       managerData: "settings/managerData",
       chosenPrinter: "settings/chosenPrinter",
+      isOldScale: "settings/isOldScale",
+      comPortName: "settings/comPortName",
     }),
     showSetsGrid() {
       let res = false;
@@ -1414,6 +1420,10 @@ export default {
       "clearCart",
       "appendSetWithItems",
     ]),
+    clearScaleDialog() {
+      this.isPlusScale = false;
+      this.isMinusScale = false;
+    },
     plusSetCartItem(node) {
       this.editingSetId = node.data.id;
       this.showSearchDialog = true;
@@ -1492,6 +1502,22 @@ export default {
         return false;
       }
     },
+    listenOldScale() {
+      this.scaleWeightInterval = setInterval(async () => {
+        try {
+          let { data } = await this.$http.get(
+            "http://localhost:8888/api/Scale?portName=" + this.comPortName
+          );
+          if (data.length && data[0]) {
+            this.currentScaleWeight = +data[0];
+          }
+        } catch (e) {}
+        if (!this.isMinusScale && !this.isPlusScale) {
+          clearInterval(this.scaleWeightInterval);
+          this.scaleWeightInterval = null;
+        }
+      }, 100);
+    },
     showPlusScale() {
       if (!this.selectedCartItem.id) {
         this.cartWeightRequiredSnack = true;
@@ -1499,6 +1525,9 @@ export default {
         return;
       }
       this.isPlusScale = true;
+      if (this.isOldScale) {
+        this.listenOldScale();
+      }
       this.showScaleDialog = true;
       setTimeout(() => {
         this.$refs.cartItemSelectedInput.focus();
@@ -1511,6 +1540,9 @@ export default {
         return;
       }
       this.isMinusScale = true;
+      if (this.isOldScale) {
+        this.listenOldScale();
+      }
       this.showScaleDialog = true;
       setTimeout(() => {
         this.$refs.cartItemSelectedInput.focus();

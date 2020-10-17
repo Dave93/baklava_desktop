@@ -9,6 +9,7 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 app.allowRendererProcessReuse = false
+app.commandLine.appendSwitch('disable-site-isolation-trials')
 
 Menu.setApplicationMenu(false);
 let mainWindow
@@ -24,7 +25,8 @@ function createWindow () {
     height: 563,
     useContentSize: true,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      webSecurity: false
     },
     width: 1000
   })
