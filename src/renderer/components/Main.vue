@@ -5,7 +5,7 @@
         <v-row>
           <v-col cols="9" class="d-flex flex-row">
             <v-card width="100%">
-              <v-card-text style="height: 100%;" class="pb-0">
+              <v-card-text style="height: 100%" class="pb-0">
                 <v-row>
                   <v-col cols="12" class="mt-n3">
                     <v-btn
@@ -415,7 +415,7 @@
             <v-col cols="5">
               <div
                 class="align-center d-flex justify-center"
-                style="height: 100%; width: 100%;"
+                style="height: 100%; width: 100%"
               >
                 <div>
                   <div class="font-weight-black">Показатель весов:</div>
@@ -607,7 +607,7 @@
               </v-row>
               <v-divider></v-divider>
               <div class="d-flex">
-                <v-list dense height="315" style="flex: 3; overflow-y: auto;">
+                <v-list dense height="315" style="flex: 3; overflow-y: auto">
                   <v-list-item
                     :class="{ 'v-list-item--active': currentCategoryId === 0 }"
                     :color="currentCategoryId === 0 ? 'green accent-3' : ''"
@@ -634,7 +634,7 @@
                   </v-list-item>
                 </v-list>
                 <v-divider vertical></v-divider>
-                <div class="product-list-block" style="flex: 10;">
+                <div class="product-list-block" style="flex: 10">
                   <v-list dense>
                     <v-virtual-scroll
                       :items="filteredProducts"
@@ -675,7 +675,7 @@
           </v-card>
         </div>
       </v-dialog>
-      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px;">
+      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px">
         <v-card v-if="showPayMethodDialog">
           <v-card-text>
             <v-slide-group show-arrows class="py-6">
@@ -706,7 +706,7 @@
             </v-slide-group>
           </v-card-text>
         </v-card>
-        <v-row style="background-color: #ffffff;" class="mx-md-auto">
+        <v-row style="background-color: #ffffff" class="mx-md-auto">
           <v-col cols="4" class="">
             <v-card flat class="keyboard-background px-10 weight-keyboard">
               <v-row>
@@ -925,7 +925,7 @@
     <v-dialog v-model="showPrintDialog" max-width="590px">
       <v-card v-if="showPrintDialog">
         <v-card-text>
-          <div id="order-print" style="width: 540px;">
+          <div id="order-print" style="width: 540px">
             <div class="text-center py-3">
               <img :src="printLogo" alt="" />
             </div>
@@ -973,8 +973,8 @@
                     <td>{{ orderPrintData.discountPrintValue }}</td>
                   </tr>
                   <tr>
-                    <td style="font-weight: bold; font-size: 30px;">Итог:</td>
-                    <td style="font-weight: bold; font-size: 30px;">
+                    <td style="font-weight: bold; font-size: 30px">Итог:</td>
+                    <td style="font-weight: bold; font-size: 30px">
                       {{ orderPrintData.totalPrice }}
                     </td>
                   </tr>
@@ -1008,7 +1008,7 @@
     <v-dialog v-model="showSetPrintDialog" max-width="450px">
       <v-card v-if="showSetPrintDialog">
         <v-card-text>
-          <div id="sets-print" style="width: 400px;">
+          <div id="sets-print" style="width: 400px">
             <div class="text-center">
               <img :src="printLogo" alt="" />
             </div>
@@ -1095,9 +1095,7 @@
           </div>
           <v-row>
             <v-col cols="6">
-              <div class="title font-weight-bold">
-                Общая сумма:
-              </div>
+              <div class="title font-weight-bold">Общая сумма:</div>
             </v-col>
             <v-col cols="6">
               <div class="title font-weight-bold">
@@ -1564,6 +1562,8 @@ export default {
       this.clientPhone = "";
       this.clientEmail = "";
       this.orderData = {};
+      this.cashPrice = "";
+      this.cardPrice = "";
     },
     payTotalSumm() {
       if (this.cashBtn) {
@@ -1792,11 +1792,11 @@ export default {
         return;
       }
 
-      if (!this.currentClient.ID) {
-        this.cartWeightRequiredSnack = true;
-        this.cartError = "Не указан клиент";
-        return;
-      }
+      // if (!this.currentClient.ID) {
+      //   this.cartWeightRequiredSnack = true;
+      //   this.cartError = "Не указан клиент";
+      //   return;
+      // }
 
       this.cartItems.map((item) => {
         if (item.type !== "set" && item.weight === 0) {

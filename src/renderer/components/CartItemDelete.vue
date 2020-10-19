@@ -7,14 +7,10 @@
       v-if="params.data.type === 'set'"
       class="mr-2"
     >
-      <v-icon>
-        mdi-plus
-      </v-icon>
+      <v-icon> mdi-plus </v-icon>
     </v-btn>
     <v-btn fab x-small color="red" @click="removeCartItem">
-      <v-icon color="white">
-        mdi-delete
-      </v-icon>
+      <v-icon color="white"> mdi-delete </v-icon>
     </v-btn>
   </div>
 </template>
