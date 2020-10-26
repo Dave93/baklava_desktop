@@ -1,13 +1,17 @@
 const state = {
     items: [],
     categories: [],
-    cartItems: []
+    cartItems: [],
+    cartTabs: [{
+      title: 'Корзина #1'
+    }]
 }
 
 const getters = {
   items: (state) => state.items,
   categories: (state) => state.categories,
-  cartItems: (state) => state.cartItems
+  cartItems: (state) => state.cartItems,
+  cartTabs: (state) => state.cartTabs
 }
 
 const mutations = {
@@ -89,7 +93,6 @@ const mutations = {
     state.cartItems = []
   },
   SET_WEIGHT(state, {id, weight, parentId}) {
-    console.log('weight params', {id, weight, parentId});
     if (parentId) {
       state.cartItems = state.cartItems.map(parent => {
         parent.totalPrice = 0
@@ -143,6 +146,14 @@ const mutations = {
 
       return item;
     })
+  },
+  APPEND_CART_TAB(state) {
+    state.cartTabs.push({
+      title: 'Корзина #' + (+state.cartTabs.length + 1)
+    })
+  },
+  CLOSE_TAB_BY_INDEX(state, { index }) {
+    state.cartTabs.splice(index, 1);
   }
 }
 
@@ -179,6 +190,12 @@ const actions = {
   },
   appendSetWithItems({commit}, {setId, items}) {
     commit('APPEND_SET_WITH_ITEMS', {setId, items})
+  },
+  appendCartTab({commit}) {
+    commit('APPEND_CART_TAB');
+  },
+  closeTabByIndex({commit}, {index}) {
+    commit('CLOSE_TAB_BY_INDEX', {index});
   }
 }
 
