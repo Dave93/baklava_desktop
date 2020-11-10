@@ -8,7 +8,8 @@ const state = {
     managerData: {},
     chosenPrinter: '',
     isOldScale: false,
-    comPortName: 'COM1'
+    comPortName: 'COM1',
+    remotePrinterAddress: ''
 }
 
 const getters = {
@@ -17,6 +18,7 @@ const getters = {
     managerData: (state) => state.managerData,
     chosenPrinter: (state) => state.chosenPrinter,
     isOldScale: (state) => state.isOldScale,
+    remotePrinterAddress: (state) => state.remotePrinterAddress,
     comPortName: (state) => state.comPortName
 }
 
@@ -44,6 +46,10 @@ const mutations = {
     SET_COM_PORT_NAME(state, { val }) {
         state.comPortName = val
         eStore.set('comPortName', JSON.stringify(val))
+    },
+    SET_REMOTE_PRINTER_ADDRESS(state, { val }) {
+        state.remotePrinterAddress = val
+        eStore.set('remotePrinterAddress', JSON.stringify(val))
     }
 }
 
@@ -68,6 +74,9 @@ const actions = {
     },
     setComPortName({ commit }, { val }) {
         commit('SET_COM_PORT_NAME', { val })
+    },
+    setRemotePrinterAddress({ commit }, { val }) {
+        commit('SET_REMOTE_PRINTER_ADDRESS', { val })
     }
 }
 

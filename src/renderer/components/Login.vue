@@ -7,7 +7,7 @@
             <div
               class="auth-back"
               :style="{
-                backgroundImage: printLogo,
+                backgroundImage: printLogo
               }"
             ></div>
           </v-col>
@@ -55,6 +55,7 @@
                           type="password"
                           v-model="password"
                           :rules="passwordRules"
+                          @keyup.enter="tryLogin"
                           required
                           outlined
                           rounded
@@ -89,6 +90,14 @@
                 outlined
                 rounded
                 @change="saveSettings"
+              />
+              <v-text-field
+                :value="remotePrinterAddress"
+                ref="remotePrinterAddress"
+                label="Адрес удалённого принтера"
+                outlined
+                rounded
+                @change="saveRemotePrinterAddress"
               />
               <v-select
                 outlined
@@ -147,7 +156,7 @@ import { mapGetters, mapActions } from "vuex";
 let { remote, ipcRenderer } = require("electron");
 let webContents = remote.getCurrentWebContents();
 let printers = webContents.getPrinters(); //list the printers
-let printerNames = printers.map((item) => item.name);
+let printerNames = printers.map(item => item.name);
 export default {
   name: "Login",
   layout: "auth",
@@ -162,11 +171,11 @@ export default {
     password: "",
     updateSnack: false,
     downloadProgress: 0,
-    managerRules: [(v) => !!v || "Выберите менеджера"],
-    passwordRules: [(v) => !!v || "Введите пароль"],
+    managerRules: [v => !!v || "Выберите менеджера"],
+    passwordRules: [v => !!v || "Введите пароль"],
     authError: "",
     isAuthLoading: false,
-    printers: printerNames,
+    printers: printerNames
   }),
   async mounted() {
     await this.tryGetManagers();
@@ -187,7 +196,8 @@ export default {
       chosenPrinter: "settings/chosenPrinter",
       isOldScale: "settings/isOldScale",
       comPortName: "settings/comPortName",
-    }),
+      remotePrinterAddress: "settings/remotePrinterAddress"
+    })
   },
   methods: {
     ...mapActions({
@@ -197,8 +207,9 @@ export default {
       setPrinter: "settings/setPrinter",
       setOldScaleCheckbox: "settings/setOldScaleCheckbox",
       setComPortName: "settings/setComPortName",
+      setRemotePrinterAddress: "settings/setRemotePrinterAddress",
       setCategories: "setCategories",
-      setProducts: "setProducts",
+      setProducts: "setProducts"
     }),
     saveSettings(val) {
       this.setWebHook({ val });
@@ -211,6 +222,9 @@ export default {
     },
     savePortName(val) {
       this.setComPortName({ val });
+    },
+    saveRemotePrinterAddress(val) {
+      this.setRemotePrinterAddress({ val });
     },
     async closeDialog() {
       this.isSavingSettings = true;
@@ -226,9 +240,9 @@ export default {
           this.webHook + "mymanager.user.getList?filter[UF_MANAGER]=1"
         );
         if (data.result && data.result.length) {
-          this.managers = data.result.map((item) => ({
+          this.managers = data.result.map(item => ({
             value: item.LOGIN,
-            text: `${item.LAST_NAME} ${item.NAME}`,
+            text: `${item.LAST_NAME} ${item.NAME}`
           }));
           this.isManagersFound = true;
         } else {
@@ -254,16 +268,16 @@ export default {
             `${this.webHook}mycatalog.section.list`
           );
           await this.setCategories({
-            val: categoriesData.result.map((item) => ({
+            val: categoriesData.result.map(item => ({
               id: item.ID,
-              name: item.NAME,
-            })),
+              name: item.NAME
+            }))
           });
           let { data: productsData } = await this.$http.get(
             `${this.webHook}mycatalog.product.list?managerId=${data.result.ID}`
           );
           await this.setProducts({
-            val: productsData.result.map((item) => ({
+            val: productsData.result.map(item => ({
               id: item.ID,
               name: item.ELEMENT_NAME,
               barcode: item.BARCODE_BARCODE,
@@ -272,8 +286,8 @@ export default {
               categoryId: item.ELEMENT_IBLOCK_SECTION_ID,
               image: item.PREVIEW_PICTURE,
               price: item.BASE_PRICE,
-              totalAmountCount: item.TOTAL_AMOUNT_COUNT,
-            })),
+              totalAmountCount: item.TOTAL_AMOUNT_COUNT
+            }))
           });
           this.isAuthLoading = false;
           await this.$router.push("/main");
@@ -286,8 +300,8 @@ export default {
         this.isAuthLoading = false;
         this.authError = "Неверный пароль";
       }
-    },
-  },
+    }
+  }
 };
 </script>
 

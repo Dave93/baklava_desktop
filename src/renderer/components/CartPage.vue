@@ -623,7 +623,7 @@
                     :key="item.id"
                     @click="categoryToggle(item.id)"
                     :class="{
-                      'v-list-item--active': currentCategoryId === item.id,
+                      'v-list-item--active': currentCategoryId === item.id
                     }"
                     :color="
                       currentCategoryId === item.id ? 'green accent-3' : ''
@@ -1134,6 +1134,7 @@ const electron = require("electron");
 // install escpos-usb adapter module manually
 escpos.USB = require("escpos-usb");
 
+// escpos.Network = require("escpos-network");
 ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
 JSPM.JSPrintManager.auto_reconnect = true;
 JSPM.JSPrintManager.start();
@@ -1150,8 +1151,8 @@ export default {
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [v => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [v => !!v || "Имя обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -1187,7 +1188,7 @@ export default {
         cellRenderer: "agGroupCellRenderer",
         suppressSizeToFit: true,
         flex: 3,
-        wrapText: true,
+        wrapText: true
       },
       {
         headerName: "Цена",
@@ -1195,7 +1196,7 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2,
+        flex: 2
       },
       { headerName: "Вес", field: "weight", width: 50, flex: 2 },
       {
@@ -1204,15 +1205,15 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2,
+        flex: 2
       },
       {
         headerName: "",
         field: "id",
         cellRenderer: "CartItemDelete",
         width: 40,
-        flex: 1,
-      },
+        flex: 1
+      }
     ],
     context: null,
     frameworkComponents: null,
@@ -1221,7 +1222,7 @@ export default {
     options: [],
     currentClient: {
       ID: null,
-      NAME: null,
+      NAME: null
     },
     setName: "",
     detailCellRendererParams: null,
@@ -1238,7 +1239,7 @@ export default {
     showScaleDialog: false,
     isPlusScale: false,
     isMinusScale: false,
-    cartItems: [],
+    cartItems: []
   }),
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
   computed: {
@@ -1248,10 +1249,11 @@ export default {
       chosenPrinter: "settings/chosenPrinter",
       isOldScale: "settings/isOldScale",
       comPortName: "settings/comPortName",
+      remotePrinterAddress: "settings/remotePrinterAddress"
     }),
     showSetsGrid() {
       let res = false;
-      this.cartItems.map((item) => {
+      this.cartItems.map(item => {
         if (item.type === "set") {
           res = true;
         }
@@ -1259,17 +1261,17 @@ export default {
       return res;
     },
     singleProducts() {
-      return this.cartItems.filter((item) => item.type !== "set");
+      return this.cartItems.filter(item => item.type !== "set");
     },
     setProducts() {
-      return this.cartItems.filter((item) => item.type === "set");
+      return this.cartItems.filter(item => item.type === "set");
     },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       let totalPrice = 0;
-      this.cartItems.map((item) => {
+      this.cartItems.map(item => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1279,7 +1281,7 @@ export default {
     totalPrice() {
       let totalPrice = 0;
 
-      this.cartItems.map((item) => {
+      this.cartItems.map(item => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1304,7 +1306,7 @@ export default {
     },
     filteredProducts() {
       if (this.searchText.length > 0) {
-        return this.items.filter((item) => {
+        return this.items.filter(item => {
           return (
             item.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
             (item.barcode && item.barcode.indexOf(this.searchText) >= 0) ||
@@ -1314,14 +1316,14 @@ export default {
       }
       if (this.currentCategoryId > 0) {
         return this.items.filter(
-          (item) => item.categoryId === this.currentCategoryId
+          item => item.categoryId === this.currentCategoryId
         );
       }
       return this.items;
     },
     changePrice() {
       return +this.cashPrice + +this.cardPrice - +this.totalPrice;
-    },
+    }
   },
   beforeMount() {
     this.gridOptions = {};
@@ -1329,7 +1331,7 @@ export default {
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
-      MoneyColumn,
+      MoneyColumn
     };
 
     this.defaultColDef = { flex: 1, resizable: true };
@@ -1341,7 +1343,7 @@ export default {
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
-            wrapText: true,
+            wrapText: true
           },
           {
             headerName: "Цена",
@@ -1349,37 +1351,37 @@ export default {
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
-            wrapText: true,
+            wrapText: true
           },
           { headerName: "Вес", field: "weight", width: 100, flex: 2 },
           {
             headerName: "Итоговая цена",
             field: "totalPrice",
             width: 150,
-            flex: 2,
+            flex: 2
           },
           {
             headerName: "",
             field: "id",
             cellRenderer: "CartItemDelete",
-            flex: 1,
-          },
+            flex: 1
+          }
         ],
         context: { componentParent: this },
         defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
-          MoneyColumn,
+          MoneyColumn
         },
         rowSelection: "single",
-        onRowSelected: this.cartSetItemSelected,
+        onRowSelected: this.cartSetItemSelected
         // events: {
         //   "selection-changed": this.cartSetItemSelected,
         // },
       },
-      getDetailRowData: (params) => {
+      getDetailRowData: params => {
         params.successCallback(params.data.childs);
-      },
+      }
     };
   },
   mounted() {
@@ -1417,12 +1419,12 @@ export default {
       "unselectAllItems",
       "setWeight",
       "clearCart",
-      "appendSetWithItems",
+      "appendSetWithItems"
     ]),
     selectProductBySearch() {
       const foundItem = this.filteredProducts[0];
       console.log(foundItem);
-      const foundIndex = this.cartItems.findIndex((prod) => {
+      const foundIndex = this.cartItems.findIndex(prod => {
         return foundItem.id === prod.id;
       });
 
@@ -1446,7 +1448,7 @@ export default {
     async showPaymentReport() {
       this.isPaymentReportLoading = true;
       let { data } = await this.$http.post(this.webHook + `mysale.getReport`, {
-        managerId: this.managerData.ID,
+        managerId: this.managerData.ID
       });
 
       this.isPaymentReportLoading = false;
@@ -1489,7 +1491,7 @@ export default {
           currency(+item.price, {
             symbol: "",
             separator: " ",
-            decimal: ",",
+            decimal: ","
           }).format() +
           CR;
         cmds +=
@@ -1595,42 +1597,55 @@ export default {
       }
     },
     async printNode(nodeId) {
-      // Select the adapter based on your printer type
-      const device = new escpos.USB();
-      // const device  = new escpos.Network('localhost');
-      // const device  = new escpos.Serial('/dev/usb/lp0');
-
-      const options = {
-        // encoding: "cp1251"
-        /*encoding: "GB18030"*/
-        /* default */
-      };
-      const printer = new escpos.Printer(device, options);
-
       var node = document.getElementById(nodeId);
 
       htmlToImage
         .toBlob(node)
-        .then(async (blob) => {
+        .then(async blob => {
           const buffer = await Buffer.from(await blob.arrayBuffer());
           const userDataPath = (electron.app || electron.remote.app).getPath(
             "userData"
           );
-          const tux = path.join(userDataPath, "test.png");
-          fs.writeFile(tux, buffer, (err) => {
-            escpos.Image.load(tux, (img) => {
-              device.open((error) => {
-                printer
-                  .align("ct")
-                  .image(img, "d24")
-                  .then(() => {
-                    printer.cut().close();
-                  });
+
+          if (this.remotePrinterAddress) {
+            const tux = path.join(userDataPath, "remotePhoto.png");
+            fs.writeFile(tux, buffer, err => {
+              // var bodyFormData = new FormData();
+              //bodyFormData.append('uploadedFile', screenshotPath);
+              // bodyFormData.append("remotePhoto", fs.createReadStream(tux));
+
+              this.$http.post(this.remotePrinterAddress + "/print", {
+                remotePhoto: buffer.toString("base64")
               });
             });
-          });
+          } else {
+            // Select the adapter based on your printer type
+            const device = new escpos.USB();
+            // const device = new escpos.Network("192.168.0.106");
+            // const device  = new escpos.Serial('/dev/usb/lp0');
+
+            const options = {
+              // encoding: "cp1251"
+              /*encoding: "GB18030"*/
+              /* default */
+            };
+            const printer = new escpos.Printer(device, options);
+            const tux = path.join(userDataPath, "test.png");
+            fs.writeFile(tux, buffer, err => {
+              escpos.Image.load(tux, img => {
+                device.open(error => {
+                  printer
+                    .align("ct")
+                    .image(img, "d24")
+                    .then(() => {
+                      printer.cut().close();
+                    });
+                });
+              });
+            });
+          }
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.error("oops, something went wrong!", error);
         });
     },
@@ -1638,7 +1653,7 @@ export default {
       const sets = [];
 
       const cartItems = [...this.cartItems];
-      cartItems.map((item) => {
+      cartItems.map(item => {
         if (item.type === "set") {
           sets.push(item);
         }
@@ -1655,7 +1670,7 @@ export default {
       let { data: setsData } = await this.$http.post(
         this.webHook + `mysale.createSets`,
         {
-          sets,
+          sets
         }
       );
 
@@ -1695,7 +1710,7 @@ export default {
             currency(+discountValue, {
               symbol: "",
               separator: ".",
-              decimal: ",",
+              decimal: ","
             }).format() + " SO'M";
         }
       }
@@ -1710,14 +1725,14 @@ export default {
           currency(+subTotalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ",",
+            decimal: ","
           }).format() + " SO'M",
         totalPrice:
           currency(+totalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ",",
-          }).format() + " SO'M",
+            decimal: ","
+          }).format() + " SO'M"
       };
 
       setTimeout(() => {
@@ -1739,10 +1754,10 @@ export default {
         cardPrice: this.cardPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
-        discountType: this.discountToggle,
+        discountType: this.discountToggle
       };
       let {
-        data: { result: order },
+        data: { result: order }
       } = await this.$http.post(
         this.webHook + `mysale.order.create`,
         orderData
@@ -1762,7 +1777,7 @@ export default {
       let chars = [];
       let vm = this;
       window.removeEventListener("keypress", () => {});
-      window.addEventListener("keypress", (e) => {
+      window.addEventListener("keypress", e => {
         if (
           e.which == 71 ||
           e.which == 85 ||
@@ -1772,7 +1787,7 @@ export default {
         }
 
         if (pressed === false) {
-          setTimeout(function () {
+          setTimeout(function() {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
               vm.addByQrCode(barcode);
@@ -1788,8 +1803,8 @@ export default {
     addByQrCode(code) {
       this.cartWeightRequiredSnack = false;
       const items = [...this.items];
-      const foundItem = items.filter((item) => item.barcode === code)[0];
-      const foundIndex = this.cartItems.findIndex((prod) => {
+      const foundItem = items.filter(item => item.barcode === code)[0];
+      const foundIndex = this.cartItems.findIndex(prod => {
         return foundItem.id === prod.id;
       });
 
@@ -1818,13 +1833,13 @@ export default {
       //   return;
       // }
 
-      this.cartItems.map((item) => {
+      this.cartItems.map(item => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
         }
 
         if (item.type === "set") {
-          item.childs.map((child) => {
+          item.childs.map(child => {
             if (child.weight === 0) {
               res = false;
             }
@@ -1887,20 +1902,18 @@ export default {
     removeCartItem(node) {
       let item = node.data;
       if (item.parentId) {
-        this.cartItems = this.cartItems.map((parent) => {
+        this.cartItems = this.cartItems.map(parent => {
           if (parent.id === item.parentId) {
-            parent.childs = parent.childs.filter(
-              (child) => child.id !== item.id
-            );
+            parent.childs = parent.childs.filter(child => child.id !== item.id);
           }
           return parent;
         });
       } else {
-        this.cartItems = this.cartItems.filter((prod) => item.id !== prod.id);
+        this.cartItems = this.cartItems.filter(prod => item.id !== prod.id);
       }
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode((node) => {
+          this.gridSetApi.forEachLeafNode(node => {
             node && node.setExpanded(true);
           });
         }
@@ -1917,7 +1930,7 @@ export default {
       });
     },
     firstDataRendered() {
-      this.gridSetApi.forEachLeafNode((node) => {
+      this.gridSetApi.forEachLeafNode(node => {
         node && node.setExpanded(true);
       });
     },
@@ -1937,7 +1950,7 @@ export default {
       }
       // this.$refs.cartItemSelectedInput.focus();
     },
-    getHostname: (url) => {
+    getHostname: url => {
       return new URL(url).hostname;
     },
     logout() {
@@ -2026,12 +2039,12 @@ export default {
       let id = this.selectedCartItem.id;
       weight = +parseFloat(itemWeight).toFixed(3);
       if (this.selectedCartItem.parentId) {
-        this.cartItems = this.cartItems.map((parent) => {
+        this.cartItems = this.cartItems.map(parent => {
           parent.totalPrice = 0;
           parent.price = 0;
           parent.weight = 1;
           if (parent.id === this.selectedCartItem.parentId) {
-            parent.childs = parent.childs.map((child) => {
+            parent.childs = parent.childs.map(child => {
               if (child.id === id) {
                 child.weight = +weight;
                 child.totalPrice = +weight * +child.price;
@@ -2041,7 +2054,7 @@ export default {
               return child;
             });
           } else if (parent.childs) {
-            parent.childs = parent.childs.map((child) => {
+            parent.childs = parent.childs.map(child => {
               parent.totalPrice += child.totalPrice || 0;
               parent.price += child.totalPrice || 0;
               return child;
@@ -2050,7 +2063,7 @@ export default {
           return parent;
         });
       } else {
-        this.cartItems = this.cartItems.map((item) => {
+        this.cartItems = this.cartItems.map(item => {
           if (item.id === id) {
             item.weight = +weight;
             item.totalPrice = +weight * +item.price;
@@ -2065,7 +2078,7 @@ export default {
       this.showScaleDialog = false;
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode((node) => {
+          this.gridSetApi.forEachLeafNode(node => {
             node && node.setExpanded(true);
           });
         }
@@ -2100,7 +2113,7 @@ export default {
     addChosenProducts() {
       if (this.editingSetId > 0) {
         const selectedForSetItems = [];
-        this.items.map((item) => {
+        this.items.map(item => {
           if (item.selected) {
             selectedForSetItems.push(item);
           }
@@ -2108,10 +2121,10 @@ export default {
 
         let setId = this.editingSetId;
         let items = selectedForSetItems;
-        this.cartItems = this.cartItems.map((item) => {
+        this.cartItems = this.cartItems.map(item => {
           if (item.type === "set" && item.id === setId) {
-            items.map((child) => {
-              const foundIndex = item.childs.findIndex((prod) => {
+            items.map(child => {
+              const foundIndex = item.childs.findIndex(prod => {
                 return child.id === prod.id;
               });
               if (child.totalAmountCount > 0) {
@@ -2127,7 +2140,7 @@ export default {
 
         this.editingSetId = 0;
         setTimeout(() => {
-          this.gridSetApi.forEachLeafNode((node) => {
+          this.gridSetApi.forEachLeafNode(node => {
             node && node.setExpanded(true);
           });
         }, 300);
@@ -2141,9 +2154,9 @@ export default {
             price: 0,
             totalPrice: 0,
             type: "set",
-            id: parentId,
+            id: parentId
           };
-          this.items.map((prod) => {
+          this.items.map(prod => {
             if (prod.selected) {
               if (prod.totalAmountCount > 0) {
                 item.childs.push({ ...prod, parentId });
@@ -2161,7 +2174,7 @@ export default {
             price: item.price,
             totalPrice: 0,
             weight: 0,
-            type: item.type,
+            type: item.type
           };
           if (item.childs) {
             newItem.childs = item.childs;
@@ -2169,14 +2182,14 @@ export default {
           this.cartItems.push(newItem);
 
           setTimeout(() => {
-            this.gridSetApi.forEachLeafNode((node) => {
+            this.gridSetApi.forEachLeafNode(node => {
               node && node.setExpanded(true);
             });
           }, 300);
         } else {
-          this.items.map((item) => {
+          this.items.map(item => {
             if (item.selected) {
-              const foundIndex = this.cartItems.findIndex((prod) => {
+              const foundIndex = this.cartItems.findIndex(prod => {
                 return item.id === prod.id;
               });
 
@@ -2190,7 +2203,7 @@ export default {
                     price: item.price,
                     totalPrice: 0,
                     weight: 0,
-                    type: "product",
+                    type: "product"
                   };
                   this.cartItems.push(newItem);
                 }
@@ -2209,16 +2222,16 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
-    },
+    }
   },
   filters: {
-    money: (value) => {
+    money: value => {
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
       );
-    },
-  },
+    }
+  }
 };
 </script>
 
