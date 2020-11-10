@@ -704,6 +704,17 @@
                   <v-card-title class="subtitle-2">Картой</v-card-title>
                 </v-card>
               </v-slide-item>
+              <v-slide-item v-slot:default="{ active, toggle }">
+                <v-card
+                    height="75"
+                    width="90"
+                    :color="udsBtn ? 'primary' : ''"
+                    class="d-flex align-center mx-2 justify-center my-2"
+                    @click="() => togglePaymentType('uds')"
+                >
+                  <v-card-title class="subtitle-2">UDS</v-card-title>
+                </v-card>
+              </v-slide-item>
             </v-slide-group>
           </v-card-text>
         </v-card>
@@ -789,7 +800,7 @@
                       <v-btn
                         fab
                         color="black"
-                        @click="substr(['cashPrice', 'cardPrice'])"
+                        @click="substr(['cashPrice', 'cardPrice', 'udsPrice'])"
                         ><h1 class="font-weight-bold green--text">
                           &larr;
                         </h1></v-btn
@@ -826,6 +837,7 @@
               width="100%"
               height="70"
               @click="payTotalSumm"
+              class="mt-1"
             >
               <h1 class="font-weight-medium">Всю сумму</h1>
             </v-btn>
@@ -852,15 +864,23 @@
               >
             </v-row>
             <v-row>
+              <v-col cols="6"><h3>UDS</h3></v-col>
+              <v-col cols="6"
+              ><h3>{{ parseInt(udsPrice, 10) || 0 | money }} сум</h3></v-col
+              >
+            </v-row>
+            <v-row>
               <v-col cols="6"><h3>Сдача</h3></v-col>
               <v-col cols="6"
-                ><div class="display-1 font-weight-bold">
+                ><div>
+                  <h3>
                   {{
                     parseInt(changePrice, 10) > 0
                       ? parseInt(changePrice, 10)
                       : 0 | money
                   }}
                   сум
+                  </h3>
                 </div></v-col
               >
             </v-row>
@@ -1167,8 +1187,10 @@ export default {
     columnApi: null,
     cashPrice: "",
     cardPrice: "",
+    udsPrice: "",
     cashBtn: true,
     cardBtn: false,
+    udsBtn: false,
     currentWeight: "",
     operator: null,
     previous: null,
@@ -1322,7 +1344,7 @@ export default {
       return this.items;
     },
     changePrice() {
-      return +this.cashPrice + +this.cardPrice - +this.totalPrice;
+      return +this.cashPrice + +this.cardPrice + +this.udsPrice - +this.totalPrice;
     }
   },
   beforeMount() {
@@ -1586,14 +1608,21 @@ export default {
       this.orderData = {};
       this.cashPrice = "";
       this.cardPrice = "";
+      this.udsPrice = "";
     },
     payTotalSumm() {
       if (this.cashBtn) {
         this.cashPrice = this.totalPrice;
         this.cardPrice = 0;
-      } else {
+        this.udsPrice = 0;
+      } else if (this.cardBtn) {
         this.cashPrice = 0;
         this.cardPrice = this.totalPrice;
+        this.udsPrice = 0;
+      } else if (this.udsBtn){
+        this.cashPrice = 0;
+        this.cardPrice = 0;
+        this.udsPrice = this.totalPrice;
       }
     },
     async printNode(nodeId) {
@@ -1752,6 +1781,7 @@ export default {
         cartItems: this.cartItems,
         cashPrice: this.cashPrice,
         cardPrice: this.cardPrice,
+        udsPrice: this.udsPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
         discountType: this.discountToggle
@@ -1966,6 +1996,9 @@ export default {
       if (this.cardBtn) {
         this.cardPrice = "";
       }
+      if (this.udsBtn) {
+        this.udsPrice = "";
+      }
     },
     append(number) {
       if (["+", "-"].includes(number)) {
@@ -1980,19 +2013,27 @@ export default {
       }
     },
     shopAppend(number) {
+      const udsPrice = this.udsPrice || 0;
       if (this.cashBtn) {
         this.cashPrice = this.cashPrice + number;
         this.cardPrice =
-          this.totalPrice - this.cashPrice > 0
-            ? this.totalPrice - this.cashPrice
+            (this.totalPrice - udsPrice) - this.cashPrice > 0
+            ? (this.totalPrice - udsPrice) - this.cashPrice
             : 0;
       }
       if (this.cardBtn) {
         this.cardPrice = this.cardPrice + number;
         this.cashPrice =
-          this.totalPrice - this.cardPrice > 0
-            ? this.totalPrice - this.cardPrice
+            (this.totalPrice - udsPrice) - this.cardPrice > 0
+            ? (this.totalPrice - udsPrice) - this.cardPrice
             : 0;
+      }
+      if (this.udsBtn) {
+        this.udsPrice = this.udsPrice + number;
+        // this.cashPrice =
+        //     this.totalPrice - this.udsPrice > 0
+        //         ? this.totalPrice - this.udsPrice
+        //         : 0;
       }
     },
     substr(param) {
@@ -2010,6 +2051,11 @@ export default {
         this.cardPrice = this.cardPrice
           .toString()
           .substring(0, this.cardPrice.toString().length - 1);
+      }
+      if (param.includes("udsPrice") && this.udsBtn) {
+        this.udsPrice = this.udsPrice
+            .toString()
+            .substring(0, this.udsPrice.toString().length - 1);
       }
     },
     dot() {
@@ -2091,10 +2137,18 @@ export default {
     togglePaymentType(type) {
       if (type === "cash") {
         this.cardBtn = false;
+        this.udsBtn = false;
         this.cashBtn = true;
-      } else {
+        this.cardPrice = "";
+      } else if (type === "card") {
         this.cardBtn = true;
         this.cashBtn = false;
+        this.udsBtn = false;
+        this.cashPrice = "";
+      }else if (type === "uds"){
+        this.cardBtn = false;
+        this.cashBtn = false;
+        this.udsBtn = true;
       }
     },
 

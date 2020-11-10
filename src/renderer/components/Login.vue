@@ -52,13 +52,15 @@
                         ></v-select>
                         <v-text-field
                           label="Пароль"
-                          type="password"
+                          :type="show1 ? 'text' : 'password'"
                           v-model="password"
+                          :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                           :rules="passwordRules"
                           @keyup.enter="tryLogin"
                           required
                           outlined
                           rounded
+                          @click:append="show1 = !show1"
                         />
                         <v-btn
                           color="primary"
@@ -169,6 +171,7 @@ export default {
     authForm: false,
     manager: "",
     password: "",
+    show1: false,
     updateSnack: false,
     downloadProgress: 0,
     managerRules: [v => !!v || "Выберите менеджера"],
