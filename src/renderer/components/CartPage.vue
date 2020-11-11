@@ -854,19 +854,19 @@
             <v-row>
               <v-col cols="6"><h3>Наличными</h3></v-col>
               <v-col cols="6"
-                ><h3>{{ parseInt(cashPrice, 10) || 0 | money }} сум</h3></v-col
+                ><h3>{{ +cashPrice || 0 | money }} сум</h3></v-col
               >
             </v-row>
             <v-row>
               <v-col cols="6"><h3>Картой</h3></v-col>
               <v-col cols="6"
-                ><h3>{{ parseInt(cardPrice, 10) || 0 | money }} сум</h3></v-col
+                ><h3>{{ +cardPrice || 0 | money }} сум</h3></v-col
               >
             </v-row>
             <v-row>
               <v-col cols="6"><h3>UDS</h3></v-col>
               <v-col cols="6"
-                ><h3>{{ parseInt(udsPrice, 10) || 0 | money }} сум</h3></v-col
+              ><h3>{{ +udsPrice || 0 | money }} сум</h3></v-col
               >
             </v-row>
             <v-row>
