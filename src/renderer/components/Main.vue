@@ -36,15 +36,15 @@ import { mapGetters, mapActions } from "vuex";
 import CartPage from "./CartPage.vue";
 export default {
   components: {
-    CartPage
+    CartPage,
   },
   data: () => ({
-    currentTab: null
+    currentTab: null,
   }),
   computed: {
     ...mapGetters({
-      cartTabs: "cartTabs"
-    })
+      cartTabs: "cartTabs",
+    }),
   },
   methods: {
     ...mapActions(["appendCartTab", "closeTabByIndex"]),
@@ -57,7 +57,7 @@ export default {
         this.addCartTab();
       }
       this.closeTabByIndex({ index: this.currentTab });
-    }
-  }
+    },
+  },
 };
 </script>

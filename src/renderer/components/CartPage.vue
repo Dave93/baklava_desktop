@@ -623,7 +623,7 @@
                     :key="item.id"
                     @click="categoryToggle(item.id)"
                     :class="{
-                      'v-list-item--active': currentCategoryId === item.id
+                      'v-list-item--active': currentCategoryId === item.id,
                     }"
                     :color="
                       currentCategoryId === item.id ? 'green accent-3' : ''
@@ -706,11 +706,11 @@
               </v-slide-item>
               <v-slide-item v-slot:default="{ active, toggle }">
                 <v-card
-                    height="75"
-                    width="90"
-                    :color="udsBtn ? 'primary' : ''"
-                    class="d-flex align-center mx-2 justify-center my-2"
-                    @click="() => togglePaymentType('uds')"
+                  height="75"
+                  width="90"
+                  :color="udsBtn ? 'primary' : ''"
+                  class="d-flex align-center mx-2 justify-center my-2"
+                  @click="() => togglePaymentType('uds')"
                 >
                   <v-card-title class="subtitle-2">UDS</v-card-title>
                 </v-card>
@@ -866,7 +866,7 @@
             <v-row>
               <v-col cols="6"><h3>UDS</h3></v-col>
               <v-col cols="6"
-              ><h3>{{ parseInt(udsPrice, 10) || 0 | money }} сум</h3></v-col
+                ><h3>{{ parseInt(udsPrice, 10) || 0 | money }} сум</h3></v-col
               >
             </v-row>
             <v-row>
@@ -874,12 +874,12 @@
               <v-col cols="6"
                 ><div>
                   <h3>
-                  {{
-                    parseInt(changePrice, 10) > 0
-                      ? parseInt(changePrice, 10)
-                      : 0 | money
-                  }}
-                  сум
+                    {{
+                      parseInt(changePrice, 10) > 0
+                        ? parseInt(changePrice, 10)
+                        : 0 | money
+                    }}
+                    сум
                   </h3>
                 </div></v-col
               >
@@ -1171,8 +1171,8 @@ export default {
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [v => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [v => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -1210,7 +1210,7 @@ export default {
         cellRenderer: "agGroupCellRenderer",
         suppressSizeToFit: true,
         flex: 3,
-        wrapText: true
+        wrapText: true,
       },
       {
         headerName: "Цена",
@@ -1218,7 +1218,7 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       { headerName: "Вес", field: "weight", width: 50, flex: 2 },
       {
@@ -1227,15 +1227,15 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       {
         headerName: "",
         field: "id",
         cellRenderer: "CartItemDelete",
         width: 40,
-        flex: 1
-      }
+        flex: 1,
+      },
     ],
     context: null,
     frameworkComponents: null,
@@ -1244,7 +1244,7 @@ export default {
     options: [],
     currentClient: {
       ID: null,
-      NAME: null
+      NAME: null,
     },
     setName: "",
     detailCellRendererParams: null,
@@ -1261,7 +1261,7 @@ export default {
     showScaleDialog: false,
     isPlusScale: false,
     isMinusScale: false,
-    cartItems: []
+    cartItems: [],
   }),
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
   computed: {
@@ -1271,11 +1271,11 @@ export default {
       chosenPrinter: "settings/chosenPrinter",
       isOldScale: "settings/isOldScale",
       comPortName: "settings/comPortName",
-      remotePrinterAddress: "settings/remotePrinterAddress"
+      remotePrinterAddress: "settings/remotePrinterAddress",
     }),
     showSetsGrid() {
       let res = false;
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         if (item.type === "set") {
           res = true;
         }
@@ -1283,17 +1283,17 @@ export default {
       return res;
     },
     singleProducts() {
-      return this.cartItems.filter(item => item.type !== "set");
+      return this.cartItems.filter((item) => item.type !== "set");
     },
     setProducts() {
-      return this.cartItems.filter(item => item.type === "set");
+      return this.cartItems.filter((item) => item.type === "set");
     },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       let totalPrice = 0;
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1303,7 +1303,7 @@ export default {
     totalPrice() {
       let totalPrice = 0;
 
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1328,7 +1328,7 @@ export default {
     },
     filteredProducts() {
       if (this.searchText.length > 0) {
-        return this.items.filter(item => {
+        return this.items.filter((item) => {
           return (
             item.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
             (item.barcode && item.barcode.indexOf(this.searchText) >= 0) ||
@@ -1338,14 +1338,16 @@ export default {
       }
       if (this.currentCategoryId > 0) {
         return this.items.filter(
-          item => item.categoryId === this.currentCategoryId
+          (item) => item.categoryId === this.currentCategoryId
         );
       }
       return this.items;
     },
     changePrice() {
-      return +this.cashPrice + +this.cardPrice + +this.udsPrice - +this.totalPrice;
-    }
+      return (
+        +this.cashPrice + +this.cardPrice + +this.udsPrice - +this.totalPrice
+      );
+    },
   },
   beforeMount() {
     this.gridOptions = {};
@@ -1353,7 +1355,7 @@ export default {
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
-      MoneyColumn
+      MoneyColumn,
     };
 
     this.defaultColDef = { flex: 1, resizable: true };
@@ -1365,7 +1367,7 @@ export default {
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
-            wrapText: true
+            wrapText: true,
           },
           {
             headerName: "Цена",
@@ -1373,37 +1375,38 @@ export default {
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
-            wrapText: true
+            wrapText: true,
           },
           { headerName: "Вес", field: "weight", width: 100, flex: 2 },
           {
             headerName: "Итоговая цена",
             field: "totalPrice",
             width: 150,
-            flex: 2
+            cellRenderer: "MoneyColumn",
+            flex: 2,
           },
           {
             headerName: "",
             field: "id",
             cellRenderer: "CartItemDelete",
-            flex: 1
-          }
+            flex: 1,
+          },
         ],
         context: { componentParent: this },
         defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
-          MoneyColumn
+          MoneyColumn,
         },
         rowSelection: "single",
-        onRowSelected: this.cartSetItemSelected
+        onRowSelected: this.cartSetItemSelected,
         // events: {
         //   "selection-changed": this.cartSetItemSelected,
         // },
       },
-      getDetailRowData: params => {
+      getDetailRowData: (params) => {
         params.successCallback(params.data.childs);
-      }
+      },
     };
   },
   mounted() {
@@ -1441,12 +1444,12 @@ export default {
       "unselectAllItems",
       "setWeight",
       "clearCart",
-      "appendSetWithItems"
+      "appendSetWithItems",
     ]),
     selectProductBySearch() {
       const foundItem = this.filteredProducts[0];
       console.log(foundItem);
-      const foundIndex = this.cartItems.findIndex(prod => {
+      const foundIndex = this.cartItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
 
@@ -1470,7 +1473,7 @@ export default {
     async showPaymentReport() {
       this.isPaymentReportLoading = true;
       let { data } = await this.$http.post(this.webHook + `mysale.getReport`, {
-        managerId: this.managerData.ID
+        managerId: this.managerData.ID,
       });
 
       this.isPaymentReportLoading = false;
@@ -1513,7 +1516,7 @@ export default {
           currency(+item.price, {
             symbol: "",
             separator: " ",
-            decimal: ","
+            decimal: ",",
           }).format() +
           CR;
         cmds +=
@@ -1619,7 +1622,7 @@ export default {
         this.cashPrice = 0;
         this.cardPrice = this.totalPrice;
         this.udsPrice = 0;
-      } else if (this.udsBtn){
+      } else if (this.udsBtn) {
         this.cashPrice = 0;
         this.cardPrice = 0;
         this.udsPrice = this.totalPrice;
@@ -1630,7 +1633,7 @@ export default {
 
       htmlToImage
         .toBlob(node)
-        .then(async blob => {
+        .then(async (blob) => {
           const buffer = await Buffer.from(await blob.arrayBuffer());
           const userDataPath = (electron.app || electron.remote.app).getPath(
             "userData"
@@ -1638,13 +1641,13 @@ export default {
 
           if (this.remotePrinterAddress) {
             const tux = path.join(userDataPath, "remotePhoto.png");
-            fs.writeFile(tux, buffer, err => {
+            fs.writeFile(tux, buffer, (err) => {
               // var bodyFormData = new FormData();
               //bodyFormData.append('uploadedFile', screenshotPath);
               // bodyFormData.append("remotePhoto", fs.createReadStream(tux));
 
               this.$http.post(this.remotePrinterAddress + "/print", {
-                remotePhoto: buffer.toString("base64")
+                remotePhoto: buffer.toString("base64"),
               });
             });
           } else {
@@ -1660,9 +1663,9 @@ export default {
             };
             const printer = new escpos.Printer(device, options);
             const tux = path.join(userDataPath, "test.png");
-            fs.writeFile(tux, buffer, err => {
-              escpos.Image.load(tux, img => {
-                device.open(error => {
+            fs.writeFile(tux, buffer, (err) => {
+              escpos.Image.load(tux, (img) => {
+                device.open((error) => {
                   printer
                     .align("ct")
                     .image(img, "d24")
@@ -1674,7 +1677,7 @@ export default {
             });
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           console.error("oops, something went wrong!", error);
         });
     },
@@ -1682,7 +1685,7 @@ export default {
       const sets = [];
 
       const cartItems = [...this.cartItems];
-      cartItems.map(item => {
+      cartItems.map((item) => {
         if (item.type === "set") {
           sets.push(item);
         }
@@ -1699,7 +1702,7 @@ export default {
       let { data: setsData } = await this.$http.post(
         this.webHook + `mysale.createSets`,
         {
-          sets
+          sets,
         }
       );
 
@@ -1739,7 +1742,7 @@ export default {
             currency(+discountValue, {
               symbol: "",
               separator: ".",
-              decimal: ","
+              decimal: ",",
             }).format() + " SO'M";
         }
       }
@@ -1754,14 +1757,14 @@ export default {
           currency(+subTotalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ","
+            decimal: ",",
           }).format() + " SO'M",
         totalPrice:
           currency(+totalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ","
-          }).format() + " SO'M"
+            decimal: ",",
+          }).format() + " SO'M",
       };
 
       setTimeout(() => {
@@ -1784,10 +1787,10 @@ export default {
         udsPrice: this.udsPrice,
         discount: this.discountValue,
         managerId: this.managerData.ID,
-        discountType: this.discountToggle
+        discountType: this.discountToggle,
       };
       let {
-        data: { result: order }
+        data: { result: order },
       } = await this.$http.post(
         this.webHook + `mysale.order.create`,
         orderData
@@ -1807,7 +1810,7 @@ export default {
       let chars = [];
       let vm = this;
       window.removeEventListener("keypress", () => {});
-      window.addEventListener("keypress", e => {
+      window.addEventListener("keypress", (e) => {
         if (
           e.which == 71 ||
           e.which == 85 ||
@@ -1817,7 +1820,7 @@ export default {
         }
 
         if (pressed === false) {
-          setTimeout(function() {
+          setTimeout(function () {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
               vm.addByQrCode(barcode);
@@ -1833,8 +1836,8 @@ export default {
     addByQrCode(code) {
       this.cartWeightRequiredSnack = false;
       const items = [...this.items];
-      const foundItem = items.filter(item => item.barcode === code)[0];
-      const foundIndex = this.cartItems.findIndex(prod => {
+      const foundItem = items.filter((item) => item.barcode === code)[0];
+      const foundIndex = this.cartItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
 
@@ -1863,13 +1866,13 @@ export default {
       //   return;
       // }
 
-      this.cartItems.map(item => {
+      this.cartItems.map((item) => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
         }
 
         if (item.type === "set") {
-          item.childs.map(child => {
+          item.childs.map((child) => {
             if (child.weight === 0) {
               res = false;
             }
@@ -1932,18 +1935,20 @@ export default {
     removeCartItem(node) {
       let item = node.data;
       if (item.parentId) {
-        this.cartItems = this.cartItems.map(parent => {
+        this.cartItems = this.cartItems.map((parent) => {
           if (parent.id === item.parentId) {
-            parent.childs = parent.childs.filter(child => child.id !== item.id);
+            parent.childs = parent.childs.filter(
+              (child) => child.id !== item.id
+            );
           }
           return parent;
         });
       } else {
-        this.cartItems = this.cartItems.filter(prod => item.id !== prod.id);
+        this.cartItems = this.cartItems.filter((prod) => item.id !== prod.id);
       }
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }
@@ -1960,12 +1965,12 @@ export default {
       });
     },
     firstDataRendered() {
-      this.gridSetApi.forEachLeafNode(node => {
+      this.gridSetApi.forEachLeafNode((node) => {
         node && node.setExpanded(true);
       });
     },
     cartSetItemSelected(event) {
-      if (!event.node.selected) {
+      if (event.node && !event.node.selected) {
         return;
       }
       if (event.node) {
@@ -1980,7 +1985,7 @@ export default {
       }
       // this.$refs.cartItemSelectedInput.focus();
     },
-    getHostname: url => {
+    getHostname: (url) => {
       return new URL(url).hostname;
     },
     logout() {
@@ -2017,15 +2022,15 @@ export default {
       if (this.cashBtn) {
         this.cashPrice = this.cashPrice + number;
         this.cardPrice =
-            (this.totalPrice - udsPrice) - this.cashPrice > 0
-            ? (this.totalPrice - udsPrice) - this.cashPrice
+          this.totalPrice - udsPrice - this.cashPrice > 0
+            ? this.totalPrice - udsPrice - this.cashPrice
             : 0;
       }
       if (this.cardBtn) {
         this.cardPrice = this.cardPrice + number;
         this.cashPrice =
-            (this.totalPrice - udsPrice) - this.cardPrice > 0
-            ? (this.totalPrice - udsPrice) - this.cardPrice
+          this.totalPrice - udsPrice - this.cardPrice > 0
+            ? this.totalPrice - udsPrice - this.cardPrice
             : 0;
       }
       if (this.udsBtn) {
@@ -2054,8 +2059,8 @@ export default {
       }
       if (param.includes("udsPrice") && this.udsBtn) {
         this.udsPrice = this.udsPrice
-            .toString()
-            .substring(0, this.udsPrice.toString().length - 1);
+          .toString()
+          .substring(0, this.udsPrice.toString().length - 1);
       }
     },
     dot() {
@@ -2085,12 +2090,12 @@ export default {
       let id = this.selectedCartItem.id;
       weight = +parseFloat(itemWeight).toFixed(3);
       if (this.selectedCartItem.parentId) {
-        this.cartItems = this.cartItems.map(parent => {
+        this.cartItems = this.cartItems.map((parent) => {
           parent.totalPrice = 0;
           parent.price = 0;
           parent.weight = 1;
           if (parent.id === this.selectedCartItem.parentId) {
-            parent.childs = parent.childs.map(child => {
+            parent.childs = parent.childs.map((child) => {
               if (child.id === id) {
                 child.weight = +weight;
                 child.totalPrice = +weight * +child.price;
@@ -2100,7 +2105,7 @@ export default {
               return child;
             });
           } else if (parent.childs) {
-            parent.childs = parent.childs.map(child => {
+            parent.childs = parent.childs.map((child) => {
               parent.totalPrice += child.totalPrice || 0;
               parent.price += child.totalPrice || 0;
               return child;
@@ -2109,7 +2114,7 @@ export default {
           return parent;
         });
       } else {
-        this.cartItems = this.cartItems.map(item => {
+        this.cartItems = this.cartItems.map((item) => {
           if (item.id === id) {
             item.weight = +weight;
             item.totalPrice = +weight * +item.price;
@@ -2124,7 +2129,7 @@ export default {
       this.showScaleDialog = false;
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }
@@ -2145,7 +2150,7 @@ export default {
         this.cashBtn = false;
         this.udsBtn = false;
         this.cashPrice = "";
-      }else if (type === "uds"){
+      } else if (type === "uds") {
         this.cardBtn = false;
         this.cashBtn = false;
         this.udsBtn = true;
@@ -2165,9 +2170,9 @@ export default {
       }
     },
     addChosenProducts() {
-      if (this.editingSetId > 0) {
+      if (this.editingSetId.length > 0) {
         const selectedForSetItems = [];
-        this.items.map(item => {
+        this.items.map((item) => {
           if (item.selected) {
             selectedForSetItems.push(item);
           }
@@ -2175,10 +2180,10 @@ export default {
 
         let setId = this.editingSetId;
         let items = selectedForSetItems;
-        this.cartItems = this.cartItems.map(item => {
+        this.cartItems = this.cartItems.map((item) => {
           if (item.type === "set" && item.id === setId) {
-            items.map(child => {
-              const foundIndex = item.childs.findIndex(prod => {
+            items.map((child) => {
+              const foundIndex = item.childs.findIndex((prod) => {
                 return child.id === prod.id;
               });
               if (child.totalAmountCount > 0) {
@@ -2192,15 +2197,16 @@ export default {
           return item;
         });
 
-        this.editingSetId = 0;
+        this.editingSetId = "";
         setTimeout(() => {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }, 300);
       } else {
         if (this.set) {
-          const parentId = Math.floor(Math.random() * Math.floor(99999));
+          const parentId =
+            "set_" + Math.floor(Math.random() * Math.floor(99999));
           const item = {
             name: this.setName,
             weight: 1,
@@ -2208,9 +2214,9 @@ export default {
             price: 0,
             totalPrice: 0,
             type: "set",
-            id: parentId
+            id: parentId,
           };
-          this.items.map(prod => {
+          this.items.map((prod) => {
             if (prod.selected) {
               if (prod.totalAmountCount > 0) {
                 item.childs.push({ ...prod, parentId });
@@ -2228,7 +2234,7 @@ export default {
             price: item.price,
             totalPrice: 0,
             weight: 0,
-            type: item.type
+            type: item.type,
           };
           if (item.childs) {
             newItem.childs = item.childs;
@@ -2236,20 +2242,21 @@ export default {
           this.cartItems.push(newItem);
 
           setTimeout(() => {
-            this.gridSetApi.forEachLeafNode(node => {
+            this.gridSetApi.forEachLeafNode((node) => {
               node && node.setExpanded(true);
             });
           }, 300);
         } else {
-          this.items.map(item => {
+          this.items.map((item) => {
             if (item.selected) {
-              const foundIndex = this.cartItems.findIndex(prod => {
+              console.log(item);
+              const foundIndex = this.cartItems.findIndex((prod) => {
                 return item.id === prod.id;
               });
 
               if (item.totalAmountCount > 0) {
                 if (foundIndex < 0) {
-                  const newItem = {
+                  let newItem = {
                     id: item.id,
                     name: item.name,
                     barcode: item.barcode,
@@ -2257,8 +2264,29 @@ export default {
                     price: item.price,
                     totalPrice: 0,
                     weight: 0,
-                    type: "product"
+                    type: item.type,
                   };
+                  if (item.type === "set") {
+                    let setTotalPrice = 0;
+                    newItem.childs = [];
+                    newItem.weight = 1;
+                    item.childs.map((child) => {
+                      setTotalPrice += +child.QUANTITY * +child.BASE_PRICE;
+                      newItem.childs.push({
+                        id: child.ID,
+                        name: child.ELEMENT_NAME,
+                        barcode: child.BARCODE_BARCODE,
+                        price: child.BASE_PRICE,
+                        type: child.type,
+                        totalAmountCount: child.TOTAL_AMOUNT_COUNT,
+                        img: child.image,
+                        totalPrice: +child.QUANTITY * +child.BASE_PRICE,
+                        weight: child.QUANTITY,
+                        parentId: item.id,
+                      });
+                    });
+                    newItem.totalPrice = setTotalPrice;
+                  }
                   this.cartItems.push(newItem);
                 }
               } else {
@@ -2276,16 +2304,16 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
-    }
+    },
   },
   filters: {
-    money: value => {
+    money: (value) => {
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
       );
-    }
-  }
+    },
+  },
 };
 </script>
 

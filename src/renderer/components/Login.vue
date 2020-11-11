@@ -7,7 +7,7 @@
             <div
               class="auth-back"
               :style="{
-                backgroundImage: printLogo
+                backgroundImage: printLogo,
               }"
             ></div>
           </v-col>
@@ -158,7 +158,7 @@ import { mapGetters, mapActions } from "vuex";
 let { remote, ipcRenderer } = require("electron");
 let webContents = remote.getCurrentWebContents();
 let printers = webContents.getPrinters(); //list the printers
-let printerNames = printers.map(item => item.name);
+let printerNames = printers.map((item) => item.name);
 export default {
   name: "Login",
   layout: "auth",
@@ -174,11 +174,11 @@ export default {
     show1: false,
     updateSnack: false,
     downloadProgress: 0,
-    managerRules: [v => !!v || "Выберите менеджера"],
-    passwordRules: [v => !!v || "Введите пароль"],
+    managerRules: [(v) => !!v || "Выберите менеджера"],
+    passwordRules: [(v) => !!v || "Введите пароль"],
     authError: "",
     isAuthLoading: false,
-    printers: printerNames
+    printers: printerNames,
   }),
   async mounted() {
     await this.tryGetManagers();
@@ -199,8 +199,8 @@ export default {
       chosenPrinter: "settings/chosenPrinter",
       isOldScale: "settings/isOldScale",
       comPortName: "settings/comPortName",
-      remotePrinterAddress: "settings/remotePrinterAddress"
-    })
+      remotePrinterAddress: "settings/remotePrinterAddress",
+    }),
   },
   methods: {
     ...mapActions({
@@ -212,7 +212,7 @@ export default {
       setComPortName: "settings/setComPortName",
       setRemotePrinterAddress: "settings/setRemotePrinterAddress",
       setCategories: "setCategories",
-      setProducts: "setProducts"
+      setProducts: "setProducts",
     }),
     saveSettings(val) {
       this.setWebHook({ val });
@@ -243,9 +243,9 @@ export default {
           this.webHook + "mymanager.user.getList?filter[UF_MANAGER]=1"
         );
         if (data.result && data.result.length) {
-          this.managers = data.result.map(item => ({
+          this.managers = data.result.map((item) => ({
             value: item.LOGIN,
-            text: `${item.LAST_NAME} ${item.NAME}`
+            text: `${item.LAST_NAME} ${item.NAME}`,
           }));
           this.isManagersFound = true;
         } else {
@@ -271,16 +271,16 @@ export default {
             `${this.webHook}mycatalog.section.list`
           );
           await this.setCategories({
-            val: categoriesData.result.map(item => ({
+            val: categoriesData.result.map((item) => ({
               id: item.ID,
-              name: item.NAME
-            }))
+              name: item.NAME,
+            })),
           });
           let { data: productsData } = await this.$http.get(
             `${this.webHook}mycatalog.product.list?managerId=${data.result.ID}`
           );
           await this.setProducts({
-            val: productsData.result.map(item => ({
+            val: productsData.result.map((item) => ({
               id: item.ID,
               name: item.ELEMENT_NAME,
               barcode: item.BARCODE_BARCODE,
@@ -289,9 +289,12 @@ export default {
               categoryId: item.ELEMENT_IBLOCK_SECTION_ID,
               image: item.PREVIEW_PICTURE,
               price: item.BASE_PRICE,
-              totalAmountCount: item.TOTAL_AMOUNT_COUNT
-            }))
+              type: item.type,
+              totalAmountCount: item.TOTAL_AMOUNT_COUNT,
+              childs: item.childs,
+            })),
           });
+          console.log(productsData);
           this.isAuthLoading = false;
           await this.$router.push("/main");
         } else {
@@ -303,8 +306,8 @@ export default {
         this.isAuthLoading = false;
         this.authError = "Неверный пароль";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
