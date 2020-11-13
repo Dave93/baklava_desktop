@@ -71,7 +71,7 @@
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "currency.js": "^2.0.3",
-    "date-fns": "^2.15.0",
+    "date-fns": "^2.16.1",
     "electron-log": "^4.2.4",
     "electron-pos-printer": "^1.2.1",
     "electron-store": "^6.0.0",

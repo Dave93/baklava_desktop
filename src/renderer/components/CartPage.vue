@@ -293,23 +293,61 @@
                     </v-tooltip>
                   </v-col>
                   <v-col cols="4" class="pb-0">
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
+                    <v-speed-dial
+                      v-model="moreTools"
+                      direction="top"
+                      open-on-hover
+                      transition="slide-y-reverse-transition"
+                    >
+                      <template v-slot:activator>
                         <v-btn
+                          v-model="moreTools"
                           color="grey darken-3"
                           class="green--text"
                           width="60"
                           height="70"
-                          :loading="isPaymentReportLoading"
-                          @click="showPaymentReport"
-                          v-bind="attrs"
-                          v-on="on"
                         >
-                          <v-icon large>mdi-file-chart</v-icon>
+                          <v-icon v-if="moreTools">
+                            mdi-close
+                          </v-icon>
+                          <v-icon v-else>
+                            mdi-dots-horizontal
+                          </v-icon>
                         </v-btn>
                       </template>
-                      <span>Показать отчёт о суммах</span>
-                    </v-tooltip>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            color="grey darken-3"
+                            class="green--text"
+                            width="60"
+                            height="70"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="showOrderDialog"
+                          >
+                            <v-icon large>mdi-clipboard-list-outline</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Заказы</span>
+                      </v-tooltip>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            color="grey darken-3"
+                            class="green--text"
+                            width="60"
+                            height="70"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="logout"
+                          >
+                            <v-icon large>mdi-lock-open-variant-outline</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Выход</span>
+                      </v-tooltip>
+                    </v-speed-dial>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -358,14 +396,15 @@
                           class="green--text"
                           width="60"
                           height="70"
+                          :loading="isPaymentReportLoading"
+                          @click="showPaymentReport"
                           v-bind="attrs"
                           v-on="on"
-                          @click="logout"
                         >
-                          <v-icon large>mdi-lock-open-variant-outline</v-icon>
+                          <v-icon large>mdi-file-chart</v-icon>
                         </v-btn>
                       </template>
-                      <span>Выход</span>
+                      <span>Показать отчёт о суммах</span>
                     </v-tooltip>
                   </v-col>
                 </v-row>
@@ -402,6 +441,81 @@
           </v-col>
         </v-row>
       </v-container>
+      <v-dialog v-model="orderDialog">
+        <div v-if="orderDialog">
+          <v-card>
+            <v-card-text>
+              <v-row class="d-flex align-center">
+                <v-menu
+                  v-model="showOrderDatePicker"
+                  :close-on-content-click="false"
+                  :nudge-right="40"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      :value="orderPickerDateFormatted"
+                      label="Период заказов"
+                      readonly
+                      placeholder="Укажите даты"
+                      v-bind="attrs"
+                      class="px-4 col-4"
+                      outlined
+                      allowed-dates
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="orderPickerDate"
+                    locale="ru"
+                    show-current
+                    range
+                    no-title
+                    @input="showOrderDatePicker = false"
+                  >
+                  </v-date-picker>
+                </v-menu>
+                <v-btn
+                  color="green accent-3 mb-8"
+                  :loading="orderDataLoading"
+                  @click="loadOrdersList"
+                  >Обновить</v-btn
+                >
+              </v-row>
+              <v-data-table
+                :headers="ordersHeaders"
+                :items="ordersList"
+                :loading="orderDataLoading"
+                class="elevation-1"
+              >
+                <template v-slot:item.actions="{ item }">
+                  <v-icon small class="mr-2">
+                    mdi-pencil
+                  </v-icon>
+                  <v-icon small>
+                    mdi-delete
+                  </v-icon>
+                </template>
+                <template v-slot:item.TOTAL_PRICE="{ item }">
+                  <span>{{ item.TOTAL_PRICE | money }} сум</span>
+                </template>
+                <template v-slot:item.PAYMENT="{ item }">
+                  <div v-for="payment in item.PAYMENT">
+                    {{ payment.LABEL }}: {{ payment.SUM | money }} сум
+                  </div>
+                </template>
+                <template v-slot:no-data>
+                  <v-btn color="primary">
+                    Reset
+                  </v-btn>
+                </template>
+              </v-data-table>
+            </v-card-text>
+          </v-card>
+        </div>
+      </v-dialog>
       <v-dialog
         v-model="showScaleDialog"
         @click:outside="clearScaleDialog"
@@ -866,7 +980,7 @@
             <v-row>
               <v-col cols="6"><h3>UDS</h3></v-col>
               <v-col cols="6"
-              ><h3>{{ +udsPrice || 0 | money }} сум</h3></v-col
+                ><h3>{{ +udsPrice || 0 | money }} сум</h3></v-col
               >
             </v-row>
             <v-row>
@@ -1146,6 +1260,8 @@ import CartItemDelete from "./CartItemDelete";
 import MoneyColumn from "./MoneyColumn";
 import htmlToImage from "html-to-image";
 import VueBarcode from "vue-barcode";
+import { formatWithOptions, parseISO } from "date-fns/fp";
+import { ru } from "date-fns/locale";
 const { ipcRenderer } = require("electron");
 const escpos = require("escpos");
 const path = require("path");
@@ -1161,6 +1277,44 @@ JSPM.JSPrintManager.start();
 
 export default {
   data: () => ({
+    orderDataLoading: false,
+    ordersList: [],
+    ordersHeaders: [
+      {
+        text: "Номер заказа",
+        align: "start",
+        sortable: false,
+        value: "ID",
+      },
+      {
+        text: "Дата заказа",
+        sortable: false,
+        value: "DATE_INSERT",
+      },
+      {
+        text: "Общая сумма",
+        sortable: false,
+        value: "TOTAL_PRICE",
+      },
+      {
+        text: "Оплаты",
+        sortable: false,
+        value: "PAYMENT",
+      },
+      // { text: 'Calories', value: 'calories' },
+      // { text: 'Fat (g)', value: 'fat' },
+      // { text: 'Carbs (g)', value: 'carbs' },
+      // { text: 'Protein (g)', value: 'protein' },
+      { text: "Действия", value: "actions", sortable: false },
+    ],
+    orderPickerDate: [
+      new Date().toISOString().substr(0, 10),
+      new Date().toISOString().substr(0, 10),
+    ],
+    orderPickerMinDate: new Date().toISOString().substr(0, 10),
+    showOrderDatePicker: false,
+    orderDialog: false,
+    moreTools: false,
     editingSetId: 0,
     showPaymentReportDialog: false,
     isPaymentReportLoading: false,
@@ -1273,6 +1427,17 @@ export default {
       comPortName: "settings/comPortName",
       remotePrinterAddress: "settings/remotePrinterAddress",
     }),
+    orderPickerDateFormatted() {
+      const arrival = this.orderPickerDate;
+      return Array.isArray(arrival)
+        ? arrival
+            .sort()
+            .map((item) => {
+              return formatWithOptions({ locale: ru }, "d MMM", parseISO(item));
+            })
+            .join(" - ")
+        : "";
+    },
     showSetsGrid() {
       let res = false;
       this.cartItems.map((item) => {
@@ -1431,6 +1596,7 @@ export default {
     document.removeEventListener("setWeight", this.setScaleWeight);
     document.addEventListener("setWeight", this.setScaleWeight);
     this.listenForBarcode();
+    this.loadOrdersList();
   },
   beforeDestroy() {
     document.removeEventListener("setWeight", this.setScaleWeight);
@@ -1446,6 +1612,20 @@ export default {
       "clearCart",
       "appendSetWithItems",
     ]),
+    async loadOrdersList() {
+      console.log(this.orderPickerDate);
+      this.orderDataLoading = true;
+
+      let { data } = await this.$http.post(
+        this.webHook + `mysale.getOrderList`,
+        {
+          managerId: this.managerData.ID,
+          dateRange: this.orderPickerDate,
+        }
+      );
+      this.ordersList = data.result;
+      this.orderDataLoading = false;
+    },
     selectProductBySearch() {
       const foundItem = this.filteredProducts[0];
       console.log(foundItem);
@@ -2304,6 +2484,9 @@ export default {
     },
     focusDiscountInput() {
       this.$refs.discountInput.focus();
+    },
+    showOrderDialog() {
+      this.orderDialog = true;
     },
   },
   filters: {
