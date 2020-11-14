@@ -163,7 +163,7 @@ export default {
   name: "Login",
   layout: "auth",
   data: () => ({
-    printLogo: "static/images/auth.png",
+    printLogo: "/images/auth.png",
     dialog: false,
     managers: [],
     isSavingSettings: false,

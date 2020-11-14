@@ -1724,22 +1724,7 @@ export default {
         return false;
       }
     },
-    listenOldScale() {
-      this.scaleWeightInterval = setInterval(async () => {
-        try {
-          let { data } = await this.$http.get(
-            "http://localhost:8888/api/Scale?portName=" + this.comPortName
-          );
-          if (data.length && data[0]) {
-            this.currentScaleWeight = +data[0];
-          }
-        } catch (e) {}
-        if (!this.isMinusScale && !this.isPlusScale) {
-          clearInterval(this.scaleWeightInterval);
-          this.scaleWeightInterval = null;
-        }
-      }, 100);
-    },
+
     showPlusScale() {
       if (!this.selectedCartItem.id) {
         this.cartWeightRequiredSnack = true;
@@ -1747,9 +1732,6 @@ export default {
         return;
       }
       this.isPlusScale = true;
-      if (this.isOldScale) {
-        this.listenOldScale();
-      }
       this.showScaleDialog = true;
       setTimeout(() => {
         this.$refs.cartItemSelectedInput.focus();
@@ -1762,9 +1744,6 @@ export default {
         return;
       }
       this.isMinusScale = true;
-      if (this.isOldScale) {
-        this.listenOldScale();
-      }
       this.showScaleDialog = true;
       setTimeout(() => {
         this.$refs.cartItemSelectedInput.focus();
