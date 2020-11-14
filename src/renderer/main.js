@@ -72,8 +72,26 @@ const listenForScale = async () => {
   });
 };
 
+const listenOldScale  = () => {
+  this.scaleWeightInterval = setInterval(async () => {
+    try {
+      let { data } = await axios.get(
+          "http://localhost:8888/api/Scale?portName=COM1"
+      );
+
+      const event = new CustomEvent('setWeight', {
+        detail: {
+          weight: +data[0]
+        },
+      });
+    } catch (e) {}
+  }, 100);
+};
+
 if (!isOldScale) {
   listenForScale();
+} else {
+  listenOldScale();
 }
 
 /* eslint-disable no-new */
