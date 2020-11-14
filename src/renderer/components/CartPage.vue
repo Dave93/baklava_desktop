@@ -1098,7 +1098,7 @@
                 <tbody>
                   <tr>
                     <td>Сумма с ндс, 15%:</td>
-                    <td>{{ orderPrintData.subTotalPrice | money }}</td>
+                    <td>{{ orderPrintData.subTotalPrice }}</td>
                   </tr>
                   <tr>
                     <td>Скидка:</td>
@@ -1107,7 +1107,7 @@
                   <tr>
                     <td style="font-weight: bold; font-size: 30px;">Итог:</td>
                     <td style="font-weight: bold; font-size: 30px;">
-                      {{ orderPrintData.totalPrice | money }}
+                      {{ orderPrintData.totalPrice }}
                     </td>
                   </tr>
                 </tbody>
@@ -2593,6 +2593,11 @@ export default {
   },
   filters: {
     money: (value) => {
+      console.log(value)
+      console.log((
+          value &&
+          currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
+      ))
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
