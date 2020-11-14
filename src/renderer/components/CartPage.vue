@@ -2593,11 +2593,15 @@ export default {
   },
   filters: {
     money: (value) => {
-      console.log(value)
-      console.log((
-          value &&
-          currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
-      ))
+      console.log(value);
+      console.log(
+        value &&
+          currency(+value, {
+            symbol: "",
+            separator: " ",
+            decimal: ",",
+          }).format()
+      );
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
