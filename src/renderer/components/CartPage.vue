@@ -491,11 +491,8 @@
                 class="elevation-1"
               >
                 <template v-slot:item.actions="{ item }">
-                  <v-icon small class="mr-2">
-                    mdi-pencil
-                  </v-icon>
-                  <v-icon small>
-                    mdi-delete
+                  <v-icon @click="showExistingOrderInfo(item.ID)" class="mr-2">
+                    mdi-information-outline
                   </v-icon>
                 </template>
                 <template v-slot:item.TOTAL_PRICE="{ item }">
@@ -1140,6 +1137,92 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="showExistingOrderDialog" max-width="590px">
+      <v-card v-if="showExistingOrderDialog" :loading="isLoadingExistingOrder">
+        <v-card-text>
+          <div
+            id="existing-order-print"
+            v-if="!isLoadingExistingOrder"
+            style="width: 540px;"
+          >
+            <div class="text-center py-3">
+              <img :src="printLogo" alt="" />
+            </div>
+            <div class="text-center py-3">OOO "Gavali Sweets"</div>
+            <div class="text-center py-3">
+              <div>
+                <v-icon>mdi-map-marker</v-icon>
+                {{ existingOrderPrintData.address }}
+              </div>
+            </div>
+            <div class="text-center py-3">
+              <span>{{ existingOrderPrintData.printTime }}</span>
+              <span>Чек №: {{ existingOrderPrintData.orderId }}</span>
+              <span>Кассир: {{ existingOrderPrintData.manager }}</span>
+            </div>
+            <div class="clear-user-agent-styles print-cart-items-table py-3">
+              <table>
+                <thead>
+                  <tr>
+                    <th width="30px">Кол-во</th>
+                    <th width="50px">Наименование товара</th>
+                    <th width="50px">Цена</th>
+                    <th width="50px">Сумма</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="item in existingOrderPrintData.cartItems"
+                    :key="item.id"
+                  >
+                    <td>{{ item.weight }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.price | money }}</td>
+                    <td>{{ item.totalPrice | money }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="clear-user-agent-styles py-3">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>Сумма с ндс, 15%:</td>
+                    <td>{{ existingOrderPrintData.subTotalPrice | money }}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold; font-size: 30px;">Итог:</td>
+                    <td style="font-weight: bold; font-size: 30px;">
+                      {{ existingOrderPrintData.totalPrice | money }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="text-center py-6">Спасибо за покупку!</div>
+            <v-row>
+              <v-col cols="6">
+                <v-icon>mdi-phone-in-talk-outline</v-icon> +998 97 444-11-00
+              </v-col>
+              <v-col cols="6"> <v-icon>mdi-web</v-icon> www.gavali.uz </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="6">
+                <v-icon>mdi-facebook</v-icon> gavali_uzbekistan
+              </v-col>
+              <v-col cols="6">
+                <v-icon>mdi-instagram</v-icon> gavali_uzbekistan
+              </v-col>
+            </v-row>
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn icon large @click="printNode('existing-order-print')">
+            <v-icon>mdi-cloud-print-outline</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="showSetPrintDialog" max-width="450px">
       <v-card v-if="showSetPrintDialog">
         <v-card-text>
@@ -1175,7 +1258,7 @@
                   <tbody>
                     <tr>
                       <td>Сумма:</td>
-                      <td>{{ set.totalPrice }}</td>
+                      <td>{{ set.totalPrice | money }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1277,6 +1360,8 @@ JSPM.JSPrintManager.start();
 
 export default {
   data: () => ({
+    showExistingOrderDialog: false,
+    isLoadingExistingOrder: false,
     orderDataLoading: false,
     ordersList: [],
     ordersHeaders: [
@@ -1409,6 +1494,7 @@ export default {
     currentScaleWeight: 0,
     showPrintDialog: false,
     orderPrintData: {},
+    existingOrderPrintData: {},
     isSetSaving: false,
     setPrintData: null,
     showSetPrintDialog: false,
@@ -1591,7 +1677,6 @@ export default {
     );
     this.gridApi = this.gridOptions.api;
     this.gridSetApi = this.gridSetOptions.api;
-    window.davr = this.gridSetApi;
     this.gridColumnApi = this.gridOptions.columnApi;
     document.removeEventListener("setWeight", this.setScaleWeight);
     document.addEventListener("setWeight", this.setScaleWeight);
@@ -1612,6 +1697,23 @@ export default {
       "clearCart",
       "appendSetWithItems",
     ]),
+    async showExistingOrderInfo(orderId) {
+      this.isLoadingExistingOrder = true;
+
+      this.showExistingOrderDialog = true;
+
+      let { data } = await this.$http.post(
+        this.webHook + `mysale.getOrderById`,
+        {
+          managerId: this.managerData.ID,
+          orderId,
+        }
+      );
+
+      this.existingOrderPrintData = data.result;
+
+      this.isLoadingExistingOrder = false;
+    },
     async loadOrdersList() {
       console.log(this.orderPickerDate);
       this.orderDataLoading = true;
@@ -2470,6 +2572,11 @@ export default {
   },
   filters: {
     money: (value) => {
+      console.log(value)
+      console.log((
+          value &&
+          currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
+      ))
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
