@@ -36,17 +36,17 @@ import { mapGetters, mapActions } from "vuex";
 import CartPage from "./CartPage.vue";
 export default {
   components: {
-    CartPage,
+    CartPage
   },
   data: () => ({
-    currentTab: null,
+    currentTab: null
     // currentScaleWeight: 0,
   }),
   computed: {
     ...mapGetters({
-      cartTabs: "cartTabs",
+      cartTabs: "cartTabs"
       // comPortName: "settings/comPortName",
-    }),
+    })
   },
   methods: {
     ...mapActions(["appendCartTab", "closeTabByIndex"]),
@@ -59,7 +59,7 @@ export default {
         this.addCartTab();
       }
       this.closeTabByIndex({ index: this.currentTab });
-    },
+    }
   },
   mounted: {
     // listenOldScale() {
