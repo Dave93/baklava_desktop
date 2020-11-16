@@ -86,6 +86,7 @@ const listenOldScale  = () => {
           weight: +data[0]
         },
       });
+      document.dispatchEvent(event);
     } catch (e) {}
   }, 100);
 };
