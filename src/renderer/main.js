@@ -93,9 +93,9 @@ const listenOldScale  = () => {
 
 if (!isOldScale) {
   listenForScale();
-} else {
+}/* else {
   listenOldScale();
-}
+}*/
 
 /* eslint-disable no-new */
 new Vue({
