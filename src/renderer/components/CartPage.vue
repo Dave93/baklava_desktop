@@ -12,12 +12,7 @@
                       color="grey"
                       x-large
                       width="100%"
-                      @click="
-                        () => {
-                          this.showSearchDialog = true;
-                          this.selectedCartItem = {};
-                        }
-                      "
+                      @click="openSearchDialog"
                       >Поиск товара</v-btn
                     >
                   </v-col>
@@ -695,6 +690,7 @@
                   <v-text-field
                     v-model="searchText"
                     placeholder="Поиск..."
+                    ref="searchText"
                     rounded
                     outlined
                     dense
@@ -1345,6 +1341,7 @@ import htmlToImage from "html-to-image";
 import VueBarcode from "vue-barcode";
 import { formatWithOptions, parseISO } from "date-fns/fp";
 import { ru } from "date-fns/locale";
+import axios from "axios";
 const { ipcRenderer } = require("electron");
 const escpos = require("escpos");
 const path = require("path");
@@ -1502,6 +1499,7 @@ export default {
     isPlusScale: false,
     isMinusScale: false,
     cartItems: [],
+    portListener: null,
   }),
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
   computed: {
@@ -1697,6 +1695,13 @@ export default {
       "clearCart",
       "appendSetWithItems",
     ]),
+    openSearchDialog() {
+      this.showSearchDialog = true;
+      this.selectedCartItem = {};
+      setTimeout(() => {
+        this.$refs.searchText.focus();
+      });
+    },
     async showExistingOrderInfo(orderId) {
       this.isLoadingExistingOrder = true;
 
@@ -1728,16 +1733,32 @@ export default {
       this.ordersList = data.result;
       this.orderDataLoading = false;
     },
-    selectProductBySearch() {
+    async selectProductBySearch() {
       const foundItem = this.filteredProducts[0];
-      console.log(foundItem);
       const foundIndex = this.cartItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
 
       if (foundItem.totalAmountCount > 0) {
         if (foundIndex < 0) {
-          this.cartItems.push({ ...foundItem, type: "product" });
+          if (this.isOldScale) {
+            try {
+              let comPortName = this.comPortName;
+              let { data } = await this.$http.get(
+                "http://localhost:8888/api/Scale?portName=" + comPortName
+              );
+
+              foundItem.weight = +data[0];
+              foundItem.totalPrice = +foundItem.weight * +foundItem.price;
+              this.cartItems.push({ ...foundItem, type: "product" });
+              // this.showSearchDialog = false;
+            } catch (e) {}
+          } else {
+            foundItem.weight = this.currentScaleWeight;
+            foundItem.totalPrice = +foundItem.weight * +foundItem.price;
+            this.cartItems.push({ ...foundItem, type: "product" });
+            // this.showSearchDialog = false;
+          }
         }
       } else {
         this.cartWeightRequiredSnack = true;
@@ -1835,6 +1856,20 @@ export default {
       }
       this.isPlusScale = true;
       this.showScaleDialog = true;
+
+      if (this.isOldScale) {
+        this.portListener = setInterval(async () => {
+          try {
+            let comPortName = this.comPortName;
+            let { data } = await this.$http.get(
+              "http://localhost:8888/api/Scale?portName=" + comPortName
+            );
+
+            this.currentScaleWeight = +data[0];
+          } catch (e) {}
+        }, 100);
+      }
+
       setTimeout(() => {
         this.$refs.cartItemSelectedInput.focus();
       });
@@ -1847,6 +1882,18 @@ export default {
       }
       this.isMinusScale = true;
       this.showScaleDialog = true;
+      if (this.isOldScale) {
+        this.portListener = setInterval(async () => {
+          try {
+            let comPortName = this.comPortName;
+            let { data } = await this.$http.get(
+              "http://localhost:8888/api/Scale?portName=" + comPortName
+            );
+
+            this.currentScaleWeight = +data[0];
+          } catch (e) {}
+        }, 100);
+      }
       setTimeout(() => {
         this.$refs.cartItemSelectedInput.focus();
       });
@@ -2335,6 +2382,10 @@ export default {
         ? this.currentWeight
         : this.currentScaleWeight;
 
+      if (this.isOldScale) {
+        clearTimeout(this.portListener);
+      }
+
       let { weight: itemWeight } = this.selectedCartItem;
       if (!itemWeight) {
         itemWeight = 0;
@@ -2572,15 +2623,6 @@ export default {
   },
   filters: {
     money: (value) => {
-      console.log(value);
-      console.log(
-        value &&
-          currency(+value, {
-            symbol: "",
-            separator: " ",
-            decimal: ",",
-          }).format()
-      );
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()

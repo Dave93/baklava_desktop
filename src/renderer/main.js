@@ -73,10 +73,12 @@ const listenForScale = async () => {
 };
 
 const listenOldScale  = () => {
-  this.scaleWeightInterval = setInterval(async () => {
+  setInterval(async () => {
     try {
+      let comPortName = eStore.get('comPortName');
+      comPortName = JSON.parse(comPortName);
       let { data } = await axios.get(
-          "http://localhost:8888/api/Scale?portName=COM1"
+          "http://localhost:8888/api/Scale?portName=" + comPortName
       );
 
       const event = new CustomEvent('setWeight', {
@@ -84,15 +86,16 @@ const listenOldScale  = () => {
           weight: +data[0]
         },
       });
+      document.dispatchEvent(event);
     } catch (e) {}
   }, 100);
 };
 
 if (!isOldScale) {
   listenForScale();
-} else {
+}/* else {
   listenOldScale();
-}
+}*/
 
 /* eslint-disable no-new */
 new Vue({
