@@ -512,6 +512,7 @@
         v-model="showScaleDialog"
         @click:outside="clearScaleDialog"
         max-width="450px"
+        persistent
       >
         <v-card
           v-if="showScaleDialog"
@@ -1867,7 +1868,7 @@ export default {
 
             this.currentScaleWeight = +data[0];
           } catch (e) {}
-        }, 100);
+        }, 200);
       }
 
       setTimeout(() => {
@@ -1892,7 +1893,7 @@ export default {
 
             this.currentScaleWeight = +data[0];
           } catch (e) {}
-        }, 100);
+        }, 200);
       }
       setTimeout(() => {
         this.$refs.cartItemSelectedInput.focus();
