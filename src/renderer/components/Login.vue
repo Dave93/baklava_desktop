@@ -1,22 +1,14 @@
 <template>
   <v-app light>
     <v-main>
-      <v-container class="fill-height" fluid>
+      <v-container class="fill-height auth-background" fluid>
         <v-row align="stretch" justify="start">
-          <v-col cols="6">
-            <div
-              class="auth-back"
-              :style="{
-                backgroundImage: printLogo
-              }"
-            ></div>
-          </v-col>
-          <v-col cols="6" class="mt-n6">
+          <v-col cols="6" class="mt-n6 mx-auto">
             <div>
               <v-row>
                 <v-col cols="10"></v-col>
                 <v-col cols="2">
-                  <v-btn icon @click="dialog = true">
+                  <v-btn icon @click="dialog = true" color="white">
                     <v-icon>mdi-cog</v-icon>
                   </v-btn>
                 </v-col>
@@ -32,7 +24,7 @@
                         size="64"
                       ></v-progress-circular>
                     </v-overlay>
-                    <v-card flat align="center">
+                    <v-card class="auth-form px-6" flat align="center">
                       <v-card-title class="headline justify-center"
                         >Авторизация</v-card-title
                       >
@@ -158,7 +150,7 @@ import { mapGetters, mapActions } from "vuex";
 let { remote, ipcRenderer } = require("electron");
 let webContents = remote.getCurrentWebContents();
 let printers = webContents.getPrinters(); //list the printers
-let printerNames = printers.map(item => item.name);
+let printerNames = printers.map((item) => item.name);
 export default {
   name: "Login",
   layout: "auth",
@@ -174,11 +166,11 @@ export default {
     show1: false,
     updateSnack: false,
     downloadProgress: 0,
-    managerRules: [v => !!v || "Выберите менеджера"],
-    passwordRules: [v => !!v || "Введите пароль"],
+    managerRules: [(v) => !!v || "Выберите менеджера"],
+    passwordRules: [(v) => !!v || "Введите пароль"],
     authError: "",
     isAuthLoading: false,
-    printers: printerNames
+    printers: printerNames,
   }),
   async mounted() {
     await this.tryGetManagers();
@@ -199,8 +191,8 @@ export default {
       chosenPrinter: "settings/chosenPrinter",
       isOldScale: "settings/isOldScale",
       comPortName: "settings/comPortName",
-      remotePrinterAddress: "settings/remotePrinterAddress"
-    })
+      remotePrinterAddress: "settings/remotePrinterAddress",
+    }),
   },
   methods: {
     ...mapActions({
@@ -212,7 +204,7 @@ export default {
       setComPortName: "settings/setComPortName",
       setRemotePrinterAddress: "settings/setRemotePrinterAddress",
       setCategories: "setCategories",
-      setProducts: "setProducts"
+      setProducts: "setProducts",
     }),
     saveSettings(val) {
       this.setWebHook({ val });
@@ -243,9 +235,9 @@ export default {
           this.webHook + "mymanager.user.getList?filter[UF_MANAGER]=1"
         );
         if (data.result && data.result.length) {
-          this.managers = data.result.map(item => ({
+          this.managers = data.result.map((item) => ({
             value: item.LOGIN,
-            text: `${item.LAST_NAME} ${item.NAME}`
+            text: `${item.LAST_NAME} ${item.NAME}`,
           }));
           this.isManagersFound = true;
         } else {
@@ -271,16 +263,16 @@ export default {
             `${this.webHook}mycatalog.section.list`
           );
           await this.setCategories({
-            val: categoriesData.result.map(item => ({
+            val: categoriesData.result.map((item) => ({
               id: item.ID,
-              name: item.NAME
-            }))
+              name: item.NAME,
+            })),
           });
           let { data: productsData } = await this.$http.get(
             `${this.webHook}mycatalog.product.list?managerId=${data.result.ID}`
           );
           await this.setProducts({
-            val: productsData.result.map(item => ({
+            val: productsData.result.map((item) => ({
               id: item.ID,
               name: item.ELEMENT_NAME,
               barcode: item.BARCODE_BARCODE,
@@ -291,8 +283,8 @@ export default {
               price: item.BASE_PRICE,
               type: item.type,
               totalAmountCount: item.TOTAL_AMOUNT_COUNT,
-              childs: item.childs
-            }))
+              childs: item.childs,
+            })),
           });
           console.log(productsData);
           this.isAuthLoading = false;
@@ -306,8 +298,8 @@ export default {
         this.isAuthLoading = false;
         this.authError = "Неверный пароль";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -327,5 +319,15 @@ export default {
 }
 .block-relative {
   position: relative;
+}
+.auth-background {
+  background: url("http://crm.gavali.uz/upload/background.jpg") center center
+    no-repeat fixed;
+  background-size: cover;
+  width: 100%;
+  height: 100vh;
+}
+.auth-form {
+  background-color: #ffffffe3 !important;
 }
 </style>
