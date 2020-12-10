@@ -1310,6 +1310,26 @@
           </div>
           <v-row>
             <v-col cols="6">
+              <div class="title font-weight-bold">Общая сумма без скидок:</div>
+            </v-col>
+            <v-col cols="6">
+              <div class="title font-weight-bold">
+                {{ paymentReportData.TOTAL_WITHOUT_DISCOUNT | money }}
+              </div>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
+              <div class="title font-weight-bold">Общая скидка:</div>
+            </v-col>
+            <v-col cols="6">
+              <div class="title font-weight-bold">
+                {{ paymentReportData.TOTAL_DISCOUNT | money }}
+              </div>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
               <div class="title font-weight-bold">Общая сумма:</div>
             </v-col>
             <v-col cols="6">
