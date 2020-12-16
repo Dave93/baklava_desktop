@@ -13,10 +13,10 @@ export default Vue.extend({
       return currency(+val, {
         symbol: "",
         separator: " ",
-        decimal: ","
+        decimal: ",",
       }).format();
-    }
-  }
+    },
+  },
 });
 </script>
 

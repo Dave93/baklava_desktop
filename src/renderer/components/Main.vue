@@ -34,19 +34,22 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import CartPage from "./CartPage.vue";
+import loadData from "../mixins/loadData";
 export default {
+  mixins: [loadData],
   components: {
-    CartPage
+    CartPage,
   },
   data: () => ({
-    currentTab: null
+    currentTab: null,
+    loadDataInterval: null,
     // currentScaleWeight: 0,
   }),
   computed: {
     ...mapGetters({
-      cartTabs: "cartTabs"
+      cartTabs: "cartTabs",
       // comPortName: "settings/comPortName",
-    })
+    }),
   },
   methods: {
     ...mapActions(["appendCartTab", "closeTabByIndex"]),
@@ -59,10 +62,13 @@ export default {
         this.addCartTab();
       }
       this.closeTabByIndex({ index: this.currentTab });
-    }
+    },
   },
-  mounted: {
-    // listenOldScale() {
+  mounted() {
+    this.loadDataInterval = setInterval(async () => {
+      await this.loadData();
+    }, 600000);
+    // listenOldSale() {
     //   this.scaleWeightInterval = setInterval(async () => {
     //     try {
     //       let {data} = await this.$http.get(
