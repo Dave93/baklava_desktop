@@ -342,6 +342,22 @@
                         </template>
                         <span>Выход</span>
                       </v-tooltip>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            color="grey darken-3"
+                            class="green--text"
+                            width="60"
+                            height="70"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="loadData"
+                          >
+                            <v-icon large>mdi-refresh</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Обновить товары</span>
+                      </v-tooltip>
                     </v-speed-dial>
                   </v-col>
                 </v-row>
@@ -1358,6 +1374,7 @@ import currency from "currency.js";
 import vSelect from "vue-select";
 import CartItemDelete from "./CartItemDelete";
 import MoneyColumn from "./MoneyColumn";
+import loadData from "../mixins/loadData";
 import htmlToImage from "html-to-image";
 import VueBarcode from "vue-barcode";
 import { formatWithOptions, parseISO } from "date-fns/fp";
@@ -1522,6 +1539,7 @@ export default {
     cartItems: [],
     portListener: null,
   }),
+  mixins: [loadData],
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
   computed: {
     ...mapGetters({
@@ -2262,12 +2280,21 @@ export default {
       this.toggleProduct({ item });
     },
     removeCartItem(node) {
+      console.log(node);
       let item = node.data;
       if (item.parentId) {
         this.cartItems = this.cartItems.map((parent) => {
           if (parent.id === item.parentId) {
             parent.childs = parent.childs.filter(
               (child) => child.id !== item.id
+            );
+            parent.price = parent.childs.reduce(
+              (accumulator, child) => accumulator + child.price * child.weight,
+              0
+            );
+            parent.totalPrice = parent.childs.reduce(
+              (accumulator, child) => accumulator + child.price * child.weight,
+              0
             );
           }
           return parent;

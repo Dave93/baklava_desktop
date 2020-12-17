@@ -1,15 +1,21 @@
 
 import { mapGetters, mapActions } from "vuex";
 export default {
+    computed: {
+        ...mapGetters({
+            webHook: "settings/webHook",
+            managerData: "settings/managerData",
+        })
+    },
     methods: {
         ...mapActions({
-            setProducts: "setProducts",
+            refreshData: "refreshData",
         }),
        async loadData() {
             let { data: productsData } = await this.$http.get(
-                `${this.webHook}mycatalog.product.list?managerId=${data.result.ID}`
+                `${this.webHook}mycatalog.product.list?managerId=${this.managerData.ID}`
             );
-            await this.setProducts({
+            await this.refreshData({
                 val: productsData.result.map((item) => ({
                     id: item.ID,
                     name: item.ELEMENT_NAME,
