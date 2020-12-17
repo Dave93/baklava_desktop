@@ -57,7 +57,6 @@ export default {
       this.appendCartTab();
     },
     closeCurrentTab() {
-      console.log(this.currentTab);
       if (this.cartTabs.length === 1) {
         this.addCartTab();
       }
@@ -67,24 +66,10 @@ export default {
   mounted() {
     this.loadDataInterval = setInterval(async () => {
       await this.loadData();
-    }, 600000);
-    // listenOldSale() {
-    //   this.scaleWeightInterval = setInterval(async () => {
-    //     try {
-    //       let {data} = await this.$http.get(
-    //           "http://localhost:8888/api/Scale?portName=" + this.comPortName
-    //       );
-    //       if (data.length && data[0]) {
-    //         this.currentScaleWeight = +data[0];
-    //       }
-    //     } catch (e) {
-    //     }
-    //     if (!this.isMinusScale && !this.isPlusScale) {
-    //       clearInterval(this.scaleWeightInterval);
-    //       this.scaleWeightInterval = null;
-    //     }
-    //   }, 100);
-    // },
+    }, 120000);
+  },
+  beforeDestroy() {
+    clearInterval(this.loadDataInterval);
   },
 };
 </script>

@@ -29,6 +29,27 @@ const mutations = {
   SET_ITEMS(state, { val }) {
     state.items = val
   },
+  REFRESH_DATA(state, { val }) {
+    const newData = {};
+    val.map(item => {
+      if (item.totalAmountCount > 0) newData[item.id] = item;
+    });
+
+    state.items.filter(item => item.totalAmountCount > 0)
+
+    state.items = state.items.map(item => {
+      const newItem = {...newData[item.id]};
+      const res = { ...newItem, selected: item.selected }
+      return res
+    });
+    state.items.map(item => {
+      delete newData[item.id];
+    });
+
+    for(let id in newData) {
+      state.items.push(newData[id])
+    }
+  },
   TOGGLE_PRODUCT(state, { item }) {
     state.items = state.items.map(prod => {
       if(prod.id === item.id) {
@@ -166,6 +187,9 @@ const actions = {
   },
   setProducts({ commit }, { val }) {
     commit('SET_ITEMS', { val })
+  },
+  refreshData({ commit }, { val }) {
+    commit('REFRESH_DATA', { val })
   },
   toggleProduct({ commit }, { item }) {
     commit('TOGGLE_PRODUCT', { item })
