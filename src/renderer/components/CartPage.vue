@@ -1618,7 +1618,10 @@ export default {
       if (this.searchText.length > 0) {
         return this.items.filter((item) => {
           return (
-            item.name && item.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
+            (item.name &&
+              item.name
+                .toLowerCase()
+                .includes(this.searchText.toLowerCase())) ||
             (item.barcode && item.barcode.indexOf(this.searchText) >= 0) ||
             (item.customCode && item.customCode.indexOf(this.searchText) >= 0)
           );

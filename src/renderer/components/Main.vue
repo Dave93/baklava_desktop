@@ -66,7 +66,7 @@ export default {
   mounted() {
     this.loadDataInterval = setInterval(async () => {
       await this.loadData();
-    }, 120000);
+    }, 600000);
   },
   beforeDestroy() {
     clearInterval(this.loadDataInterval);
