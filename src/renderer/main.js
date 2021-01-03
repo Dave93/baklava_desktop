@@ -88,7 +88,7 @@ const listenOldScale  = () => {
       });
       document.dispatchEvent(event);
     } catch (e) {}
-  }, 100);
+  }, 150);
 };
 
 if (!isOldScale) {
