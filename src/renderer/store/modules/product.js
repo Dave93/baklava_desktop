@@ -174,7 +174,7 @@ const mutations = {
     })
   },
   CLOSE_TAB_BY_INDEX(state, { index }) {
-    state.cartTabs.splice(index, 1);
+    state.cartTabs = state.cartTabs.filter((item, i) => i !== index)
   }
 }
 
