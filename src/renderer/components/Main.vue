@@ -38,25 +38,25 @@ import loadData from "../mixins/loadData";
 export default {
   mixins: [loadData],
   components: {
-    CartPage,
+    CartPage
   },
   data: () => ({
     currentTab: null,
-    loadDataInterval: null,
+    loadDataInterval: null
     // currentScaleWeight: 0,
   }),
   computed: {
     ...mapGetters({
-      cartTabs: "cartTabs",
+      cartTabs: "cartTabs"
       // comPortName: "settings/comPortName",
-    }),
+    })
   },
   methods: {
     ...mapActions([
       "appendCartTab",
       "closeTabByIndex",
       "setTabItemsByIndex",
-      "loadData",
+      "loadData"
     ]),
     addCartTab() {
       this.appendCartTab();
@@ -69,7 +69,7 @@ export default {
     },
     setItems(items) {
       console.log(items);
-    },
+    }
   },
   mounted() {
     this.loadDataInterval = setInterval(async () => {
@@ -78,6 +78,6 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.loadDataInterval);
-  },
+  }
 };
 </script>

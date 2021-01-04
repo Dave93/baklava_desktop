@@ -10,6 +10,8 @@ const state = {
     ]
 }
 
+import ProductItems from "../models/items";
+
 const getters = {
   items: (state) => state.items,
   categories: (state) => state.categories,
@@ -55,12 +57,19 @@ const mutations = {
     }
   },
   TOGGLE_PRODUCT(state, { item }) {
-    state.items = state.items.map(prod => {
-      if(prod.id === item.id) {
-        prod.selected = !prod.selected
+    const prod = ProductItems.find(item.id)
+    ProductItems.update({
+      where: item.id,
+      data: {
+        selected: !prod.selected
       }
-      return prod
     })
+    // state.items = state.items.map(prod => {
+    //   if(prod.id === item.id) {
+    //     prod.selected = !prod.selected
+    //   }
+    //   return prod
+    // })
   },
   TOGGLE_PRODUCT_CART(state, {item}) {
     const foundIndex = state.cartItems.findIndex(prod => {

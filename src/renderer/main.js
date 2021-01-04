@@ -3,17 +3,21 @@ import axios from 'axios'
 import Serialport from 'serialport';
 // import { AgGridVue } from "ag-grid-vue";
 
-const Store = require('electron-store');
-
-const eStore = new Store();
 
 import App from './App'
 import router from './router'
 import store from './store'
 
+import settings from "electron-settings";
 
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
+
+
+import AsyncComputed from 'vue-async-computed'
+
+Vue.use(AsyncComputed)
+
 // Vue.use(AgGridVue)
 Vue.use(Vuetify)
 
@@ -25,11 +29,6 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
-let storeData = eStore.get('isOldScale');
-if (storeData) {
-  storeData = JSON.parse(storeData);
-}
-const isOldScale = (storeData || false)
 
 const listenForScale = async () => {
   const ports = await Serialport.list();
@@ -91,9 +90,15 @@ const listenOldScale  = () => {
   }, 150);
 };
 
-if (!isOldScale) {
-  listenForScale();
-}/* else {
+(async () => {
+  let storeData = await settings.get('isOldScale');
+  const isOldScale = (storeData || false)
+  if (!isOldScale) {
+    listenForScale();
+  }
+})();
+
+/* else {
   listenOldScale();
 }*/
 

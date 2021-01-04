@@ -747,7 +747,7 @@
                     :key="item.id"
                     @click="categoryToggle(item.id)"
                     :class="{
-                      'v-list-item--active': currentCategoryId === item.id,
+                      'v-list-item--active': currentCategoryId === item.id
                     }"
                     :color="
                       currentCategoryId === item.id ? 'green accent-3' : ''
@@ -1388,6 +1388,9 @@ const electron = require("electron");
 // install escpos-usb adapter module manually
 escpos.USB = require("escpos-usb");
 
+import ProductItems from "@/store/models/items";
+import settings from "electron-settings";
+
 // escpos.Network = require("escpos-network");
 ModuleRegistry.registerModules([ClientSideRowModelModule, MasterDetailModule]);
 // JSPM.JSPrintManager.auto_reconnect = true;
@@ -1405,32 +1408,32 @@ export default {
         text: "Номер заказа",
         align: "start",
         sortable: false,
-        value: "ID",
+        value: "ID"
       },
       {
         text: "Дата заказа",
         sortable: false,
-        value: "DATE_INSERT",
+        value: "DATE_INSERT"
       },
       {
         text: "Общая сумма",
         sortable: false,
-        value: "TOTAL_PRICE",
+        value: "TOTAL_PRICE"
       },
       {
         text: "Оплаты",
         sortable: false,
-        value: "PAYMENT",
+        value: "PAYMENT"
       },
       // { text: 'Calories', value: 'calories' },
       // { text: 'Fat (g)', value: 'fat' },
       // { text: 'Carbs (g)', value: 'carbs' },
       // { text: 'Protein (g)', value: 'protein' },
-      { text: "Действия", value: "actions", sortable: false },
+      { text: "Действия", value: "actions", sortable: false }
     ],
     orderPickerDate: [
       new Date().toISOString().substr(0, 10),
-      new Date().toISOString().substr(0, 10),
+      new Date().toISOString().substr(0, 10)
     ],
     orderPickerMinDate: new Date().toISOString().substr(0, 10),
     showOrderDatePicker: false,
@@ -1446,8 +1449,8 @@ export default {
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [v => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [v => !!v || "Имя обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -1485,7 +1488,7 @@ export default {
         cellRenderer: "agGroupCellRenderer",
         suppressSizeToFit: true,
         flex: 3,
-        wrapText: true,
+        wrapText: true
       },
       {
         headerName: "Цена",
@@ -1493,7 +1496,7 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2,
+        flex: 2
       },
       { headerName: "Вес", field: "weight", width: 50, flex: 2 },
       {
@@ -1502,15 +1505,15 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2,
+        flex: 2
       },
       {
         headerName: "",
         field: "id",
         cellRenderer: "CartItemDelete",
         width: 40,
-        flex: 1,
-      },
+        flex: 1
+      }
     ],
     context: null,
     frameworkComponents: null,
@@ -1519,7 +1522,7 @@ export default {
     options: [],
     currentClient: {
       ID: null,
-      NAME: null,
+      NAME: null
     },
     setName: "",
     detailCellRendererParams: null,
@@ -1538,19 +1541,36 @@ export default {
     isPlusScale: false,
     isMinusScale: false,
     cartItems: [],
-    portListener: null,
+    portListener: null
   }),
   mixins: [loadData],
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
+  asyncComputed: {
+    async webHook() {
+      return await settings.get("webHook");
+    },
+    async chosenPrinter() {
+      return await settings.get("chosenPrinter");
+    },
+    async isOldScale() {
+      return await settings.get("isOldScale");
+    },
+    async comPortName() {
+      return await settings.get("comPortName");
+    },
+    async remotePrinterAddress() {
+      return await settings.get("remotePrinterAddress");
+    }
+  },
   computed: {
     ...mapGetters({
-      webHook: "settings/webHook",
-      managerData: "settings/managerData",
-      chosenPrinter: "settings/chosenPrinter",
-      isOldScale: "settings/isOldScale",
-      comPortName: "settings/comPortName",
-      remotePrinterAddress: "settings/remotePrinterAddress",
-      cartTabItems: "cartTabItems",
+      // webHook: "settings/webHook",
+      // managerData: "settings/managerData",
+      // chosenPrinter: "settings/chosenPrinter",
+      // isOldScale: "settings/isOldScale",
+      // comPortName: "settings/comPortName",
+      // remotePrinterAddress: "settings/remotePrinterAddress",
+      cartTabItems: "cartTabItems"
     }),
     tabItems() {
       return this.cartTabItems[this.tabIndex];
@@ -1560,7 +1580,7 @@ export default {
       return Array.isArray(arrival)
         ? arrival
             .sort()
-            .map((item) => {
+            .map(item => {
               return formatWithOptions({ locale: ru }, "d MMM", parseISO(item));
             })
             .join(" - ")
@@ -1568,7 +1588,7 @@ export default {
     },
     showSetsGrid() {
       let res = false;
-      [...this.tabItems].map((item) => {
+      [...this.tabItems].map(item => {
         if (item.type === "set") {
           res = true;
         }
@@ -1576,17 +1596,17 @@ export default {
       return res;
     },
     singleProducts() {
-      return this.tabItems.filter((item) => item.type !== "set");
+      return this.tabItems.filter(item => item.type !== "set");
     },
     setProducts() {
-      return this.tabItems.filter((item) => item.type === "set");
+      return this.tabItems.filter(item => item.type === "set");
     },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       let totalPrice = 0;
-      [...this.tabItems].map((item) => {
+      [...this.tabItems].map(item => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1596,7 +1616,7 @@ export default {
     totalPrice() {
       let totalPrice = 0;
 
-      [...this.tabItems].map((item) => {
+      [...this.tabItems].map(item => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1608,14 +1628,14 @@ export default {
       }
     },
     items: () => {
-      return product.getters.items;
+      return ProductItems.query().all();
     },
     categories: () => {
       return product.getters.categories;
     },
     filteredProducts() {
       if (this.searchText.length > 0) {
-        return this.items.filter((item) => {
+        return this.items.filter(item => {
           return (
             (item.name &&
               item.name
@@ -1628,7 +1648,7 @@ export default {
       }
       if (this.currentCategoryId > 0) {
         return this.items.filter(
-          (item) => item.categoryId === this.currentCategoryId
+          item => item.categoryId === this.currentCategoryId
         );
       }
       return this.items;
@@ -1637,7 +1657,7 @@ export default {
       return (
         +this.cashPrice + +this.cardPrice + +this.udsPrice - +this.totalPrice
       );
-    },
+    }
   },
   beforeMount() {
     this.gridOptions = {};
@@ -1645,7 +1665,7 @@ export default {
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
-      MoneyColumn,
+      MoneyColumn
     };
 
     this.defaultColDef = { flex: 1, resizable: true };
@@ -1657,7 +1677,7 @@ export default {
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
-            wrapText: true,
+            wrapText: true
           },
           {
             headerName: "Цена",
@@ -1665,7 +1685,7 @@ export default {
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
-            wrapText: true,
+            wrapText: true
           },
           { headerName: "Вес", field: "weight", width: 100, flex: 2 },
           {
@@ -1673,30 +1693,30 @@ export default {
             field: "totalPrice",
             width: 150,
             cellRenderer: "MoneyColumn",
-            flex: 2,
+            flex: 2
           },
           {
             headerName: "",
             field: "id",
             cellRenderer: "CartItemDelete",
-            flex: 1,
-          },
+            flex: 1
+          }
         ],
         context: { componentParent: this },
         defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
-          MoneyColumn,
+          MoneyColumn
         },
         rowSelection: "single",
-        onRowSelected: this.cartSetItemSelected,
+        onRowSelected: this.cartSetItemSelected
         // events: {
         //   "selection-changed": this.cartSetItemSelected,
         // },
       },
-      getDetailRowData: (params) => {
+      getDetailRowData: params => {
         params.successCallback(params.data.childs);
-      },
+      }
     };
   },
   mounted() {
@@ -1732,7 +1752,7 @@ export default {
       "clearCart",
       "appendSetWithItems",
       "setTabItemsByIndex",
-      "pushTabItemByIndex",
+      "pushTabItemByIndex"
     ]),
     openSearchDialog() {
       this.showSearchDialog = true;
@@ -1745,44 +1765,41 @@ export default {
       this.isLoadingExistingOrder = true;
 
       this.showExistingOrderDialog = true;
-
-      let { data } = await this.$http.post(
-        this.webHook + `mysale.getOrderById`,
-        {
-          managerId: this.managerData.ID,
-          orderId,
-        }
-      );
+      const webHook = await settings.get("webHook");
+      const managerData = await settings.get("managerData");
+      let { data } = await this.$http.post(webHook + `mysale.getOrderById`, {
+        managerId: managerData.ID,
+        orderId
+      });
 
       this.existingOrderPrintData = data.result;
 
       this.isLoadingExistingOrder = false;
     },
     async loadOrdersList() {
-      console.log(this.orderPickerDate);
       this.orderDataLoading = true;
 
-      let { data } = await this.$http.post(
-        this.webHook + `mysale.getOrderList`,
-        {
-          managerId: this.managerData.ID,
-          dateRange: this.orderPickerDate,
-        }
-      );
+      const webHook = await settings.get("webHook");
+      const managerData = await settings.get("managerData");
+      let { data } = await this.$http.post(webHook + `mysale.getOrderList`, {
+        managerId: managerData.ID,
+        dateRange: this.orderPickerDate
+      });
       this.ordersList = data.result;
       this.orderDataLoading = false;
     },
     async selectProductBySearch() {
       const foundItem = this.filteredProducts[0];
-      const foundIndex = this.tabItems.findIndex((prod) => {
+      const foundIndex = this.tabItems.findIndex(prod => {
         return foundItem.id === prod.id;
       });
 
+      const isOldScale = await settings.get("isOldScale");
       if (foundItem.totalAmountCount > 0) {
         if (foundIndex < 0) {
-          if (this.isOldScale) {
+          if (isOldScale) {
             try {
-              let comPortName = this.comPortName;
+              const comPortName = await settings.get("comPortName");
               let { data } = await this.$http.get(
                 "http://localhost:8888/api/Scale?portName=" + comPortName
               );
@@ -1791,7 +1808,7 @@ export default {
               foundItem.totalPrice = +foundItem.weight * +foundItem.price;
               this.pushTabItemByIndex({
                 item: { ...foundItem, type: "product" },
-                index: this.tabIndex,
+                index: this.tabIndex
               });
               // this.cartItems.push({ ...foundItem, type: "product" });
               // this.showSearchDialog = false;
@@ -1801,7 +1818,7 @@ export default {
             foundItem.totalPrice = +foundItem.weight * +foundItem.price;
             this.pushTabItemByIndex({
               item: { ...foundItem, type: "product" },
-              index: this.tabIndex,
+              index: this.tabIndex
             });
             // this.cartItems.push({ ...foundItem, type: "product" });
             // this.showSearchDialog = false;
@@ -1822,8 +1839,10 @@ export default {
     },
     async showPaymentReport() {
       this.isPaymentReportLoading = true;
-      let { data } = await this.$http.post(this.webHook + `mysale.getReport`, {
-        managerId: this.managerData.ID,
+      const webHook = await settings.get("webHook");
+      const managerData = await settings.get("managerData");
+      let { data } = await this.$http.post(webHook + `mysale.getReport`, {
+        managerId: managerData.ID
       });
 
       this.isPaymentReportLoading = false;
@@ -1895,7 +1914,7 @@ export default {
       }
     },
 
-    showPlusScale() {
+    async showPlusScale() {
       if (!this.selectedCartItem.id) {
         this.cartWeightRequiredSnack = true;
         this.cartError = "Не выбран товар";
@@ -1903,11 +1922,12 @@ export default {
       }
       this.isPlusScale = true;
       this.showScaleDialog = true;
+      const isOldScale = await settings.get("isOldScale");
 
-      if (this.isOldScale) {
+      if (isOldScale) {
         this.portListener = setInterval(async () => {
           try {
-            let comPortName = this.comPortName;
+            const comPortName = await settings.get("comPortName");
             let { data } = await this.$http.get(
               "http://localhost:8888/api/Scale?portName=" + comPortName
             );
@@ -1921,7 +1941,7 @@ export default {
         this.$refs.cartItemSelectedInput.focus();
       });
     },
-    showMinusScale() {
+    async showMinusScale() {
       if (!this.selectedCartItem.id) {
         this.cartWeightRequiredSnack = true;
         this.cartError = "Не выбран товар";
@@ -1929,10 +1949,11 @@ export default {
       }
       this.isMinusScale = true;
       this.showScaleDialog = true;
-      if (this.isOldScale) {
+      const isOldScale = await settings.get("isOldScale");
+      if (isOldScale) {
         this.portListener = setInterval(async () => {
           try {
-            let comPortName = this.comPortName;
+            const comPortName = await settings.get("comPortName");
             let { data } = await this.$http.get(
               "http://localhost:8888/api/Scale?portName=" + comPortName
             );
@@ -1988,21 +2009,24 @@ export default {
 
       htmlToImage
         .toBlob(node)
-        .then(async (blob) => {
+        .then(async blob => {
           const buffer = await Buffer.from(await blob.arrayBuffer());
           const userDataPath = (electron.app || electron.remote.app).getPath(
             "userData"
           );
+          const remotePrinterAddress = await settings.get(
+            "remotePrinterAddress"
+          );
 
-          if (this.remotePrinterAddress) {
+          if (remotePrinterAddress) {
             const tux = path.join(userDataPath, "remotePhoto.png");
-            fs.writeFile(tux, buffer, (err) => {
+            fs.writeFile(tux, buffer, err => {
               // var bodyFormData = new FormData();
               //bodyFormData.append('uploadedFile', screenshotPath);
               // bodyFormData.append("remotePhoto", fs.createReadStream(tux));
 
-              this.$http.post(this.remotePrinterAddress + "/print", {
-                remotePhoto: buffer.toString("base64"),
+              this.$http.post(remotePrinterAddress + "/print", {
+                remotePhoto: buffer.toString("base64")
               });
             });
           } else {
@@ -2018,9 +2042,9 @@ export default {
             };
             const printer = new escpos.Printer(device, options);
             const tux = path.join(userDataPath, "test.png");
-            fs.writeFile(tux, buffer, (err) => {
-              escpos.Image.load(tux, (img) => {
-                device.open((error) => {
+            fs.writeFile(tux, buffer, err => {
+              escpos.Image.load(tux, img => {
+                device.open(error => {
                   printer
                     .align("ct")
                     .image(img, "d24")
@@ -2032,7 +2056,7 @@ export default {
             });
           }
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.error("oops, something went wrong!", error);
         });
     },
@@ -2040,7 +2064,7 @@ export default {
       const sets = [];
 
       const cartItems = [...this.tabItems];
-      cartItems.map((item) => {
+      cartItems.map(item => {
         if (item.type === "set") {
           sets.push(item);
         }
@@ -2054,10 +2078,11 @@ export default {
 
       this.isSetSaving = true;
 
+      const webHook = await settings.get("webHook");
       let { data: setsData } = await this.$http.post(
-        this.webHook + `mysale.createSets`,
+        webHook + `mysale.createSets`,
         {
-          sets,
+          sets
         }
       );
 
@@ -2081,8 +2106,9 @@ export default {
       const discountValue = this.discountValue;
       const currentTime = format(new Date(), "HH:mm:ss");
       const currentDate = format(new Date(), "d.MM.YYY");
-      const managerName = this.managerData.NAME;
-      const managerLastName = this.managerData.LAST_NAME;
+      const managerData = await settings.get("managerData");
+      const managerName = managerData.NAME;
+      const managerLastName = managerData.LAST_NAME;
       const { orderId, storeData } = this.orderData;
       const address = storeData ? storeData.ADDRESS : "";
 
@@ -2097,7 +2123,7 @@ export default {
             currency(+discountValue, {
               symbol: "",
               separator: ".",
-              decimal: ",",
+              decimal: ","
             }).format() + " SO'M";
         }
       }
@@ -2112,14 +2138,14 @@ export default {
           currency(+subTotalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ",",
+            decimal: ","
           }).format() + " SO'M",
         totalPrice:
           currency(+totalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ",",
-          }).format() + " SO'M",
+            decimal: ","
+          }).format() + " SO'M"
       };
 
       setTimeout(() => {
@@ -2134,6 +2160,7 @@ export default {
       }
 
       this.savingOrderLoading = true;
+      const managerData = await settings.get("managerData");
       let orderData = {
         client: this.currentClient,
         cartItems: this.tabItems,
@@ -2141,15 +2168,14 @@ export default {
         cardPrice: this.cardPrice,
         udsPrice: this.udsPrice,
         discount: this.discountValue,
-        managerId: this.managerData.ID,
-        discountType: this.discountToggle,
+        managerId: managerData.ID,
+        discountType: this.discountToggle
       };
+
+      const webHook = await settings.get("webHook");
       let {
-        data: { result: order },
-      } = await this.$http.post(
-        this.webHook + `mysale.order.create`,
-        orderData
-      );
+        data: { result: order }
+      } = await this.$http.post(webHook + `mysale.order.create`, orderData);
 
       if (order.error) {
         this.cartWeightRequiredSnack = true;
@@ -2165,7 +2191,7 @@ export default {
       let chars = [];
       let vm = this;
       window.removeEventListener("keypress", () => {});
-      window.addEventListener("keypress", (e) => {
+      window.addEventListener("keypress", e => {
         if (
           e.which == 71 ||
           e.which == 85 ||
@@ -2175,7 +2201,7 @@ export default {
         }
 
         if (pressed === false) {
-          setTimeout(function () {
+          setTimeout(function() {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
               vm.addByQrCode(barcode);
@@ -2191,8 +2217,8 @@ export default {
     addByQrCode(code) {
       this.cartWeightRequiredSnack = false;
       const items = [...this.items];
-      const foundItem = items.filter((item) => item.barcode === code)[0];
-      const foundIndex = this.tabItems.findIndex((prod) => {
+      const foundItem = items.filter(item => item.barcode === code)[0];
+      const foundIndex = this.tabItems.findIndex(prod => {
         return foundItem.id === prod.id;
       });
 
@@ -2200,7 +2226,7 @@ export default {
         if (foundIndex < 0) {
           this.pushTabItemByIndex({
             item: { ...foundItem, type: "product" },
-            index: this.tabIndex,
+            index: this.tabIndex
           });
         }
       } else {
@@ -2224,13 +2250,13 @@ export default {
       //   return;
       // }
 
-      [...this.tabItems].map((item) => {
+      [...this.tabItems].map(item => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
         }
 
         if (item.type === "set") {
-          item.childs.map((child) => {
+          item.childs.map(child => {
             if (child.weight === 0) {
               res = false;
             }
@@ -2252,15 +2278,17 @@ export default {
     },
     async saveClient() {
       this.savingClientLoading = true;
+      const webHook = await settings.get("webHook");
       if (this.currentClient.ID) {
+        const managerData = await settings.get("managerData");
         let { data } = await this.$http.get(
-          this.webHook +
+          webHook +
             `myuser.updateUser?id=${this.currentClient.ID}&PHONE=${this.clientPhone}&EMAIL=${this.clientEmail}&NAME=${this.clientName}&LAST_NAME=${this.clientFirstName}`
         );
         this.currentClient = data.result.user;
       } else {
         let { data } = await this.$http.get(
-          this.webHook +
+          webHook +
             `myuser.addUser?PHONE=${this.clientPhone}&EMAIL=${this.clientEmail}&NAME=${this.clientName}&LAST_NAME=${this.clientFirstName}`
         );
         this.currentClient = data.result.user;
@@ -2293,11 +2321,9 @@ export default {
     removeCartItem(node) {
       let item = node.data;
       if (item.parentId) {
-        const items = [...this.tabItems].map((parent) => {
+        const items = [...this.tabItems].map(parent => {
           if (parent.id === item.parentId) {
-            parent.childs = parent.childs.filter(
-              (child) => child.id !== item.id
-            );
+            parent.childs = parent.childs.filter(child => child.id !== item.id);
             parent.price = parent.childs.reduce(
               (accumulator, child) => accumulator + child.price * child.weight,
               0
@@ -2311,12 +2337,12 @@ export default {
         });
         this.setTabItemsByIndex({ items, index: this.tabIndex });
       } else {
-        const items = [...this.tabItems].filter((prod) => item.id !== prod.id);
+        const items = [...this.tabItems].filter(prod => item.id !== prod.id);
         this.setTabItemsByIndex({ items, index: this.tabIndex });
       }
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode((node) => {
+          this.gridSetApi.forEachLeafNode(node => {
             node && node.setExpanded(true);
           });
         }
@@ -2333,7 +2359,7 @@ export default {
       });
     },
     firstDataRendered() {
-      this.gridSetApi.forEachLeafNode((node) => {
+      this.gridSetApi.forEachLeafNode(node => {
         node && node.setExpanded(true);
       });
     },
@@ -2353,7 +2379,7 @@ export default {
       }
       // this.$refs.cartItemSelectedInput.focus();
     },
-    getHostname: (url) => {
+    getHostname: url => {
       return new URL(url).hostname;
     },
     logout() {
@@ -2441,8 +2467,9 @@ export default {
       let weight = this.currentWeight
         ? this.currentWeight
         : this.currentScaleWeight;
+      const isOldScale = await settings.get("isOldScale");
 
-      if (this.isOldScale) {
+      if (isOldScale) {
         clearTimeout(this.portListener);
       }
 
@@ -2462,12 +2489,12 @@ export default {
       let id = this.selectedCartItem.id;
       weight = +parseFloat(itemWeight).toFixed(3);
       if (this.selectedCartItem.parentId) {
-        const items = [...this.tabItems].map((parent) => {
+        const items = [...this.tabItems].map(parent => {
           parent.totalPrice = 0;
           parent.price = 0;
           parent.weight = 1;
           if (parent.id === this.selectedCartItem.parentId) {
-            parent.childs = parent.childs.map((child) => {
+            parent.childs = parent.childs.map(child => {
               if (child.id === id) {
                 child.weight = +weight;
                 child.totalPrice = +weight * +child.price;
@@ -2477,7 +2504,7 @@ export default {
               return child;
             });
           } else if (parent.childs) {
-            parent.childs = parent.childs.map((child) => {
+            parent.childs = parent.childs.map(child => {
               parent.totalPrice += child.totalPrice || 0;
               parent.price += child.totalPrice || 0;
               return child;
@@ -2487,7 +2514,7 @@ export default {
         });
         await this.setTabItemsByIndex({ items, index: this.tabIndex });
       } else {
-        const items = [...this.tabItems].map((item) => {
+        const items = [...this.tabItems].map(item => {
           if (item.id === id) {
             item.weight = +weight;
             item.totalPrice = +weight * +item.price;
@@ -2503,7 +2530,7 @@ export default {
       this.showScaleDialog = false;
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode((node) => {
+          this.gridSetApi.forEachLeafNode(node => {
             node && node.setExpanded(true);
           });
         }
@@ -2534,8 +2561,9 @@ export default {
     async onSearch(search, loading) {
       try {
         loading(true);
+        const webHook = await settings.get("webHook");
         let { data } = await this.$http.get(
-          this.webHook + `myuser.getList?filter[NAME]=${search}`
+          webHook + `myuser.getList?filter[NAME]=${search}`
         );
         this.options = data.result;
         loading(false);
@@ -2546,7 +2574,7 @@ export default {
     addChosenProducts() {
       if (this.editingSetId.length > 0) {
         const selectedForSetItems = [];
-        this.items.map((item) => {
+        this.items.map(item => {
           if (item.selected) {
             selectedForSetItems.push(item);
           }
@@ -2554,10 +2582,10 @@ export default {
 
         let setId = this.editingSetId;
         let items = selectedForSetItems;
-        const newItems = [...this.tabItems].map((item) => {
+        const newItems = [...this.tabItems].map(item => {
           if (item.type === "set" && item.id === setId) {
-            items.map((child) => {
-              const foundIndex = item.childs.findIndex((prod) => {
+            items.map(child => {
+              const foundIndex = item.childs.findIndex(prod => {
                 return child.id === prod.id;
               });
               if (child.totalAmountCount > 0) {
@@ -2575,7 +2603,7 @@ export default {
 
         this.editingSetId = "";
         setTimeout(() => {
-          this.gridSetApi.forEachLeafNode((node) => {
+          this.gridSetApi.forEachLeafNode(node => {
             node && node.setExpanded(true);
           });
         }, 300);
@@ -2590,9 +2618,9 @@ export default {
             price: 0,
             totalPrice: 0,
             type: "set",
-            id: parentId,
+            id: parentId
           };
-          this.items.map((prod) => {
+          this.items.map(prod => {
             if (prod.selected) {
               if (prod.totalAmountCount > 0) {
                 item.childs.push({ ...prod, parentId });
@@ -2610,7 +2638,7 @@ export default {
             price: item.price,
             totalPrice: 0,
             weight: 0,
-            type: item.type,
+            type: item.type
           };
           if (item.childs) {
             newItem.childs = item.childs;
@@ -2619,14 +2647,14 @@ export default {
           this.pushTabItemByIndex({ item: newItem, index: this.tabIndex });
 
           setTimeout(() => {
-            this.gridSetApi.forEachLeafNode((node) => {
+            this.gridSetApi.forEachLeafNode(node => {
               node && node.setExpanded(true);
             });
           }, 300);
         } else {
-          this.items.map((item) => {
+          this.items.map(item => {
             if (item.selected) {
-              const foundIndex = this.tabItems.findIndex((prod) => {
+              const foundIndex = this.tabItems.findIndex(prod => {
                 return item.id === prod.id;
               });
 
@@ -2640,13 +2668,13 @@ export default {
                     price: item.price,
                     totalPrice: 0,
                     weight: 0,
-                    type: item.type,
+                    type: item.type
                   };
                   if (item.type === "set") {
                     let setTotalPrice = 0;
                     newItem.childs = [];
                     newItem.weight = 1;
-                    item.childs.map((child) => {
+                    item.childs.map(child => {
                       setTotalPrice += +child.QUANTITY * +child.BASE_PRICE;
                       newItem.childs.push({
                         id: child.ID,
@@ -2658,14 +2686,14 @@ export default {
                         img: child.image,
                         totalPrice: +child.QUANTITY * +child.BASE_PRICE,
                         weight: child.QUANTITY,
-                        parentId: item.id,
+                        parentId: item.id
                       });
                     });
                     newItem.totalPrice = setTotalPrice;
                   }
                   this.pushTabItemByIndex({
                     item: newItem,
-                    index: this.tabIndex,
+                    index: this.tabIndex
                   });
                 }
               } else {
@@ -2686,16 +2714,16 @@ export default {
     },
     showOrderDialog() {
       this.orderDialog = true;
-    },
+    }
   },
   filters: {
-    money: (value) => {
+    money: value => {
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
       );
-    },
-  },
+    }
+  }
 };
 </script>
 
