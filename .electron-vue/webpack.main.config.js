@@ -25,7 +25,18 @@ let mainConfig = {
       {
         test: /\.node$/,
         use: 'node-loader'
-      }
+      },
+      {
+        test: /\.worker\.(c|m)?js$/i,
+        use: [
+          {
+            loader: "worker-loader",
+          },
+          {
+            loader: "babel-loader",
+          },
+        ],
+      },
     ]
   },
   node: {

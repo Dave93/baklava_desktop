@@ -32,7 +32,8 @@ function createWindow () {
     useContentSize: true,
     webPreferences: {
       nodeIntegration: true,
-      webSecurity: false
+      webSecurity: false,
+      nodeIntegrationInWorker: true
     },
     width: 1000
   })
@@ -252,7 +253,7 @@ app.on('ready', () => {
     autoUpdater.checkForUpdates()
   }
   if (process.env.NODE_ENV !== 'production') {
-    require('vue-devtools').install()
+    // require('vue-devtools').install()
   }
 })
 ipcMain.on('print', (event, arg) => {

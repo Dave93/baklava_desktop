@@ -4,14 +4,18 @@ const state = {
     cartItems: [],
     cartTabs: [{
       title: 'Корзина #1'
-    }]
+    }],
+    cartTabItems: [
+        []
+    ]
 }
 
 const getters = {
   items: (state) => state.items,
   categories: (state) => state.categories,
   cartItems: (state) => state.cartItems,
-  cartTabs: (state) => state.cartTabs
+  cartTabs: (state) => state.cartTabs,
+  cartTabItems: (state) => state.cartTabItems
 }
 
 const mutations = {
@@ -171,10 +175,28 @@ const mutations = {
   APPEND_CART_TAB(state) {
     state.cartTabs.push({
       title: 'Корзина #' + (+state.cartTabs.length + 1)
-    })
+    });
+    state.cartTabItems.push([]);
   },
   CLOSE_TAB_BY_INDEX(state, { index }) {
-    state.cartTabs = state.cartTabs.filter((item, i) => i !== index)
+    state.cartTabs.splice(index, 1);
+    state.cartTabItems.splice(index, 1);
+  },
+  SET_TAB_ITEMS_BY_INDEX(state, { index, items }) {
+    state.cartTabItems = state.cartTabItems.map((tab, i) => {
+      if(i === index) {
+        return items;
+      }
+      return tab
+    });
+  },
+  PUSH_TAB_ITEM_BY_INDEX(state, { index, item }) {
+    state.cartTabItems = state.cartTabItems.map((tab, i) => {
+      if(i === index) {
+        tab.push(item);
+      }
+      return tab;
+    })
   }
 }
 
@@ -220,6 +242,12 @@ const actions = {
   },
   closeTabByIndex({commit}, {index}) {
     commit('CLOSE_TAB_BY_INDEX', {index});
+  },
+  setTabItemsByIndex({commit}, {index, items}) {
+    commit('SET_TAB_ITEMS_BY_INDEX', {index, items});
+  },
+  pushTabItemByIndex({commit}, {index, item}) {
+    commit('PUSH_TAB_ITEM_BY_INDEX', {index, item});
   }
 }
 
@@ -228,5 +256,6 @@ export default {
   state,
   mutations,
   actions,
-  getters
+  getters,
+  strict: false
 }
