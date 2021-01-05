@@ -104,7 +104,18 @@ let rendererConfig = {
             name: 'fonts/[name]--[folder].[ext]'
           }
         }
-      }
+      },
+      {
+        test: /\.worker\.(c|m)?js$/i,
+        use: [
+          {
+            loader: "worker-loader",
+          },
+          {
+            loader: "babel-loader",
+          },
+        ],
+      },
     ]
   },
   node: {

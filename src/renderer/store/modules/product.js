@@ -4,14 +4,20 @@ const state = {
     cartItems: [],
     cartTabs: [{
       title: 'Корзина #1'
-    }]
+    }],
+    cartTabItems: [
+        []
+    ]
 }
+
+import ProductItems from "../models/items";
 
 const getters = {
   items: (state) => state.items,
   categories: (state) => state.categories,
   cartItems: (state) => state.cartItems,
-  cartTabs: (state) => state.cartTabs
+  cartTabs: (state) => state.cartTabs,
+  cartTabItems: (state) => state.cartTabItems
 }
 
 const mutations = {
@@ -51,12 +57,19 @@ const mutations = {
     }
   },
   TOGGLE_PRODUCT(state, { item }) {
-    state.items = state.items.map(prod => {
-      if(prod.id === item.id) {
-        prod.selected = !prod.selected
+    const prod = ProductItems.find(item.id)
+    ProductItems.update({
+      where: item.id,
+      data: {
+        selected: !prod.selected
       }
-      return prod
     })
+    // state.items = state.items.map(prod => {
+    //   if(prod.id === item.id) {
+    //     prod.selected = !prod.selected
+    //   }
+    //   return prod
+    // })
   },
   TOGGLE_PRODUCT_CART(state, {item}) {
     const foundIndex = state.cartItems.findIndex(prod => {
@@ -171,10 +184,28 @@ const mutations = {
   APPEND_CART_TAB(state) {
     state.cartTabs.push({
       title: 'Корзина #' + (+state.cartTabs.length + 1)
-    })
+    });
+    state.cartTabItems.push([]);
   },
   CLOSE_TAB_BY_INDEX(state, { index }) {
-    state.cartTabs = state.cartTabs.filter((item, i) => i !== index)
+    state.cartTabs.splice(index, 1);
+    state.cartTabItems.splice(index, 1);
+  },
+  SET_TAB_ITEMS_BY_INDEX(state, { index, items }) {
+    state.cartTabItems = state.cartTabItems.map((tab, i) => {
+      if(i === index) {
+        return items;
+      }
+      return tab
+    });
+  },
+  PUSH_TAB_ITEM_BY_INDEX(state, { index, item }) {
+    state.cartTabItems = state.cartTabItems.map((tab, i) => {
+      if(i === index) {
+        tab.push(item);
+      }
+      return tab;
+    })
   }
 }
 
@@ -185,7 +216,7 @@ const actions = {
   setCategories({ commit }, { val }) {
     commit('SET_CATEGORIES', { val })
   },
-  setProducts({ commit }, { val }) {
+  setCartItems({ commit }, { val }) {
     commit('SET_ITEMS', { val })
   },
   refreshData({ commit }, { val }) {
@@ -220,6 +251,12 @@ const actions = {
   },
   closeTabByIndex({commit}, {index}) {
     commit('CLOSE_TAB_BY_INDEX', {index});
+  },
+  setTabItemsByIndex({commit}, {index, items}) {
+    commit('SET_TAB_ITEMS_BY_INDEX', {index, items});
+  },
+  pushTabItemByIndex({commit}, {index, item}) {
+    commit('PUSH_TAB_ITEM_BY_INDEX', {index, item});
   }
 }
 
@@ -228,5 +265,6 @@ export default {
   state,
   mutations,
   actions,
-  getters
+  getters,
+  strict: false
 }

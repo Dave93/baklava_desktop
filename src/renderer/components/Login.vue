@@ -151,7 +151,8 @@ import loadData from "../mixins/loadData";
 let { remote, ipcRenderer } = require("electron");
 let webContents = remote.getCurrentWebContents();
 let printers = webContents.getPrinters(); //list the printers
-let printerNames = printers.map(item => item.name);
+let printerNames = printers.map((item) => item.name);
+import settings from "electron-settings";
 export default {
   name: "Login",
   layout: "auth",
@@ -168,11 +169,11 @@ export default {
     show1: false,
     updateSnack: false,
     downloadProgress: 0,
-    managerRules: [v => !!v || "Выберите менеджера"],
-    passwordRules: [v => !!v || "Введите пароль"],
+    managerRules: [(v) => !!v || "Выберите менеджера"],
+    passwordRules: [(v) => !!v || "Введите пароль"],
     authError: "",
     isAuthLoading: false,
-    printers: printerNames
+    printers: printerNames,
   }),
   async mounted() {
     await this.tryGetManagers();
@@ -187,41 +188,55 @@ export default {
       }
     );
   },
-  computed: {
-    ...mapGetters({
-      webHook: "settings/webHook",
-      chosenPrinter: "settings/chosenPrinter",
-      isOldScale: "settings/isOldScale",
-      comPortName: "settings/comPortName",
-      remotePrinterAddress: "settings/remotePrinterAddress"
-    })
+  asyncComputed: {
+    async webHook() {
+      return await settings.get("webHook");
+    },
+    async chosenPrinter() {
+      return await settings.get("chosenPrinter");
+    },
+    async isOldScale() {
+      return await settings.get("isOldScale");
+    },
+    async comPortName() {
+      return await settings.get("comPortName");
+    },
+    async remotePrinterAddress() {
+      return await settings.get("remotePrinterAddress");
+    },
   },
   methods: {
     ...mapActions({
-      setWebHook: "settings/setWebHook",
-      setUserId: "settings/setUserId",
-      setManagerData: "settings/setManagerData",
-      setPrinter: "settings/setPrinter",
-      setOldScaleCheckbox: "settings/setOldScaleCheckbox",
-      setComPortName: "settings/setComPortName",
-      setRemotePrinterAddress: "settings/setRemotePrinterAddress",
+      // setWebHook: "settings/setWebHook",
+      // setUserId: "settings/setUserId",
+      // setManagerData: "settings/setManagerData",
+      // setPrinter: "settings/setPrinter",
+      // setOldScaleCheckbox: "settings/setOldScaleCheckbox",
+      // setComPortName: "settings/setComPortName",
+      // setRemotePrinterAddress: "settings/setRemotePrinterAddress",
       setCategories: "setCategories",
-      setProducts: "setProducts"
+      setProducts: "setProducts",
     }),
-    saveSettings(val) {
-      this.setWebHook({ val });
+    async saveSettings(val) {
+      await settings.setSync("webHook", val);
+      // this.setWebHook({ val });
     },
-    savePrinter(val) {
-      this.setPrinter({ val });
+    async savePrinter(val) {
+      await settings.set("chosenPrinter", val);
+      // this.setPrinter({ val });
     },
-    saveOldScale(val) {
-      this.setOldScaleCheckbox({ val });
+    async saveOldScale(val) {
+      await settings.set("isOldScale", val);
+      this.$asyncComputed.isOldScale.update();
+      // this.setOldScaleCheckbox({ val });
     },
-    savePortName(val) {
-      this.setComPortName({ val });
+    async savePortName(val) {
+      await settings.set("comPortName", val);
+      // this.setComPortName({ val });
     },
-    saveRemotePrinterAddress(val) {
-      this.setRemotePrinterAddress({ val });
+    async saveRemotePrinterAddress(val) {
+      await settings.set("remotePrinterAddress", val);
+      // this.setRemotePrinterAddress({ val });
     },
     async closeDialog() {
       this.isSavingSettings = true;
@@ -233,13 +248,15 @@ export default {
       try {
         this.managers = [];
         this.isManagersFound = false;
+        const webHook = await settings.get("webHook");
+        // console.log(webHook);
         const { data } = await this.$http.get(
-          this.webHook + "mymanager.user.getList?filter[UF_MANAGER]=1"
+          webHook + "mymanager.user.getList?filter[UF_MANAGER]=1"
         );
         if (data.result && data.result.length) {
-          this.managers = data.result.map(item => ({
+          this.managers = data.result.map((item) => ({
             value: item.LOGIN,
-            text: `${item.LAST_NAME} ${item.NAME}`
+            text: `${item.LAST_NAME} ${item.NAME}`,
           }));
           this.isManagersFound = true;
         } else {
@@ -253,23 +270,19 @@ export default {
       this.authError = "";
       this.isAuthLoading = true;
       try {
+        const webHook = await settings.get("webHook");
+
         let { data } = await this.$http.get(
-          `${this.webHook}myuser.manager.auth?login=${
-            this.manager
-          }&password=${btoa(this.password)}`
+          `${webHook}myuser.manager.auth?login=${this.manager}&password=${btoa(
+            this.password
+          )}`
         );
         if (data.result && data.result.ID) {
-          await this.setUserId({ val: data.result.ID });
-          await this.setManagerData({ val: data.result });
-          let { data: categoriesData } = await this.$http.get(
-            `${this.webHook}mycatalog.section.list`
-          );
-          await this.setCategories({
-            val: categoriesData.result.map(item => ({
-              id: item.ID,
-              name: item.NAME
-            }))
-          });
+          await settings.set("authUserId", data.result.ID);
+          await settings.set("managerData", data.result);
+          // await this.setUserId({ val: data.result.ID });
+          // await this.setManagerData({ val: data.result });
+
           await this.loadData();
           this.isAuthLoading = false;
           await this.$router.push("/main");
@@ -282,8 +295,8 @@ export default {
         this.isAuthLoading = false;
         this.authError = "Неверный пароль";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

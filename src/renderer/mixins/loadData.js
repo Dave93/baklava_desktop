@@ -1,22 +1,33 @@
+import {mapGetters, mapActions} from "vuex";
+import ProductItems from '@/store/models/items'
+import settings from "electron-settings";
 
-import { mapGetters, mapActions } from "vuex";
 export default {
-    computed: {
-        ...mapGetters({
-            webHook: "settings/webHook",
-            managerData: "settings/managerData",
-        })
-    },
     methods: {
         ...mapActions({
-            refreshData: "refreshData",
+            setCartItems: "setCartItems",
+            setCategories: "setCategories",
         }),
-       async loadData() {
-            let { data: productsData } = await this.$http.get(
-                `${this.webHook}mycatalog.product.list?managerId=${this.managerData.ID}`
+        async loadData() {
+            const webHook = await settings.get('webHook')
+            const managerData = await settings.get('managerData')
+
+            let { data: categoriesData } = await this.$http.get(
+                `${webHook}mycatalog.section.list`
             );
-            await this.refreshData({
-                val: productsData.result.map((item) => ({
+            await this.setCategories({
+                val: categoriesData.result.map((item) => ({
+                    id: item.ID,
+                    name: item.NAME,
+                })),
+            });
+
+
+            let {data: productsData} = await this.$http.get(
+                `${webHook}mycatalog.product.list?managerId=${managerData.ID}`
+            );
+            await ProductItems.insert({
+                data: productsData.result.map((item) => ({
                     id: item.ID,
                     name: item.ELEMENT_NAME,
                     barcode: item.BARCODE_BARCODE,
@@ -28,7 +39,10 @@ export default {
                     type: item.type,
                     totalAmountCount: item.TOTAL_AMOUNT_COUNT,
                     childs: item.childs,
-                })),
+                }))
+            });
+            await this.setCartItems({
+                val: []
             });
         }
     }

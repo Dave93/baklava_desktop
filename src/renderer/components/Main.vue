@@ -21,9 +21,9 @@
     </div>
     <v-tabs-items v-model="currentTab">
       <v-tab-item v-for="(n, index) in cartTabs" :key="index">
-        <v-card flat>
+        <v-card flat v-if="currentTab === index">
           <v-card-text class="px-0 py-0">
-            <CartPage @closeTab="closeCurrentTab" />
+            <CartPage @closeTab="closeCurrentTab" :tabIndex="index" />
           </v-card-text>
         </v-card>
       </v-tab-item>
@@ -38,33 +38,38 @@ import loadData from "../mixins/loadData";
 export default {
   mixins: [loadData],
   components: {
-    CartPage
+    CartPage,
   },
   data: () => ({
     currentTab: null,
-    loadDataInterval: null
+    loadDataInterval: null,
     // currentScaleWeight: 0,
   }),
   computed: {
     ...mapGetters({
-      cartTabs: "cartTabs"
+      cartTabs: "cartTabs",
       // comPortName: "settings/comPortName",
-    })
+    }),
   },
   methods: {
-    ...mapActions(["appendCartTab", "closeTabByIndex"]),
+    ...mapActions([
+      "appendCartTab",
+      "closeTabByIndex",
+      "setTabItemsByIndex",
+      "loadData",
+    ]),
     addCartTab() {
       this.appendCartTab();
     },
     closeCurrentTab() {
-      // debugger;
-      console.log("currentTab", this.currentTab);
-      this.closeTabByIndex({ index: this.currentTab });
-
       if (this.cartTabs.length === 1) {
         this.addCartTab();
       }
-    }
+      this.closeTabByIndex({ index: this.currentTab });
+    },
+    setItems(items) {
+      console.log(items);
+    },
   },
   mounted() {
     this.loadDataInterval = setInterval(async () => {
@@ -73,6 +78,6 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.loadDataInterval);
-  }
+  },
 };
 </script>

@@ -77,7 +77,18 @@ let webConfig = {
             name: 'fonts/[name].[ext]'
           }
         }
-      }
+      },
+      {
+        test: /\.worker\.(c|m)?js$/i,
+        use: [
+          {
+            loader: "worker-loader",
+          },
+          {
+            loader: "babel-loader",
+          },
+        ],
+      },
     ]
   },
   plugins: [
