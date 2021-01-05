@@ -216,7 +216,7 @@ const actions = {
   setCategories({ commit }, { val }) {
     commit('SET_CATEGORIES', { val })
   },
-  setProducts({ commit }, { val }) {
+  setCartItems({ commit }, { val }) {
     commit('SET_ITEMS', { val })
   },
   refreshData({ commit }, { val }) {

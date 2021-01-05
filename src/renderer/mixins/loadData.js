@@ -5,11 +5,24 @@ import settings from "electron-settings";
 export default {
     methods: {
         ...mapActions({
-            setProducts: "setProducts",
+            setCartItems: "setCartItems",
+            setCategories: "setCategories",
         }),
         async loadData() {
             const webHook = await settings.get('webHook')
             const managerData = await settings.get('managerData')
+
+            let { data: categoriesData } = await this.$http.get(
+                `${webHook}mycatalog.section.list`
+            );
+            await this.setCategories({
+                val: categoriesData.result.map((item) => ({
+                    id: item.ID,
+                    name: item.NAME,
+                })),
+            });
+
+
             let {data: productsData} = await this.$http.get(
                 `${webHook}mycatalog.product.list?managerId=${managerData.ID}`
             );
@@ -28,7 +41,7 @@ export default {
                     childs: item.childs,
                 }))
             });
-            await this.setProducts({
+            await this.setCartItems({
                 val: []
             });
         }

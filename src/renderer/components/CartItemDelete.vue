@@ -25,8 +25,8 @@ export default Vue.extend({
     },
     plusCartItem() {
       this.params.context.componentParent.plusSetCartItem(this.params.node);
-    }
-  }
+    },
+  },
 });
 </script>
 
