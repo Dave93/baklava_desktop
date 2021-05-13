@@ -151,7 +151,7 @@ import loadData from "../mixins/loadData";
 let { remote, ipcRenderer } = require("electron");
 let webContents = remote.getCurrentWebContents();
 let printers = webContents.getPrinters(); //list the printers
-let printerNames = printers.map((item) => item.name);
+let printerNames = printers.map(item => item.name);
 import settings from "electron-settings";
 export default {
   name: "Login",
@@ -169,11 +169,11 @@ export default {
     show1: false,
     updateSnack: false,
     downloadProgress: 0,
-    managerRules: [(v) => !!v || "Выберите менеджера"],
-    passwordRules: [(v) => !!v || "Введите пароль"],
+    managerRules: [v => !!v || "Выберите менеджера"],
+    passwordRules: [v => !!v || "Введите пароль"],
     authError: "",
     isAuthLoading: false,
-    printers: printerNames,
+    printers: printerNames
   }),
   async mounted() {
     await this.tryGetManagers();
@@ -203,7 +203,7 @@ export default {
     },
     async remotePrinterAddress() {
       return await settings.get("remotePrinterAddress");
-    },
+    }
   },
   methods: {
     ...mapActions({
@@ -215,7 +215,7 @@ export default {
       // setComPortName: "settings/setComPortName",
       // setRemotePrinterAddress: "settings/setRemotePrinterAddress",
       setCategories: "setCategories",
-      setProducts: "setProducts",
+      setProducts: "setProducts"
     }),
     async saveSettings(val) {
       await settings.setSync("webHook", val);
@@ -254,9 +254,9 @@ export default {
           webHook + "mymanager.user.getList?filter[UF_MANAGER]=1"
         );
         if (data.result && data.result.length) {
-          this.managers = data.result.map((item) => ({
+          this.managers = data.result.map(item => ({
             value: item.LOGIN,
-            text: `${item.LAST_NAME} ${item.NAME}`,
+            text: `${item.LAST_NAME} ${item.NAME}`
           }));
           this.isManagersFound = true;
         } else {
@@ -295,8 +295,8 @@ export default {
         this.isAuthLoading = false;
         this.authError = "Неверный пароль";
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
