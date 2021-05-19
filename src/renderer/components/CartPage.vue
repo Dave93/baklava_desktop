@@ -1623,13 +1623,14 @@ export default {
             if (item.childs.length == 1) {
               totalPrice += +item.childs[0].price * +item.childs[0].weight;
               } else {
-              totalPrice += item.childs.reduce((accumulator, child) => {
-                if (typeof accumulator == 'object') {
-                  return (+accumulator.price * +accumulator.weight) + (+child.price * +child.weight)
-                }
-                return accumulator + (+child.price * +child.weight)
-              });
-            }
+                console.log(item.childs);
+                totalPrice += item.childs.reduce((accumulator, child) => {
+                  if (typeof accumulator == 'object') {
+                    return (+accumulator.price * +accumulator.weight) + (+child.price * +child.weight)
+                  }
+                  return accumulator + (+child.price * +child.weight)
+                });
+              }
           }
         } else {
           const curPrice = item.price || 0;
@@ -2646,7 +2647,7 @@ export default {
           selectedItems.map(prod => {
             if (prod.selected) {
               if (prod.totalAmountCount > 0) {
-                item.childs.push({ ...prod, parentId });
+                item.childs.push({ ...prod, parentId, weight: 0 });
               } else {
                 this.cartWeightRequiredSnack = true;
                 this.cartError = `Товар "#${prod.barcode}: ${prod.name}" отсутствует в складах`;
