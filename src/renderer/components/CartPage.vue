@@ -1617,9 +1617,26 @@ export default {
       let totalPrice = 0;
 
       [...this.tabItems].map(item => {
-        const curPrice = item.price || 0;
-        const curWeight = item.weight || 0;
-        totalPrice += curPrice * curWeight;
+        if (item.type == 'set') {
+          totalPrice += 0;
+          if (item.childs.length) {
+            if (item.childs.length == 1) {
+              totalPrice += +item.childs[0].price * +item.childs[0].weight;
+              } else {
+                console.log(item.childs);
+                totalPrice += item.childs.reduce((accumulator, child) => {
+                  if (typeof accumulator == 'object') {
+                    return (+accumulator.price * +accumulator.weight) + (+child.price * +child.weight)
+                  }
+                  return accumulator + (+child.price * +child.weight)
+                });
+              }
+          }
+        } else {
+          const curPrice = item.price || 0;
+          const curWeight = item.weight || 0;
+          totalPrice += curPrice * curWeight;
+        }
       });
       if (this.discountToggle === "percent") {
         return totalPrice * ((100 - this.discountValue) / 100);
@@ -2593,7 +2610,7 @@ export default {
               });
               if (child.totalAmountCount > 0) {
                 if (foundIndex < 0) {
-                  item.childs.push({ ...child, parentId: setId });
+                  item.childs.push({ ...child, parentId: setId, weight: 0 });
                 }
               }
             });
@@ -2630,7 +2647,7 @@ export default {
           selectedItems.map(prod => {
             if (prod.selected) {
               if (prod.totalAmountCount > 0) {
-                item.childs.push({ ...prod, parentId });
+                item.childs.push({ ...prod, parentId, weight: 0 });
               } else {
                 this.cartWeightRequiredSnack = true;
                 this.cartError = `Товар "#${prod.barcode}: ${prod.name}" отсутствует в складах`;
