@@ -5,7 +5,7 @@
         <v-row>
           <v-col cols="9" class="d-flex flex-row">
             <v-card width="100%">
-              <v-card-text style="height: 100%;" class="pb-0">
+              <v-card-text style="height: 100%" class="pb-0">
                 <v-row>
                   <v-col cols="12" class="mt-n3">
                     <v-btn
@@ -302,12 +302,8 @@
                           width="60"
                           height="70"
                         >
-                          <v-icon v-if="moreTools">
-                            mdi-close
-                          </v-icon>
-                          <v-icon v-else>
-                            mdi-dots-horizontal
-                          </v-icon>
+                          <v-icon v-if="moreTools"> mdi-close </v-icon>
+                          <v-icon v-else> mdi-dots-horizontal </v-icon>
                         </v-btn>
                       </template>
                       <v-tooltip top>
@@ -358,6 +354,22 @@
                         </template>
                         <span>Обновить товары</span>
                       </v-tooltip>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            color="grey darken-3"
+                            class="red--text"
+                            width="60"
+                            height="70"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="clearBasket"
+                          >
+                            <v-icon large>mdi-close</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Очистить корзину</span>
+                      </v-tooltip>
                     </v-speed-dial>
                   </v-col>
                 </v-row>
@@ -386,17 +398,19 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn
                           color="grey darken-3"
-                          class="red--text"
+                          class="green--text"
                           width="60"
                           height="70"
                           v-bind="attrs"
                           v-on="on"
-                          @click="clearBasket"
+                          @click="showReturnDialog"
                         >
-                          <v-icon large>mdi-close</v-icon>
+                          <v-icon large
+                            >mdi-clipboard-arrow-down-outline</v-icon
+                          >
                         </v-btn>
                       </template>
-                      <span>Очистить корзину</span>
+                      <span>Возврат</span>
                     </v-tooltip>
                   </v-col>
                   <v-col cols="3" class="pr-0 pb-0">
@@ -515,11 +529,32 @@
                   </div>
                 </template>
                 <template v-slot:no-data>
-                  <v-btn color="primary">
-                    Reset
-                  </v-btn>
+                  <v-btn color="primary"> Reset </v-btn>
                 </template>
               </v-data-table>
+            </v-card-text>
+          </v-card>
+        </div>
+      </v-dialog>
+      <v-dialog v-model="returnDialog" max-width="450px">
+        <div v-if="returnDialog">
+          <v-card>
+            <v-card-text>
+              <v-form ref="returnForm" v-model="returnValid" lazy-validation>
+                <v-text-field
+                  label="Сумма"
+                  suffix="сум"
+                  :rules="returnTotalPriceRules"
+                  v-model="returnTotalPrice"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  label="Количество"
+                  :rules="returnCountRules"
+                  v-model="returnCount"
+                  required
+                ></v-text-field>
+              </v-form>
             </v-card-text>
           </v-card>
         </div>
@@ -538,7 +573,7 @@
             <v-col cols="5">
               <div
                 class="align-center d-flex justify-center"
-                style="height: 100%; width: 100%;"
+                style="height: 100%; width: 100%"
               >
                 <div>
                   <div class="font-weight-black">Показатель весов:</div>
@@ -732,7 +767,7 @@
               </v-row>
               <v-divider></v-divider>
               <div class="d-flex">
-                <v-list dense height="315" style="flex: 3; overflow-y: auto;">
+                <v-list dense height="315" style="flex: 3; overflow-y: auto">
                   <v-list-item
                     :class="{ 'v-list-item--active': currentCategoryId === 0 }"
                     :color="currentCategoryId === 0 ? 'green accent-3' : ''"
@@ -747,7 +782,7 @@
                     :key="item.id"
                     @click="categoryToggle(item.id)"
                     :class="{
-                      'v-list-item--active': currentCategoryId === item.id
+                      'v-list-item--active': currentCategoryId === item.id,
                     }"
                     :color="
                       currentCategoryId === item.id ? 'green accent-3' : ''
@@ -759,7 +794,7 @@
                   </v-list-item>
                 </v-list>
                 <v-divider vertical></v-divider>
-                <div class="product-list-block" style="flex: 10;">
+                <div class="product-list-block" style="flex: 10">
                   <v-list dense>
                     <v-virtual-scroll
                       :items="filteredProducts"
@@ -800,7 +835,7 @@
           </v-card>
         </div>
       </v-dialog>
-      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px;">
+      <v-dialog v-model="showPayMethodDialog" persistent style="width: 400px">
         <v-card v-if="showPayMethodDialog">
           <v-card-text>
             <v-slide-group show-arrows class="py-6">
@@ -842,7 +877,7 @@
             </v-slide-group>
           </v-card-text>
         </v-card>
-        <v-row style="background-color: #ffffff;" class="mx-md-auto">
+        <v-row style="background-color: #ffffff" class="mx-md-auto">
           <v-col cols="4" class="">
             <v-card flat class="keyboard-background px-10 weight-keyboard">
               <v-row>
@@ -1070,7 +1105,7 @@
     <v-dialog v-model="showPrintDialog" max-width="590px">
       <v-card v-if="showPrintDialog">
         <v-card-text>
-          <div id="order-print" style="width: 540px;">
+          <div id="order-print" style="width: 540px">
             <div class="text-center py-3">
               <img :src="printLogo" alt="" />
             </div>
@@ -1118,8 +1153,8 @@
                     <td>{{ orderPrintData.discountPrintValue }}</td>
                   </tr>
                   <tr>
-                    <td style="font-weight: bold; font-size: 30px;">Итог:</td>
-                    <td style="font-weight: bold; font-size: 30px;">
+                    <td style="font-weight: bold; font-size: 30px">Итог:</td>
+                    <td style="font-weight: bold; font-size: 30px">
                       {{ orderPrintData.totalPrice }}
                     </td>
                   </tr>
@@ -1156,7 +1191,7 @@
           <div
             id="existing-order-print"
             v-if="!isLoadingExistingOrder"
-            style="width: 540px;"
+            style="width: 540px"
           >
             <div class="text-center py-3">
               <img :src="printLogo" alt="" />
@@ -1204,8 +1239,8 @@
                     <td>{{ existingOrderPrintData.subTotalPrice | money }}</td>
                   </tr>
                   <tr>
-                    <td style="font-weight: bold; font-size: 30px;">Итог:</td>
-                    <td style="font-weight: bold; font-size: 30px;">
+                    <td style="font-weight: bold; font-size: 30px">Итог:</td>
+                    <td style="font-weight: bold; font-size: 30px">
                       {{ existingOrderPrintData.totalPrice | money }}
                     </td>
                   </tr>
@@ -1239,7 +1274,7 @@
     <v-dialog v-model="showSetPrintDialog" max-width="450px">
       <v-card v-if="showSetPrintDialog">
         <v-card-text>
-          <div id="sets-print" style="width: 400px;">
+          <div id="sets-print" style="width: 400px">
             <div class="text-center">
               <img :src="printLogo" alt="" />
             </div>
@@ -1401,39 +1436,51 @@ export default {
   data: () => ({
     showExistingOrderDialog: false,
     isLoadingExistingOrder: false,
+    returnValid: false,
+    returnTotalPrice: 0,
+    returnCount: 0,
+    returnProduct: null,
+    returnClient: null,
+    returnTotalPriceRules: [
+      (v) => (v && v > 0) || "Цена должна быть больше нуля",
+    ],
+    returnCountRules: [(v) => (v && v > 0) || "Кол-во должна быть больше нуля"],
+    returnProductRules: [(v) => !!v || "Товар должен быть выбран"],
+    returnClientRules: [(v) => !!v || "Клиент должен быть выбран"],
     orderDataLoading: false,
     ordersList: [],
+    returnDialog: false,
     ordersHeaders: [
       {
         text: "Номер заказа",
         align: "start",
         sortable: false,
-        value: "ID"
+        value: "ID",
       },
       {
         text: "Дата заказа",
         sortable: false,
-        value: "DATE_INSERT"
+        value: "DATE_INSERT",
       },
       {
         text: "Общая сумма",
         sortable: false,
-        value: "TOTAL_PRICE"
+        value: "TOTAL_PRICE",
       },
       {
         text: "Оплаты",
         sortable: false,
-        value: "PAYMENT"
+        value: "PAYMENT",
       },
       // { text: 'Calories', value: 'calories' },
       // { text: 'Fat (g)', value: 'fat' },
       // { text: 'Carbs (g)', value: 'carbs' },
       // { text: 'Protein (g)', value: 'protein' },
-      { text: "Действия", value: "actions", sortable: false }
+      { text: "Действия", value: "actions", sortable: false },
     ],
     orderPickerDate: [
       new Date().toISOString().substr(0, 10),
-      new Date().toISOString().substr(0, 10)
+      new Date().toISOString().substr(0, 10),
     ],
     orderPickerMinDate: new Date().toISOString().substr(0, 10),
     showOrderDatePicker: false,
@@ -1449,8 +1496,8 @@ export default {
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [v => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [v => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
+    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -1488,7 +1535,7 @@ export default {
         cellRenderer: "agGroupCellRenderer",
         suppressSizeToFit: true,
         flex: 3,
-        wrapText: true
+        wrapText: true,
       },
       {
         headerName: "Цена",
@@ -1496,7 +1543,7 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       { headerName: "Вес", field: "weight", width: 50, flex: 2 },
       {
@@ -1505,15 +1552,15 @@ export default {
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
-        flex: 2
+        flex: 2,
       },
       {
         headerName: "",
         field: "id",
         cellRenderer: "CartItemDelete",
         width: 40,
-        flex: 1
-      }
+        flex: 1,
+      },
     ],
     context: null,
     frameworkComponents: null,
@@ -1522,7 +1569,7 @@ export default {
     options: [],
     currentClient: {
       ID: null,
-      NAME: null
+      NAME: null,
     },
     setName: "",
     detailCellRendererParams: null,
@@ -1541,7 +1588,9 @@ export default {
     isPlusScale: false,
     isMinusScale: false,
     cartItems: [],
-    portListener: null
+    portListener: null,
+    usersList: [],
+    returnProduct: [],
   }),
   mixins: [loadData],
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
@@ -1560,7 +1609,7 @@ export default {
     },
     async remotePrinterAddress() {
       return await settings.get("remotePrinterAddress");
-    }
+    },
   },
   computed: {
     ...mapGetters({
@@ -1570,7 +1619,7 @@ export default {
       // isOldScale: "settings/isOldScale",
       // comPortName: "settings/comPortName",
       // remotePrinterAddress: "settings/remotePrinterAddress",
-      cartTabItems: "cartTabItems"
+      cartTabItems: "cartTabItems",
     }),
     tabItems() {
       return this.cartTabItems[this.tabIndex];
@@ -1580,7 +1629,7 @@ export default {
       return Array.isArray(arrival)
         ? arrival
             .sort()
-            .map(item => {
+            .map((item) => {
               return formatWithOptions({ locale: ru }, "d MMM", parseISO(item));
             })
             .join(" - ")
@@ -1588,7 +1637,7 @@ export default {
     },
     showSetsGrid() {
       let res = false;
-      [...this.tabItems].map(item => {
+      [...this.tabItems].map((item) => {
         if (item.type === "set") {
           res = true;
         }
@@ -1596,17 +1645,17 @@ export default {
       return res;
     },
     singleProducts() {
-      return this.tabItems.filter(item => item.type !== "set");
+      return this.tabItems.filter((item) => item.type !== "set");
     },
     setProducts() {
-      return this.tabItems.filter(item => item.type === "set");
+      return this.tabItems.filter((item) => item.type === "set");
     },
     domainUrl() {
       return "https://" + this.getHostname(this.webHook);
     },
     subTotalPrice() {
       let totalPrice = 0;
-      [...this.tabItems].map(item => {
+      [...this.tabItems].map((item) => {
         const curPrice = item.price || 0;
         const curWeight = item.weight || 0;
         totalPrice += curPrice * curWeight;
@@ -1616,21 +1665,24 @@ export default {
     totalPrice() {
       let totalPrice = 0;
 
-      [...this.tabItems].map(item => {
-        if (item.type == 'set') {
+      [...this.tabItems].map((item) => {
+        if (item.type == "set") {
           totalPrice += 0;
           if (item.childs.length) {
             if (item.childs.length == 1) {
               totalPrice += +item.childs[0].price * +item.childs[0].weight;
-              } else {
-                console.log(item.childs);
-                totalPrice += item.childs.reduce((accumulator, child) => {
-                  if (typeof accumulator == 'object') {
-                    return (+accumulator.price * +accumulator.weight) + (+child.price * +child.weight)
-                  }
-                  return accumulator + (+child.price * +child.weight)
-                });
-              }
+            } else {
+              console.log(item.childs);
+              totalPrice += item.childs.reduce((accumulator, child) => {
+                if (typeof accumulator == "object") {
+                  return (
+                    +accumulator.price * +accumulator.weight +
+                    +child.price * +child.weight
+                  );
+                }
+                return accumulator + +child.price * +child.weight;
+              });
+            }
           }
         } else {
           const curPrice = item.price || 0;
@@ -1652,7 +1704,7 @@ export default {
     },
     filteredProducts() {
       if (this.searchText.length > 0) {
-        return this.items.filter(item => {
+        return this.items.filter((item) => {
           return (
             (item.name &&
               item.name
@@ -1665,7 +1717,7 @@ export default {
       }
       if (this.currentCategoryId > 0) {
         return this.items.filter(
-          item => item.categoryId === this.currentCategoryId
+          (item) => item.categoryId === this.currentCategoryId
         );
       }
       return this.items;
@@ -1674,7 +1726,7 @@ export default {
       return (
         +this.cashPrice + +this.cardPrice + +this.udsPrice - +this.totalPrice
       );
-    }
+    },
   },
   beforeMount() {
     this.gridOptions = {};
@@ -1682,7 +1734,7 @@ export default {
     this.context = { componentParent: this };
     this.frameworkComponents = {
       CartItemDelete,
-      MoneyColumn
+      MoneyColumn,
     };
 
     this.defaultColDef = { flex: 1, resizable: true };
@@ -1694,7 +1746,7 @@ export default {
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
-            wrapText: true
+            wrapText: true,
           },
           {
             headerName: "Цена",
@@ -1702,7 +1754,7 @@ export default {
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
-            wrapText: true
+            wrapText: true,
           },
           { headerName: "Вес", field: "weight", width: 100, flex: 2 },
           {
@@ -1710,30 +1762,30 @@ export default {
             field: "totalPrice",
             width: 150,
             cellRenderer: "MoneyColumn",
-            flex: 2
+            flex: 2,
           },
           {
             headerName: "",
             field: "id",
             cellRenderer: "CartItemDelete",
-            flex: 1
-          }
+            flex: 1,
+          },
         ],
         context: { componentParent: this },
         defaultColDef: { flex: 1, resizable: true },
         frameworkComponents: {
           CartItemDelete,
-          MoneyColumn
+          MoneyColumn,
         },
         rowSelection: "single",
-        onRowSelected: this.cartSetItemSelected
+        onRowSelected: this.cartSetItemSelected,
         // events: {
         //   "selection-changed": this.cartSetItemSelected,
         // },
       },
-      getDetailRowData: params => {
+      getDetailRowData: (params) => {
         params.successCallback(params.data.childs);
-      }
+      },
     };
   },
   mounted() {
@@ -1754,6 +1806,8 @@ export default {
     document.addEventListener("setWeight", this.setScaleWeight);
     this.listenForBarcode();
     this.loadOrdersList();
+    this.loadUsersList();
+    this.loadReturnProducts();
   },
   beforeDestroy() {
     document.removeEventListener("setWeight", this.setScaleWeight);
@@ -1769,7 +1823,7 @@ export default {
       "clearCart",
       "appendSetWithItems",
       "setTabItemsByIndex",
-      "pushTabItemByIndex"
+      "pushTabItemByIndex",
     ]),
     openSearchDialog() {
       this.showSearchDialog = true;
@@ -1777,6 +1831,16 @@ export default {
       setTimeout(() => {
         this.$refs.searchText.focus();
       });
+    },
+    async loadUsersList() {
+      const webHook = await settings.get("webHook");
+      let { data } = await this.$http.get(`${webHook}return.users.list`);
+      this.usersList = data.result;
+    },
+    async loadReturnProducts() {
+      const webHook = await settings.get("webHook");
+      let { data } = await this.$http.get(`${webHook}return.products.list`);
+      this.returnProduct = data.result;
     },
     async showExistingOrderInfo(orderId) {
       this.isLoadingExistingOrder = true;
@@ -1786,7 +1850,7 @@ export default {
       const managerData = await settings.get("managerData");
       let { data } = await this.$http.post(webHook + `mysale.getOrderById`, {
         managerId: managerData.ID,
-        orderId
+        orderId,
       });
 
       this.existingOrderPrintData = data.result;
@@ -1800,14 +1864,14 @@ export default {
       const managerData = await settings.get("managerData");
       let { data } = await this.$http.post(webHook + `mysale.getOrderList`, {
         managerId: managerData.ID,
-        dateRange: this.orderPickerDate
+        dateRange: this.orderPickerDate,
       });
       this.ordersList = data.result;
       this.orderDataLoading = false;
     },
     async selectProductBySearch() {
       const foundItem = this.filteredProducts[0];
-      const foundIndex = this.tabItems.findIndex(prod => {
+      const foundIndex = this.tabItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
 
@@ -1825,7 +1889,7 @@ export default {
               foundItem.totalPrice = +foundItem.weight * +foundItem.price;
               this.pushTabItemByIndex({
                 item: { ...foundItem, type: "product" },
-                index: this.tabIndex
+                index: this.tabIndex,
               });
               // this.cartItems.push({ ...foundItem, type: "product" });
               // this.showSearchDialog = false;
@@ -1835,7 +1899,7 @@ export default {
             foundItem.totalPrice = +foundItem.weight * +foundItem.price;
             this.pushTabItemByIndex({
               item: { ...foundItem, type: "product" },
-              index: this.tabIndex
+              index: this.tabIndex,
             });
             // this.cartItems.push({ ...foundItem, type: "product" });
             // this.showSearchDialog = false;
@@ -1859,7 +1923,7 @@ export default {
       const webHook = await settings.get("webHook");
       const managerData = await settings.get("managerData");
       let { data } = await this.$http.post(webHook + `mysale.getReport`, {
-        managerId: managerData.ID
+        managerId: managerData.ID,
       });
 
       this.isPaymentReportLoading = false;
@@ -2026,7 +2090,7 @@ export default {
 
       htmlToImage
         .toBlob(node)
-        .then(async blob => {
+        .then(async (blob) => {
           const buffer = await Buffer.from(await blob.arrayBuffer());
           const userDataPath = (electron.app || electron.remote.app).getPath(
             "userData"
@@ -2037,13 +2101,13 @@ export default {
 
           if (remotePrinterAddress) {
             const tux = path.join(userDataPath, "remotePhoto.png");
-            fs.writeFile(tux, buffer, err => {
+            fs.writeFile(tux, buffer, (err) => {
               // var bodyFormData = new FormData();
               //bodyFormData.append('uploadedFile', screenshotPath);
               // bodyFormData.append("remotePhoto", fs.createReadStream(tux));
 
               this.$http.post(remotePrinterAddress + "/print", {
-                remotePhoto: buffer.toString("base64")
+                remotePhoto: buffer.toString("base64"),
               });
             });
           } else {
@@ -2059,9 +2123,9 @@ export default {
             };
             const printer = new escpos.Printer(device, options);
             const tux = path.join(userDataPath, "test.png");
-            fs.writeFile(tux, buffer, err => {
-              escpos.Image.load(tux, img => {
-                device.open(error => {
+            fs.writeFile(tux, buffer, (err) => {
+              escpos.Image.load(tux, (img) => {
+                device.open((error) => {
                   printer
                     .align("ct")
                     .image(img, "d24")
@@ -2073,7 +2137,7 @@ export default {
             });
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           console.error("oops, something went wrong!", error);
         });
     },
@@ -2081,7 +2145,7 @@ export default {
       const sets = [];
 
       const cartItems = [...this.tabItems];
-      cartItems.map(item => {
+      cartItems.map((item) => {
         if (item.type === "set") {
           sets.push(item);
         }
@@ -2099,7 +2163,7 @@ export default {
       let { data: setsData } = await this.$http.post(
         webHook + `mysale.createSets`,
         {
-          sets
+          sets,
         }
       );
 
@@ -2140,7 +2204,7 @@ export default {
             currency(+discountValue, {
               symbol: "",
               separator: ".",
-              decimal: ","
+              decimal: ",",
             }).format() + " SO'M";
         }
       }
@@ -2155,14 +2219,14 @@ export default {
           currency(+subTotalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ","
+            decimal: ",",
           }).format() + " SO'M",
         totalPrice:
           currency(+totalPrice, {
             symbol: "",
             separator: ".",
-            decimal: ","
-          }).format() + " SO'M"
+            decimal: ",",
+          }).format() + " SO'M",
       };
 
       setTimeout(() => {
@@ -2186,12 +2250,12 @@ export default {
         udsPrice: this.udsPrice,
         discount: this.discountValue,
         managerId: managerData.ID,
-        discountType: this.discountToggle
+        discountType: this.discountToggle,
       };
 
       const webHook = await settings.get("webHook");
       let {
-        data: { result: order }
+        data: { result: order },
       } = await this.$http.post(webHook + `mysale.order.create`, orderData);
 
       if (order.error) {
@@ -2208,7 +2272,7 @@ export default {
       let chars = [];
       let vm = this;
       window.removeEventListener("keypress", () => {});
-      window.addEventListener("keypress", e => {
+      window.addEventListener("keypress", (e) => {
         if (
           e.which == 71 ||
           e.which == 85 ||
@@ -2218,7 +2282,7 @@ export default {
         }
 
         if (pressed === false) {
-          setTimeout(function() {
+          setTimeout(function () {
             const barcode = chars.join("");
             if (/GU\d{4}/gm.test(barcode)) {
               vm.addByQrCode(barcode);
@@ -2234,8 +2298,8 @@ export default {
     addByQrCode(code) {
       this.cartWeightRequiredSnack = false;
       const items = [...this.items];
-      const foundItem = items.filter(item => item.barcode === code)[0];
-      const foundIndex = this.tabItems.findIndex(prod => {
+      const foundItem = items.filter((item) => item.barcode === code)[0];
+      const foundIndex = this.tabItems.findIndex((prod) => {
         return foundItem.id === prod.id;
       });
 
@@ -2243,7 +2307,7 @@ export default {
         if (foundIndex < 0) {
           this.pushTabItemByIndex({
             item: { ...foundItem, type: "product" },
-            index: this.tabIndex
+            index: this.tabIndex,
           });
         }
       } else {
@@ -2267,13 +2331,13 @@ export default {
       //   return;
       // }
 
-      [...this.tabItems].map(item => {
+      [...this.tabItems].map((item) => {
         if (item.type !== "set" && item.weight === 0) {
           res = false;
         }
 
         if (item.type === "set") {
-          item.childs.map(child => {
+          item.childs.map((child) => {
             if (child.weight === 0) {
               res = false;
             }
@@ -2338,9 +2402,11 @@ export default {
     removeCartItem(node) {
       let item = node.data;
       if (item.parentId) {
-        const items = [...this.tabItems].map(parent => {
+        const items = [...this.tabItems].map((parent) => {
           if (parent.id === item.parentId) {
-            parent.childs = parent.childs.filter(child => child.id !== item.id);
+            parent.childs = parent.childs.filter(
+              (child) => child.id !== item.id
+            );
             parent.price = parent.childs.reduce(
               (accumulator, child) => accumulator + child.price * child.weight,
               0
@@ -2354,12 +2420,12 @@ export default {
         });
         this.setTabItemsByIndex({ items, index: this.tabIndex });
       } else {
-        const items = [...this.tabItems].filter(prod => item.id !== prod.id);
+        const items = [...this.tabItems].filter((prod) => item.id !== prod.id);
         this.setTabItemsByIndex({ items, index: this.tabIndex });
       }
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }
@@ -2376,7 +2442,7 @@ export default {
       });
     },
     firstDataRendered() {
-      this.gridSetApi.forEachLeafNode(node => {
+      this.gridSetApi.forEachLeafNode((node) => {
         node && node.setExpanded(true);
       });
     },
@@ -2396,7 +2462,7 @@ export default {
       }
       // this.$refs.cartItemSelectedInput.focus();
     },
-    getHostname: url => {
+    getHostname: (url) => {
       return new URL(url).hostname;
     },
     logout() {
@@ -2506,12 +2572,12 @@ export default {
       let id = this.selectedCartItem.id;
       weight = +parseFloat(itemWeight).toFixed(3);
       if (this.selectedCartItem.parentId) {
-        const items = [...this.tabItems].map(parent => {
+        const items = [...this.tabItems].map((parent) => {
           parent.totalPrice = 0;
           parent.price = 0;
           parent.weight = 1;
           if (parent.id === this.selectedCartItem.parentId) {
-            parent.childs = parent.childs.map(child => {
+            parent.childs = parent.childs.map((child) => {
               if (child.id === id) {
                 child.weight = +weight;
                 child.totalPrice = +weight * +child.price;
@@ -2521,7 +2587,7 @@ export default {
               return child;
             });
           } else if (parent.childs) {
-            parent.childs = parent.childs.map(child => {
+            parent.childs = parent.childs.map((child) => {
               parent.totalPrice += child.totalPrice || 0;
               parent.price += child.totalPrice || 0;
               return child;
@@ -2531,7 +2597,7 @@ export default {
         });
         await this.setTabItemsByIndex({ items, index: this.tabIndex });
       } else {
-        const items = [...this.tabItems].map(item => {
+        const items = [...this.tabItems].map((item) => {
           if (item.id === id) {
             item.weight = +weight;
             item.totalPrice = +weight * +item.price;
@@ -2547,7 +2613,7 @@ export default {
       this.showScaleDialog = false;
       setTimeout(() => {
         if (this.gridSetApi) {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }
@@ -2594,7 +2660,7 @@ export default {
         const selectedItems = await ProductItems.query()
           .where("selected", true)
           .all();
-        selectedItems.map(item => {
+        selectedItems.map((item) => {
           if (item.selected) {
             selectedForSetItems.push(item);
           }
@@ -2602,10 +2668,10 @@ export default {
 
         let setId = this.editingSetId;
         let items = selectedForSetItems;
-        const newItems = [...this.tabItems].map(item => {
+        const newItems = [...this.tabItems].map((item) => {
           if (item.type === "set" && item.id === setId) {
-            items.map(child => {
-              const foundIndex = item.childs.findIndex(prod => {
+            items.map((child) => {
+              const foundIndex = item.childs.findIndex((prod) => {
                 return child.id === prod.id;
               });
               if (child.totalAmountCount > 0) {
@@ -2623,7 +2689,7 @@ export default {
 
         this.editingSetId = "";
         setTimeout(() => {
-          this.gridSetApi.forEachLeafNode(node => {
+          this.gridSetApi.forEachLeafNode((node) => {
             node && node.setExpanded(true);
           });
         }, 300);
@@ -2638,13 +2704,13 @@ export default {
             price: 0,
             totalPrice: 0,
             type: "set",
-            id: parentId
+            id: parentId,
           };
           const selectedItems = await ProductItems.query()
             .where("selected", true)
             .all();
 
-          selectedItems.map(prod => {
+          selectedItems.map((prod) => {
             if (prod.selected) {
               if (prod.totalAmountCount > 0) {
                 item.childs.push({ ...prod, parentId, weight: 0 });
@@ -2662,7 +2728,7 @@ export default {
             price: item.price,
             totalPrice: 0,
             weight: 0,
-            type: item.type
+            type: item.type,
           };
           if (item.childs) {
             newItem.childs = item.childs;
@@ -2671,7 +2737,7 @@ export default {
           this.pushTabItemByIndex({ item: newItem, index: this.tabIndex });
 
           setTimeout(() => {
-            this.gridSetApi.forEachLeafNode(node => {
+            this.gridSetApi.forEachLeafNode((node) => {
               node && node.setExpanded(true);
             });
           }, 300);
@@ -2680,9 +2746,9 @@ export default {
             .where("selected", true)
             .all();
 
-          selectedItems.map(item => {
+          selectedItems.map((item) => {
             if (item.selected) {
-              const foundIndex = this.tabItems.findIndex(prod => {
+              const foundIndex = this.tabItems.findIndex((prod) => {
                 return item.id === prod.id;
               });
 
@@ -2696,13 +2762,13 @@ export default {
                     price: item.price,
                     totalPrice: 0,
                     weight: 0,
-                    type: item.type
+                    type: item.type,
                   };
                   if (item.type === "set") {
                     let setTotalPrice = 0;
                     newItem.childs = [];
                     newItem.weight = 1;
-                    item.childs.map(child => {
+                    item.childs.map((child) => {
                       setTotalPrice += +child.QUANTITY * +child.BASE_PRICE;
                       newItem.childs.push({
                         id: child.ID,
@@ -2714,14 +2780,14 @@ export default {
                         img: child.image,
                         totalPrice: +child.QUANTITY * +child.BASE_PRICE,
                         weight: child.QUANTITY,
-                        parentId: item.id
+                        parentId: item.id,
                       });
                     });
                     newItem.totalPrice = setTotalPrice;
                   }
                   this.pushTabItemByIndex({
                     item: newItem,
-                    index: this.tabIndex
+                    index: this.tabIndex,
                   });
                 }
               } else {
@@ -2738,12 +2804,12 @@ export default {
       this.showSearchDialog = false;
 
       await ProductItems.update({
-        where: item => {
+        where: (item) => {
           return item.selected;
         },
         data: {
-          selected: false
-        }
+          selected: false,
+        },
       });
     },
     focusDiscountInput() {
@@ -2751,16 +2817,19 @@ export default {
     },
     showOrderDialog() {
       this.orderDialog = true;
-    }
+    },
+    showReturnDialog() {
+      this.returnDialog = true;
+    },
   },
   filters: {
-    money: value => {
+    money: (value) => {
       return (
         value &&
         currency(+value, { symbol: "", separator: " ", decimal: "," }).format()
       );
-    }
-  }
+    },
+  },
 };
 </script>
 
