@@ -539,8 +539,13 @@
       <v-dialog v-model="returnDialog" max-width="450px">
         <div v-if="returnDialog">
           <v-card>
+            <v-card-title>Оформить возврат</v-card-title>
             <v-card-text>
-              <v-form ref="returnForm" v-model="returnValid" lazy-validation>
+              <v-form
+                ref="returnForm"
+                v-model="returnValid"
+                @submit.prevent="addReturItem"
+              >
                 <v-text-field
                   label="Сумма"
                   suffix="сум"
@@ -554,6 +559,39 @@
                   v-model="returnCount"
                   required
                 ></v-text-field>
+                <v-autocomplete
+                  label="Товар"
+                  :items="returnProducts"
+                  :rules="returnProductRules"
+                  auto-select-first
+                  item-text="ELEMENT_NAME"
+                  item-value="ID"
+                  clearable
+                  filled
+                  rounded
+                  v-model="returnProduct"
+                ></v-autocomplete>
+                <v-autocomplete
+                  label="Клиент"
+                  :items="usersList"
+                  :rules="returnClientRules"
+                  auto-select-first
+                  item-text="NAME"
+                  item-value="ID"
+                  clearable
+                  filled
+                  rounded
+                  v-model="returnClient"
+                ></v-autocomplete>
+                <v-btn
+                  class="mr-4"
+                  type="submit"
+                  color="green accent-3"
+                  :disabled="!returnValid"
+                  :loading="isReturnAddLoading"
+                >
+                  Сохранить
+                </v-btn>
               </v-form>
             </v-card-text>
           </v-card>
@@ -1590,7 +1628,8 @@ export default {
     cartItems: [],
     portListener: null,
     usersList: [],
-    returnProduct: [],
+    returnProducts: [],
+    isReturnAddLoading: false,
   }),
   mixins: [loadData],
   components: { AgGridVue, "vue-select": vSelect, barcode: VueBarcode },
@@ -1825,6 +1864,16 @@ export default {
       "setTabItemsByIndex",
       "pushTabItemByIndex",
     ]),
+    async addReturItem() {
+      this.isReturnAddLoading = true;
+      const webHook = await settings.get("webHook");
+      let { data } = await this.$http.get(
+        `${webHook}add.return.item?KLIENT=${this.returnClient}&TOVAR=${this.returnProduct}&KOL_VO=${this.returnCount}&ITOGOVAYA_SUMMA=${this.returnTotalPrice}`
+      );
+      console.log(data);
+      this.isReturnAddLoading = false;
+      this.returnDialog = false;
+    },
     openSearchDialog() {
       this.showSearchDialog = true;
       this.selectedCartItem = {};
@@ -1840,7 +1889,7 @@ export default {
     async loadReturnProducts() {
       const webHook = await settings.get("webHook");
       let { data } = await this.$http.get(`${webHook}return.products.list`);
-      this.returnProduct = data.result;
+      this.returnProducts = data.result;
     },
     async showExistingOrderInfo(orderId) {
       this.isLoadingExistingOrder = true;
