@@ -13,7 +13,7 @@
                       x-large
                       width="100%"
                       @click="openSearchDialog"
-                      >Поиск товара</v-btn
+                      >Ürün Arama</v-btn
                     >
                   </v-col>
                 </v-row>
@@ -59,13 +59,13 @@
                     <v-row>
                       <v-col cols="6">
                         <v-row>
-                          <v-col cols="5" class="pr-0"><h3>Сумма</h3></v-col>
+                          <v-col cols="5" class="pr-0"><h3>Toplam</h3></v-col>
                           <v-col cols="6" class="px-0"
                             ><h3>{{ subTotalPrice | money }} сум</h3></v-col
                           >
                         </v-row>
                         <v-row>
-                          <v-col cols="5" class="pr-0"><h3>Скидка</h3></v-col>
+                          <v-col cols="5" class="pr-0"><h3>İndirim</h3></v-col>
                           <v-col cols="6" class="px-0"
                             ><h3>
                               {{ discountValue }}
@@ -101,25 +101,25 @@
                     {{
                       showClientEditor && currentClient.ID
                         ? "Редактирование"
-                        : "Добавление"
+                        : "Ekleme"
                     }}
                   </div>
                   <v-form ref="form" v-model="valid">
                     <v-text-field
                       v-model="clientFirstName"
                       :rules="firstNameRules"
-                      label="Фамилия"
+                      label="Soyadı"
                       required
                     ></v-text-field>
                     <v-text-field
                       v-model="clientName"
                       :rules="nameRules"
-                      label="Имя"
+                      label="İsim"
                       required
                     ></v-text-field>
                     <v-text-field
                       v-model="clientPhone"
-                      label="Телефон"
+                      label="Telefon"
                     ></v-text-field>
                     <v-text-field
                       v-model="clientEmail"
@@ -132,7 +132,7 @@
                       class="mr-4 accent-3"
                       @click="saveClient"
                     >
-                      Сохранить
+                      Kayıt etmek
                     </v-btn>
                   </v-form>
                 </v-card-text>
@@ -169,7 +169,7 @@
                     </div>
                   </div>
                   <div v-else>
-                    <div class="title text-center">Клиент не выбран</div>
+                    <div class="title text-center">Müşteri seçilmedi</div>
                   </div>
                 </v-card-text>
                 <v-card-actions class="justify-lg-space-around">
@@ -226,7 +226,7 @@
                     <v-row class="mx-auto d-flex flex-row">
                       <v-col cols="9">
                         <v-text-field
-                          label="Введите скидку"
+                          label="İndiriminizi girin"
                           hide-details
                           ref="discountInput"
                           outlined
@@ -265,7 +265,7 @@
                           ><span class="headline">+</span>
                         </v-btn>
                       </template>
-                      <span>Увеличить вес</span>
+                      <span>Kilo artırmak</span>
                     </v-tooltip>
                   </v-col>
                   <v-col cols="4" class="pb-0">
@@ -284,7 +284,7 @@
                           ><span class="headline">-</span>
                         </v-btn>
                       </template>
-                      <span>Уменьшить вес</span>
+                      <span>Kilo azaltmak</span>
                     </v-tooltip>
                   </v-col>
                   <v-col cols="4" class="pb-0">
@@ -320,7 +320,7 @@
                             <v-icon large>mdi-clipboard-list-outline</v-icon>
                           </v-btn>
                         </template>
-                        <span>Заказы</span>
+                        <span>Emirler</span>
                       </v-tooltip>
                       <v-tooltip top>
                         <template v-slot:activator="{ on, attrs }">
@@ -336,7 +336,7 @@
                             <v-icon large>mdi-lock-open-variant-outline</v-icon>
                           </v-btn>
                         </template>
-                        <span>Выход</span>
+                        <span>çıkış</span>
                       </v-tooltip>
                       <v-tooltip top>
                         <template v-slot:activator="{ on, attrs }">
@@ -352,7 +352,7 @@
                             <v-icon large>mdi-refresh</v-icon>
                           </v-btn>
                         </template>
-                        <span>Обновить товары</span>
+                        <span>Ürünleri güncelle</span>
                       </v-tooltip>
                       <v-tooltip top>
                         <template v-slot:activator="{ on, attrs }">
@@ -368,7 +368,7 @@
                             <v-icon large>mdi-close</v-icon>
                           </v-btn>
                         </template>
-                        <span>Очистить корзину</span>
+                        <span>Boş çöp</span>
                       </v-tooltip>
                     </v-speed-dial>
                   </v-col>
@@ -390,7 +390,7 @@
                           <v-icon large>mdi-printer</v-icon>
                         </v-btn>
                       </template>
-                      <span>Сохранить сеты и распечатать</span>
+                      <span>Setleri kaydedin ve yazdırın</span>
                     </v-tooltip>
                   </v-col>
                   <v-col cols="4" class="pr-0 pb-0">
@@ -410,7 +410,7 @@
                           >
                         </v-btn>
                       </template>
-                      <span>Возврат</span>
+                      <span>Geri dönüş</span>
                     </v-tooltip>
                   </v-col>
                   <v-col cols="3" class="pr-0 pb-0">
@@ -429,7 +429,7 @@
                           <v-icon large>mdi-file-chart</v-icon>
                         </v-btn>
                       </template>
-                      <span>Показать отчёт о суммах</span>
+                      <span>Toplam raporunu göster</span>
                     </v-tooltip>
                   </v-col>
                 </v-row>
@@ -442,7 +442,7 @@
                       @click="showPayDialog"
                     >
                       <v-icon large>mdi-cart-outline</v-icon>
-                      <h1 class="font-weight-medium">Оплата</h1>
+                      <h1 class="font-weight-medium">Ödeme</h1>
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -547,7 +547,7 @@
                 @submit.prevent="addReturItem"
               >
                 <v-text-field
-                  label="Сумма"
+                  label="Toplam"
                   suffix="сум"
                   :rules="returnTotalPriceRules"
                   v-model="returnTotalPrice"
@@ -590,7 +590,7 @@
                   :disabled="!returnValid"
                   :loading="isReturnAddLoading"
                 >
-                  Сохранить
+                  Kayıt etmek
                 </v-btn>
               </v-form>
             </v-card-text>
@@ -614,7 +614,7 @@
                 style="height: 100%; width: 100%"
               >
                 <div>
-                  <div class="font-weight-black">Показатель весов:</div>
+                  <div class="font-weight-black">Tartım göstergesi:</div>
                   <div class="headline font-weight-medium">
                     {{ currentScaleWeight }}
                   </div>
@@ -867,7 +867,7 @@
             <v-divider></v-divider>
             <v-card-actions>
               <v-btn color="green accent-3" large @click="addChosenProducts"
-                >Добавить</v-btn
+                >Ekle</v-btn
               >
             </v-card-actions>
           </v-card>
@@ -886,7 +886,7 @@
                   @click="() => togglePaymentType('cash')"
                 >
                   <v-card-title class="subtitle-2 text-no-wrap"
-                    >Наличными</v-card-title
+                    >Nakit</v-card-title
                   >
                 </v-card>
               </v-slide-item>
@@ -898,7 +898,7 @@
                   class="d-flex align-center mx-2 justify-center my-2"
                   @click="() => togglePaymentType('card')"
                 >
-                  <v-card-title class="subtitle-2">Картой</v-card-title>
+                  <v-card-title class="subtitle-2">kartla</v-card-title>
                 </v-card>
               </v-slide-item>
               <v-slide-item v-slot:default="{ active, toggle }">
@@ -1036,7 +1036,7 @@
               @click="payTotalSumm"
               class="mt-1"
             >
-              <h1 class="font-weight-medium">Всю сумму</h1>
+              <h1 class="font-weight-medium">Tüm miktar</h1>
             </v-btn>
           </v-col>
           <v-col cols="8">
@@ -1049,13 +1049,13 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="6"><h3>Наличными</h3></v-col>
+              <v-col cols="6"><h3>Nakit</h3></v-col>
               <v-col cols="6"
                 ><h3>{{ +cashPrice || 0 | money }} сум</h3></v-col
               >
             </v-row>
             <v-row>
-              <v-col cols="6"><h3>Картой</h3></v-col>
+              <v-col cols="6"><h3>kartla</h3></v-col>
               <v-col cols="6"
                 ><h3>{{ +cardPrice || 0 | money }} сум</h3></v-col
               >
@@ -1067,7 +1067,7 @@
               >
             </v-row>
             <v-row>
-              <v-col cols="6"><h3>Сдача</h3></v-col>
+              <v-col cols="6"><h3>Change</h3></v-col>
               <v-col cols="6"
                 ><div>
                   <h3>
@@ -1092,7 +1092,7 @@
                   :disabled="changePrice < 0 || +orderData.orderId > 0"
                   @click="saveOrder"
                 >
-                  <h1 class="font-weight-medium">Оплатить</h1>
+                  <h1 class="font-weight-medium">Pay</h1>
                 </v-btn>
               </v-col>
               <v-col>
@@ -1102,7 +1102,7 @@
                   height="70"
                   @click="clearCompleteBasket"
                 >
-                  <h1 class="font-weight-medium">Закрыть</h1>
+                  <h1 class="font-weight-medium">Close</h1>
                 </v-btn>
               </v-col>
             </v-row>
@@ -1123,7 +1123,7 @@
             v-bind="attrs"
             @click="cartWeightRequiredSnack = false"
           >
-            Закрыть
+            Close
           </v-btn>
         </template>
       </v-snackbar>
@@ -1165,8 +1165,8 @@
                   <tr>
                     <th width="30px">Кол-во</th>
                     <th width="50px">Наименование товара</th>
-                    <th width="50px">Цена</th>
-                    <th width="50px">Сумма</th>
+                    <th width="50px">Fiyat</th>
+                    <th width="50px">Toplam</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1183,11 +1183,11 @@
               <table>
                 <tbody>
                   <tr>
-                    <td>Сумма с ндс, 15%:</td>
+                    <td>Toplam с ндс, 15%:</td>
                     <td>{{ orderPrintData.subTotalPrice }}</td>
                   </tr>
                   <tr>
-                    <td>Скидка:</td>
+                    <td>İndirim:</td>
                     <td>{{ orderPrintData.discountPrintValue }}</td>
                   </tr>
                   <tr>
@@ -1252,8 +1252,8 @@
                   <tr>
                     <th width="30px">Кол-во</th>
                     <th width="50px">Наименование товара</th>
-                    <th width="50px">Цена</th>
-                    <th width="50px">Сумма</th>
+                    <th width="50px">Fiyat</th>
+                    <th width="50px">Toplam</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1273,7 +1273,7 @@
               <table>
                 <tbody>
                   <tr>
-                    <td>Сумма с ндс, 15%:</td>
+                    <td>Toplam с ндс, 15%:</td>
                     <td>{{ existingOrderPrintData.subTotalPrice | money }}</td>
                   </tr>
                   <tr>
@@ -1325,8 +1325,8 @@
                     <tr>
                       <th width="30px">Кол-во</th>
                       <th width="50px">Наименование товара</th>
-                      <th width="50px">Цена</th>
-                      <th width="50px">Сумма</th>
+                      <th width="50px">Fiyat</th>
+                      <th width="50px">Toplam</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1343,7 +1343,7 @@
                 <table>
                   <tbody>
                     <tr>
-                      <td>Сумма:</td>
+                      <td>Toplam:</td>
                       <td>{{ set.totalPrice | money }}</td>
                     </tr>
                   </tbody>
@@ -1534,8 +1534,8 @@ export default {
     updateSnack: false,
     downloadProgress: 0,
     discountToggle: "percent",
-    firstNameRules: [(v) => !!v || "Фамилия обязательна для заполнения"],
-    nameRules: [(v) => !!v || "Имя обязательно для заполнения"],
+    firstNameRules: [(v) => !!v || "Soyadı обязательна для заполнения"],
+    nameRules: [(v) => !!v || "İsim обязательно для заполнения"],
     valid: false,
     showAddEditor: false,
     clientFirstName: "",
@@ -1567,7 +1567,7 @@ export default {
     time: new Date(),
     cartColumns: [
       {
-        headerName: "Название",
+        headerName: "Ürün Arama",
         field: "name",
         width: 450,
         cellRenderer: "agGroupCellRenderer",
@@ -1576,16 +1576,16 @@ export default {
         wrapText: true,
       },
       {
-        headerName: "Цена",
+        headerName: "Fiyat",
         field: "price",
         width: 100,
         wrapText: true,
         cellRenderer: "MoneyColumn",
         flex: 2,
       },
-      { headerName: "Вес", field: "weight", width: 50, flex: 2 },
+      { headerName: "Ağırlık", field: "weight", width: 50, flex: 2 },
       {
-        headerName: "Итоговая цена",
+        headerName: "Toplam fiyat",
         field: "totalPrice",
         width: 100,
         wrapText: true,
@@ -1781,23 +1781,23 @@ export default {
       detailGridOptions: {
         columnDefs: [
           {
-            headerName: "Название",
+            headerName: "Ürün Arama",
             field: "name",
             suppressSizeToFit: true,
             flex: 3,
             wrapText: true,
           },
           {
-            headerName: "Цена",
+            headerName: "Fiyat",
             field: "price",
             width: 150,
             cellRenderer: "MoneyColumn",
             flex: 2,
             wrapText: true,
           },
-          { headerName: "Вес", field: "weight", width: 100, flex: 2 },
+          { headerName: "Ağırlık", field: "weight", width: 100, flex: 2 },
           {
-            headerName: "Итоговая цена",
+            headerName: "Toplam fiyat",
             field: "totalPrice",
             width: 150,
             cellRenderer: "MoneyColumn",
@@ -2009,7 +2009,7 @@ export default {
       //   cmds += "Th:m:s" + CR;
       //   cmds += "BU,43,127,3,7,45,0,3," + item.barcode + CR;
       //   cmds += "AA,7,10,1,1,0,0E," + item.name + CR;
-      //   cmds += "AA,7,64,1,1,0,0E,Цена:" + CR;
+      //   cmds += "AA,7,64,1,1,0,0E,Fiyat:" + CR;
       //   cmds +=
       //     "AA,328,64,1,1,0,0E," +
       //     currency(+item.price, {

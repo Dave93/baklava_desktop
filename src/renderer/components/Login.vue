@@ -31,7 +31,7 @@
                       elevation="6"
                     >
                       <v-card-title class="headline justify-center"
-                        >Авторизация</v-card-title
+                        >Yetkilendirme</v-card-title
                       >
                       <v-alert type="error" v-show="authError.length">{{
                         authError
@@ -45,10 +45,10 @@
                           outlined
                           required
                           rounded
-                          placeholder="Выберите менеджера"
+                          placeholder="Bir yönetici seçin"
                         ></v-select>
                         <v-text-field
-                          label="Пароль"
+                          label="Şifre"
                           :type="show1 ? 'text' : 'password'"
                           v-model="password"
                           :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -129,7 +129,7 @@
               :loading="isSavingSettings"
               text
               @click="closeDialog"
-              >Сохранить</v-btn
+              >Kayıt etmek</v-btn
             >
           </v-card-actions>
         </v-card>
