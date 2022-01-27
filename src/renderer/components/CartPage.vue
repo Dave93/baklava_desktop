@@ -1528,7 +1528,7 @@ export default {
     showPaymentReportDialog: false,
     isPaymentReportLoading: false,
     paymentReportData: {},
-    printLogo: "static/images/gavali.png",
+    printLogo: "static/images/baklava.png",
     cartWeightRequiredSnack: false,
     cartError: "",
     updateSnack: false,
